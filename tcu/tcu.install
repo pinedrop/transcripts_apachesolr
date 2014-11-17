@@ -1,14 +1,5 @@
 <?php
 
-function tcu_update_7001() {
-	if (!db_field_exists('tcu', 'trid')) {
-		$schema = tcu_schema();
-		$t_schema = $schema['tcu'];
-		db_add_field('tcu', 'trid', $t_schema['fields']['trid']);
-		db_drop_field('tcu', 'entity_id');
-	}
-}
-
 /**
  * Implements hook_schema().
  */

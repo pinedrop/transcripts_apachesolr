@@ -7,7 +7,7 @@ function transcripts_xslt_init() {
 function transcripts_xslt_menu() {
 	$items = array();
     	
-	$items['admin/config/search/apachesolr/transcripts_xslt'] = array(
+	$items['admin/config/user-interface/transcripts/transcripts_xslt'] = array(
 		'title' => 'Transcripts XSLT',
 		'description' => t('Transcripts XSLT settings'),
 		'page callback' => 'drupal_get_form',

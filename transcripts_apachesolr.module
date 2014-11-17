@@ -12,6 +12,36 @@ function transcripts_apachesolr_environment() {
 function transcripts_apachesolr_get_solr() {
 	return apachesolr_get_solr(transcripts_apachesolr_environment());
 }
+function transcripts_apachesolr_title($trid, $videotag) {
+	// how will options get through when function is not called as part of page request?
+	$options = array(
+		'term' => isset($_GET['term']) ? '"'.$_GET['term'].'"' : '',
+                'justhits' => isset($_GET['justhits']) ? true : false,
+        );
+
+        //tiers??
+	$response = transcripts_apachesolr_get($trid, $tiers, $options);
+
+	$ui = transcripts_ui_ui($trid, $response);
+        if ($ui->num_docs > 0) {
+                $vars = array(
+                        'trid' => $ui->trid,
+                        'default_mode' => $ui->default_mode,
+                        'hello' => $ui->hello,
+                        'video_tag' => $videotag,
+
+                        //render arrays
+                        'video_controls' => $ui->ui['video_controls'],
+                        'transcript_controls' => $ui->ui['transcript_controls'],
+                        'transcript' => $ui->ui['transcript'],
+                        'hits' => $ui->ui['hits'],
+                );
+                return theme('transcripts_ui_interactive_transcript', $vars);
+        }
+        else {
+                return t("This transcript is still being processed for display.");
+        }
+}
 function transcripts_apachesolr_get($trid, $tiers, $options) {
 	$solr = transcripts_apachesolr_get_solr();
 	
@@ -261,11 +291,11 @@ function transcripts_apachesolr_permission() {
 function transcripts_apachesolr_menu() {
 	$items = array();
   	
-	$items['admin/config/transcripts/apachesolr'] = array(
+	$items['admin/config/user-interface/transcripts/apachesolr'] = array(
 		'title' => 'Transcripts Apachesolr',
 		'description' => t('Transcripts Apachesolr module settings'),
 		'page callback' => 'drupal_get_form',
-		'page arguments' => array('transcripts_apachesolr_settings_form'),
+		'page arguments' => array('transcripts_apachesolr_admin'),
 		'access arguments' => array('administer transcripts'),
 		'file' => 'transcripts_apachesolr.admin.inc',
 		'type' => MENU_LOCAL_TASK,

@@ -1,10 +1,12 @@
 <?php
 
-function transcripts_apachesolr_settings_form($form, &$form_state) {
+function transcripts_apachesolr_admin() {
         $environments = apachesolr_load_all_environments();
         foreach ($environments as $id => $environment) {
                 $options[$id] = $environment['name'];
         }
+	$form = array();
+
         $form['transcripts_apachesolr_env_id'] = array(
                 '#title' => t('Search environment'),
                 '#type' => 'select',
@@ -16,14 +18,3 @@ function transcripts_apachesolr_settings_form($form, &$form_state) {
 
         return system_settings_form($form);
 }
-
-function transcripts_ui_site_settings_form($form, &$form_state) {
-	return system_settings_form(array_merge(
-		$form,
-		transcripts_ui_solr_settings(),
-		transcripts_ui_style_settings(),
-		transcripts_ui_tier_settings(),
-		transcripts_ui_profile_settings()
-	));
-}
-
