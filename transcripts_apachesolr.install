@@ -1,46 +1,7 @@
 <?php
-// $Id$
 
-function transcripts_update_7002() {
-	if (!db_field_exists('transcripts_transcript', 'trid')) {
-		db_drop_primary_key('transcripts_transcript');
-		db_drop_index('transcripts_transcript', 'type_id');
-		db_drop_index('transcripts_transcript', 'fid_status');
-		db_drop_index('transcripts_transcript', 'fid_module');
-		
-		db_add_index('transcripts_transcript', 'module_type_id', array('module', 'type', 'id'));
-		db_add_field('transcripts_transcript', 'trid',
-			array(
-				'description' => 'Transcript ID',
-				'type' => 'serial',
-				'not null' => TRUE,
-			),
-			array(
-				'primary key' => array('trid')
-			)
-		);
-	}
-}
-
-function transcripts_update_7001() {
-	if (db_field_exists('transcripts_transcript', 'nid')) { // we've got the old schema in the db
-		db_drop_field('transcripts_transcript', 'nid');
-		db_drop_field('transcripts_transcript', 'removed');
-		db_drop_field('transcripts_transcript', 'hash');
-		db_drop_field('transcripts_transcript', 'body');
-	}
-	if (!db_field_exists('transcripts_transcript', 'module')) { // we've got the old schema in the db
-		$schema = transcripts_schema();
-		$t_schema = $schema['transcripts_transcript'];
-		db_add_field('transcripts_transcript', 'module', $t_schema['fields']['module']);
-		db_add_field('transcripts_transcript', 'type', $t_schema['fields']['type']);
-		db_add_field('transcripts_transcript', 'id', $t_schema['fields']['id']);
-		db_add_field('transcripts_transcript', 'status', $t_schema['fields']['status']); 
-   }
-}
-
-function transcripts_schema() {
-	$schema['transcripts_transcript'] = array(
+function transcripts_apachesolr_schema() {
+	$schema['transcripts_apachesolr_transcript'] = array(
 		'description' => 'Track use of a transcript',
 		'fields' => array(
 			'trid' => array(

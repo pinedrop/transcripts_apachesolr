@@ -1,7 +1,7 @@
 <?php
 
 function theme_transcripts_search_snippet($vars) {
-        $markup = variable_get('transcripts_markup', 'default');
+        $markup = variable_get('transcripts_ui_markup', 'default');
         if ($markup == 'bootstrap') {
                 $out = "<div class='controls'>";
 		$out .= drupal_render($vars['element']['link']);
@@ -21,7 +21,7 @@ function theme_transcripts_goto_tcu($vars) {
         $secs = $vars['element']['#time'] % 60;
         $time = sprintf ("%d:%02d", $mins, $secs);
 
-	$markup = variable_get('transcripts_markup', 'default');
+	$markup = variable_get('transcripts_ui_markup', 'default');
 	if ($markup == 'bootstrap') {
                 $out = "<a href='" . $vars['element']['#linkurl'] . "' class='btn btn-default btn-sm'>";
                 $out .= "<span class='glyphicon glyphicon-play'></span> ";

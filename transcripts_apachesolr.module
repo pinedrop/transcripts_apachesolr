@@ -12,6 +12,81 @@ function transcripts_apachesolr_environment() {
 function transcripts_apachesolr_get_solr() {
 	return apachesolr_get_solr(transcripts_apachesolr_environment());
 }
+function transcripts_apachesolr_get($trid, $tiers, $options) {
+	$solr = transcripts_apachesolr_get_solr();
+	
+	$tiers = array_keys($tiers);
+	$fl = implode(",", $tiers) . ",id,is_trid,entity_id,ss_speaker,fts_start,fts_end";
+	
+	if ($options['term'] == '') {
+		$params = array(
+			'q' => '*:*', 
+			'start' => 0, 
+			'rows' => 1000, //what if transcript has more than 1000 lines??
+			'fl' => $fl,
+			'qt' => 'standard',
+		);
+	} else { //highlighting
+		$arr = array();
+		foreach ($tiers as $tier) {
+			$arr[] = "$tier:" . $options['term'];
+		}
+		$q = implode(" OR ", $arr);
+		if (!$options['justhits']) {
+			$q .= " OR *:*";
+		}
+		$params = array(
+			'q' => $q,
+			'start' => 0, 
+			'rows' => 1000, //what if transcript has more than 1000 lines??
+			'fl' => $fl,
+			'qt' => 'standard',
+			'hl' => 'true',
+			'hl.fl' => implode(' ', $tiers),
+			'hl.fragsize' => 0,
+			'hl.simple.pre' => "<mark>",
+			'hl.simple.post' => "</mark>",
+		);
+	}
+	$query = apachesolr_drupal_query('transcripts_apachesolr', $params, 'fts_start asc', '', $solr);
+	if ($trid) {
+		$query->addFilter("is_trid", $trid);
+	}
+	//see http://drupalconnect.com/blog/steve/creating-custom-sorts-apache-solr
+	$query->setAvailableSort('fts_start', array(
+		'title' => t('Temporal order'),
+		'default' => 'asc',
+	));
+	list($final_query, $response) = transcripts_apachesolr_do_query($query);
+	return $response;
+}
+function transcripts_apachesolr_do_query(DrupalSolrQueryInterface $current_query) {
+        if (!is_object($current_query)) {
+                throw new Exception(t('NULL query object in function apachesolr_do_query()'));
+        }
+        // Allow modules to alter the query prior to statically caching it.
+        // This can e.g. be used to add available sorts.
+        $searcher = $current_query->getSearcher();
+
+        // Cache the original query. Since all the built queries go through
+        // this process, all the hook_invocations will happen later
+        $env_id = $current_query->solr('getId');
+        $query = apachesolr_current_query($env_id, $current_query);
+        $keys = $query->getParam('q');
+
+        // We must run htmlspecialchars() here since converted entities are in the index.
+        // and thus bare entities &, > or < won't match. Single quotes are converted
+        // too, but not double quotes since the dismax parser looks at them for
+        // phrase queries.
+        $keys = htmlspecialchars($keys, ENT_NOQUOTES, 'UTF-8');
+        $keys = str_replace("'", '&#039;', $keys);
+        $response = $query->search($keys);
+        // The response is cached so that it is accessible to the blocks and anything
+        // else that needs it beyond the initial search.
+        apachesolr_static_response_cache($searcher, $response);
+        return array($query, $response);
+}
+
 function transcripts_apachesolr_theme_registry_alter(&$theme_registry) {
 	if ($theme_registry['apachesolr_search_snippets']['function'] == 'theme_apachesolr_search_snippets') {
         	$theme_registry['apachesolr_search_snippets']['theme path'] = drupal_get_path('module', 'transcripts_apachesolr');
