@@ -1,0 +1,112 @@
+<?php
+
+function transcripts_xslt_init() {
+	module_load_include('inc', 'transcripts_xslt', 'transcripts_xslt.admin');
+}
+
+function transcripts_xslt_menu() {
+	$items = array();
+    	
+	$items['admin/config/search/apachesolr/transcripts_xslt'] = array(
+		'title' => 'Transcripts XSLT',
+		'description' => t('Transcripts XSLT settings'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('transcripts_xslt_settings_form'),
+		'access arguments' => array('administer transcripts'),
+		'file' => 'transcripts_xslt.admin.inc',
+		'type' => MENU_LOCAL_TASK,
+	);
+	
+	return $items;
+}
+
+function transcripts_xslt_as_tcus($file, $node) {
+    $dot = strrpos($file->uri, '.');
+    $ext = $dot === FALSE ? '' : substr($file->uri, $dot+1);
+
+    if ($ext == 'xml') {
+        $saxon_path = realpath(variable_get('transcripts_xslt_saxon_path', 'sites/all/libraries/saxon'));
+
+        $xslfield = variable_get('transcripts_xslt_transformer_field','field_transcripts_xsl');
+        if ($node->{$xslfield}) {
+                $field = $node->{$xslfield};
+                $uri = $field[$node->language][0]['uri'];
+                $xslt = drupal_realpath($node->{$xslfield}[$node->language][0]['uri']);
+        } else {
+                $xslt = realpath($saxon_path . '/' . variable_get('transcripts_xslt_file', ''));
+        }  
+
+        watchdog('Transcripts XSLT', "Indexing transcript at node/%nid", array('%nid' => $node->nid), WATCHDOG_INFO);
+
+        $xml = transcripts_xslt_saxon_transform($xslt, $file);
+        return json_decode(json_encode(simplexml_load_string($xml)), TRUE);
+    }
+    else if ($ext == 'txt') {
+        $saxon_path = realpath(variable_get('transcripts_xslt_saxon_path', 'sites/all/libraries/saxon'));
+        
+        $xslt = $saxon_path . '/toolbox.xsl';
+
+        $filepath = drupal_realpath($file->uri);
+        // Check that we have a valid filepath.
+        if (!$filepath || !is_file($filepath)) {
+          watchdog('Transcripts XSLT', '%filepath is not a valid file path', array('%filepath' => $file->uri), WATCHDOG_WARNING);
+          return FALSE;
+        }
+        $params = array();
+        $params['file'] = $filepath;
+        $params['tierNames'] = variable_get('transcripts_apachesolr_toolbox_mappings', 'tx|ts_content_even, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_eng, ru|ts_content_rus');
+        drupal_alter('transcripts_xslt_saxon_params', $params, $node);
+        $xml = transcripts_xslt_saxon_transform($xslt, '', 'toolbox', $params);
+
+        return json_decode(json_encode(simplexml_load_string($xml)), TRUE);
+    }
+}
+
+function transcripts_xslt_saxon_transform($xsl, $source = '', $it = '', $params = array()) {
+	$saxon_path = realpath(variable_get('transcripts_xslt_saxon_path', 'sites/all/libraries/saxon'));
+	
+	$saxon = realpath($saxon_path . '/' . variable_get('transcripts_xslt_saxon_jar', 'saxon9he.jar'));
+	if (!$saxon || !is_file($saxon)) {
+		throw new Exception(t('Invalid path or filename for saxon application jar.'));
+	}
+
+	if ($source) {
+		$filepath = drupal_realpath($source->uri);
+		// Check that we have a valid filepath.
+		if (!$filepath || !is_file($filepath)) {
+			watchdog('Transcripts XSLT', '%filepath is not a valid file path', array('%filepath' => $source->uri), WATCHDOG_WARNING);
+			return FALSE;
+		}
+		// Support UTF-8 encoded filenames.
+		if (mb_detect_encoding($filepath, 'ASCII,UTF-8', true) == 'UTF-8') {
+			$cmd .= 'export LANG="en_US.utf-8"; ';
+			setlocale(LC_CTYPE, 'UTF8', 'en_US.UTF-8');
+		}
+	}
+
+	$par = '';
+	foreach ($params as $key => $value) {
+		$par .= $key."=".escapeshellarg($value)." ";
+	}
+  
+	$cmd = '';
+	// Add a work-around for a MAMP bug + java 1.5.
+	if (strpos(ini_get('extension_dir'), 'MAMP/')) {
+		$cmd .= 'export DYLD_LIBRARY_PATH=""; ';
+	}
+  
+	// By default force UTF-8 output
+	$cmd .= escapeshellcmd(variable_get('transcripts_xslt_java', 'java'))
+		. ' '.escapeshellarg(variable_get('transcripts_xslt_java_opts', '-Dfile.encoding=UTF8'))
+		. ' -jar '.escapeshellarg($saxon) 
+		. ' -xsl:'.escapeshellarg($xsl);
+	
+	if ($source) $cmd .= ' -s:' .escapeshellarg($filepath);
+	if ($it) $cmd .= ' -it:' .escapeshellarg($it);
+	if ($par) $cmd .= ' ' .$par; 
+	//. ' 2>&1'; //for debugging
+	
+	watchdog('Transcripts XSLT', "$cmd", NULL, WATCHDOG_DEBUG);
+	$document = shell_exec($cmd);
+	return $document;
+}
