@@ -1,0 +1,232 @@
+<?php
+
+function transcripts_apachesolr_init() {
+	drupal_add_js(drupal_get_path('module', 'transcripts_apachesolr') .'/transcripts_apachesolr.js', 'file');
+	module_load_include('inc', 'transcripts_apachesolr', 'transcripts_apachesolr.index');
+}
+
+function transcripts_apachesolr_environment() {
+	return variable_get('transcripts_apachesolr_env_id', apachesolr_default_environment());
+}
+
+function transcripts_apachesolr_get_solr() {
+	return apachesolr_get_solr(transcripts_apachesolr_environment());
+}
+function transcripts_apachesolr_theme_registry_alter(&$theme_registry) {
+	if ($theme_registry['apachesolr_search_snippets']['function'] == 'theme_apachesolr_search_snippets') {
+        	$theme_registry['apachesolr_search_snippets']['theme path'] = drupal_get_path('module', 'transcripts_apachesolr');
+		$theme_registry['apachesolr_search_snippets']['function'] = 'transcripts_apachesolr_nodots_tcu_snippet';
+	}
+	array_unshift($theme_registry['apachesolr_search_snippets']['preprocess functions'], 'transcripts_apachesolr_preprocess_tcu_snippet');
+	array_unshift($theme_registry['apachesolr_search_snippets']['process functions'], 'transcripts_apachesolr_process_tcu_snippet');
+}
+
+function transcripts_apachesolr_theme() {
+	return array(
+		'transcripts_apachesolr_search_snippet' => array(
+			'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+			'file' => 'transcripts_apachesolr.theme.inc',
+			'render element' => 'element',
+		),
+		'transcripts_apachesolr_goto_tcu' => array(
+			'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+			'file' => 'transcripts_apachesolr.theme.inc',
+			'render element' => 'element',
+		),
+		'transcripts_apachesolr_search_result_tier' => array(			
+                        'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+                        'file' => 'transcripts_apachesolr.theme.inc',
+			'template' => 'transcripts-apachesolr-search-result-tier',
+      			'variables' => array('snippets' => NULL, 'tier_name' => NULL),
+		),
+	);
+}
+
+/**
+ * Prepare the query by adding parameters, sorts, etc.
+ *
+ * This hook is invoked before the query is cached.  The cached query
+ * is used after the search such as for building facet and sort blocks,
+ * so parameters added during this hook may be visible to end users.
+ *
+ * This is otherwise the same as HOOK_apachesolr_query_alter(), but runs
+ * before it.
+ *
+ * @param $query
+ *  An object implementing DrupalSolrQueryInterface. No need for &.
+ */
+function transcripts_apachesolr_apachesolr_query_prepare($query) {  
+  //should we really assume this is what people want?
+  $filters = $query->getFilters('bundle');
+  foreach ($filters as $filter) {
+  	if ($filter['#value'] == 'tcu' && !$filter['#exclude']) {
+			$query->removeAvailableSort('sort_label');
+			$query->removeAvailableSort('bundle');
+			$query->removeAvailableSort('sort_name');
+			$query->removeAvailableSort('ds_created');
+		
+			// Add a sort on the transcript title
+			$query->setAvailableSort('ss_node_label', array(
+				'title' => t('Title'),
+				'default' => 'asc',
+			));  		
+  	}
+  }
+}
+
+/**
+ * Implements hook_apachesolr_query_alter().
+ */
+function transcripts_apachesolr_apachesolr_query_alter($query) {
+  $query->addParams(array('fl' => array('ss_node_label', 'is_eid', 'entity_id', 'fts_start', 'fts_end')));
+  $tiers = transcripts_apachesolr_all_tiers();
+  if (count($tiers) > 0) {
+  	$qf = array();
+  	foreach ($tiers as $tier) {
+  		$qf[] = $tier."^1.0";
+  	}
+  	$query->addParam('qf', implode(" ", $qf));
+  	$query->addParams(array('fl' => $tiers));
+  	$query->addParams(array('hl.fl' => $tiers));
+  }
+  $query->replaceParam('hl.fragsize', 0);
+  $query->addParam('f.content.hl.fragsize', 100);
+}
+
+function transcripts_apachesolr_preprocess_tcu_snippet(&$vars) {
+	if ($vars['doc']->entity_type == 'tcu') {
+		$snippets = $vars['snippets'];
+		$doc = $vars['doc'];
+
+		$tiers = array();
+        	foreach (transcripts_apachesolr_all_tiers() as $tier) {
+        	        if (isset($doc->{$tier})) {
+                	        $variables = array();
+                	        $variables['tier_name'] = $tier;
+				$variables['tier_value'] = $doc->{$tier};
+                	        if (isset($snippets[$tier])) {
+                	                $variables['snippets'] = $snippets[$tier];
+                	        }
+                	        $tiers[] = theme('transcripts_apachesolr_search_result_tier__' . $tier, $variables);
+                	}
+        	}
+		$vars['transcripts_apachesolr_search_snippet'] = array(
+			'#attached' => array(
+				'css' => array(drupal_get_path('module', 'transcripts_apachesolr') .'/theme/transcripts-apachesolr-search-snippet.css'),
+			),
+			'#theme' => 'transcripts_apachesolr_search_snippet',
+                        '#prefix' => "<div class='transcripts-apachesolr-search-snippet'>",
+                        '#suffix' => "</div>",
+			'tiers' => $tiers,
+			'link' => array(
+				'#theme' => 'transcripts_apachesolr_goto_tcu',
+				'#linkurl' => url($doc->path),
+				'#time' => $doc->fts_start,
+                        ),
+		);
+	}
+}
+
+function transcripts_apachesolr_process_tcu_snippet(&$vars) {
+	if ($vars['doc']->entity_type == 'tcu') {
+		$vars['flattened_snippets'] = array(drupal_render($vars['transcripts_apachesolr_search_snippet']));
+	}
+}
+
+function transcripts_apachesolr_nodots_tcu_snippet(&$vars) {
+        return implode(' ... ', $vars['flattened_snippets']);
+}
+
+function transcripts_apachesolr_apachesolr_search_result_alter($doc, &$extra, $query) {
+	if ($doc->entity_type == 'tcu') {
+		$keyword = $query->getParam('q');
+		$doc->search_term = $keyword ? $keyword : '';
+	}
+}
+
+function transcripts_apachesolr_form_apachesolr_search_custom_page_search_form_alter(&$form, &$form_state, $form_id) {
+	//copied from bootstrap theme
+
+	if (variable_get('transcripts_apachesolr_markup', 'default') == 'bootstrap') {
+        	// Add a clearfix class so the results don't overflow onto the form.
+        	$form['#attributes']['class'][] = 'clearfix';
+
+        	// Remove container-inline from the container classes.
+        	$form['basic']['#attributes']['class'] = array();
+
+        	// Hide the default button from display.
+        	$form['basic']['submit']['#attributes']['class'][] = 'element-invisible';
+
+        	// Implement a theme wrapper to add a submit button containing a search
+        	// icon directly after the input element.
+        	$form['basic']['keys']['#theme_wrappers'] = array('bootstrap_search_form_wrapper');
+        	$form['basic']['keys']['#title'] = '';
+        	$form['basic']['keys']['#attributes']['placeholder'] = t('Search');
+	}
+}
+
+function transcripts_apachesolr_permission() {
+	$profiles = transcripts_apachesolr_all_profiles();
+	$permissions = array();
+	$permissions['view transcripts'] = array(
+		'title' => t('View transcripts'),
+	);
+	$permissions['administer transcripts'] = array(
+		'title' => t('Administer transcripts module, including managing profiles'),
+	);
+	foreach ($profiles as $profile) {
+		$pid = $profile['pid'];
+		$permissions["view profile $pid"] = array(
+			'title' => t('View profile %pid', array('%pid' => $profile['pid']))
+		);
+	}
+	return $permissions;
+}
+
+function transcripts_apachesolr_menu() {
+	$items = array();
+  	
+	$items['admin/config/transcripts/apachesolr'] = array(
+		'title' => 'Transcripts Apachesolr',
+		'description' => t('Transcripts Apachesolr module settings'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('transcripts_apachesolr_settings_form'),
+		'access arguments' => array('administer transcripts'),
+		'file' => 'transcripts_apachesolr.admin.inc',
+		'type' => MENU_LOCAL_TASK,
+	);
+	
+	return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function transcripts_apachesolr_block_info() {
+	$blocks=array();
+	$blocks['transcript_search'] = array(
+		'info' => 'Search Transcripts',
+		'custom' => FALSE,
+	);
+	return $blocks;
+}
+
+function transcripts_apachesolr_block_view($delta) {
+	switch($delta) { 
+	case 'transcript_search':
+		$block['subject'] = 'Search Transcripts';
+		$block['content'] = transcript_search_form();
+		return $block;
+	}
+}
+   
+function transcript_search_form() {
+	module_load_include('inc','apachesolr','apachesolr_search.pages');
+	global $base_path;
+	$transcripts = apachesolr_search_page_load('transcripts');
+	$transcript_search_form = drupal_get_form('apachesolr_search_custom_page_search_form', $transcripts);
+	unset( $transcript_search_form['basic']['keys']['#title'] );
+	unset( $transcript_search_form['basic']['retain-filters'] );
+	$output = drupal_render($transcript_search_form);
+	return $output;
+}

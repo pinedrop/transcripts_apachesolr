@@ -1,0 +1,14 @@
+/* sentence display in search results */
+.transcripts-search-snippet {
+	clear: both;
+}
+.transcripts-search-snippet .controls {
+        float: left;
+        width: 70px;
+}
+.transcripts-search-snippet .tiers{
+        margin-left: 75px;
+}
+.untimed {
+	color:grey;
+}
