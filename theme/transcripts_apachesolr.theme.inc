@@ -1,6 +1,6 @@
 <?php
 
-function theme_transcripts_search_snippet($vars) {
+function theme_transcripts_apachesolr_search_snippet($vars) {
         $markup = variable_get('transcripts_ui_markup', 'default');
         if ($markup == 'bootstrap') {
                 $out = "<div class='controls'>";

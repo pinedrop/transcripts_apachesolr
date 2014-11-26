@@ -144,6 +144,12 @@ function transcripts_apachesolr_theme() {
 	);
 }
 
+function transcripts_apachesolr_preprocess_search_result(&$vars) {
+        if ($vars['result']['entity_type'] == 'tcu') {
+                $vars['title'] = '';
+        }
+}
+
 /**
  * Prepare the query by adding parameters, sorts, etc.
  *
@@ -212,16 +218,17 @@ function transcripts_apachesolr_preprocess_tcu_snippet(&$vars) {
                 	        $tiers[] = theme('transcripts_apachesolr_search_result_tier__' . $tier, $variables);
                 	}
         	}
+
 		$vars['transcripts_apachesolr_search_snippet'] = array(
 			'#attached' => array(
-				'css' => array(drupal_get_path('module', 'transcripts_apachesolr') .'/theme/transcripts-apachesolr-search-snippet.css'),
+				'css' => array(drupal_get_path('module', 'transcripts_apachesolr') .'/theme/transcripts_apachesolr_search_snippet.css'),
 			),
 			'#theme' => 'transcripts_apachesolr_search_snippet',
                         '#prefix' => "<div class='transcripts-apachesolr-search-snippet'>",
                         '#suffix' => "</div>",
 			'tiers' => $tiers,
 			'link' => array(
-				'#theme' => 'transcripts_apachesolr_goto_tcu',
+				'#theme' => 'transcripts_ui_goto_tcu',
 				'#linkurl' => url($doc->path),
 				'#time' => $doc->fts_start,
                         ),
@@ -287,8 +294,25 @@ function transcripts_apachesolr_menu() {
 		'file' => 'transcripts_apachesolr.admin.inc',
 		'type' => MENU_LOCAL_TASK,
 	);
+	$items['transcript/%'] = array(
+		'page callback' => 'transcripts_redirect',
+		'page arguments' => array(1),
+		'access callback' => 'user_access',
+		'access arguments' => array('view transcripts'),
+	);
 	
 	return $items;
+}
+
+function transcripts_redirect($trid, $tcuid = '') {
+	$transcript = db_query("SELECT * FROM {transcripts_apachesolr_transcript} WHERE trid=:trid", array(':trid' => $trid))
+		->fetchAssoc();
+		
+	if (count($transcript) > 0) {
+		$fragment = !intval($tcuid) ? NULL : 'tcu/' .$tcuid;
+		$redirect = $transcript['module'].'_redirect_transcript';
+		$redirect($transcript, $fragment);
+	}
 }
 
 /**
