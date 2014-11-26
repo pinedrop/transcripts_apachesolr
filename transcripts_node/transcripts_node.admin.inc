@@ -32,21 +32,8 @@ function transcripts_node_node_settings() {
 			);
 		}
 	}
-	
-	$message = 'On occasion, you may wish to use custom XSLT files to transform incoming transcripts into time code units. '
-			. 'If this is the case, then specify a file field here. '
-			. 'The field should be attached to one or more of the "permissible node types" above. '
-			. 'You can then upload alternative stylesheets to the field on a node by node basis.';
 
-	$form['transcripts_node_node_settings']['transcripts_xslt_field'] = array(
-		'#type' => 'textfield',
-		'#title' => t('XSLT overrides'),
-		'#size' => 20,
-		'#description' => t($message),
-		'#default_value' => variable_get('transcripts_xslt_field', ''),
-    );
-    
-    return $form;
+        return $form;
 }
 
 function transcripts_node_videotag_settings() {

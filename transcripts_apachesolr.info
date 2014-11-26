@@ -1,5 +1,5 @@
 ;$Id$
-name = Transcripts Apachesolr
+name = Transcripts Apache Solr
 description = Drupal module for working with a corpus of transcripts stored in a SOLR index
 dependencies[] = transcripts_ui
 dependencies[] = tcu

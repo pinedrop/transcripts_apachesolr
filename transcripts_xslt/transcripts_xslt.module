@@ -33,7 +33,7 @@ function transcripts_xslt_as_tcus($file, $node) {
                 $uri = $field[$node->language][0]['uri'];
                 $xslt = drupal_realpath($node->{$xslfield}[$node->language][0]['uri']);
         } else {
-                $xslt = realpath($saxon_path . '/' . variable_get('transcripts_xslt_file', ''));
+                $xslt = realpath($saxon_path . '/' . variable_get('transcripts_xslt_default_transformer', 'transcripts.xsl'));
         }  
 
         watchdog('Transcripts XSLT', "Indexing transcript at node/%nid", array('%nid' => $node->nid), WATCHDOG_INFO);

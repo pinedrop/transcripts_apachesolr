@@ -50,7 +50,7 @@ function transcripts_node_redirect_transcript($transcript, $fragment = NULL) {
 }
 
 function transcripts_node_get_player($nid) {
-	$trid = transcripts_already_indexed_trid('transcripts_node', 'node', $nid);
+	$trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
 	if ($trid) {
 		$videotag = transcripts_node_videotag($nid, $trid);
 		$tiers = transcripts_ui_tiers();
@@ -60,7 +60,7 @@ function transcripts_node_get_player($nid) {
 
 function transcripts_node_videotag($entity_id, $trid) {
 	//note: var $id is passed and made available to eval, array $val is returned
-	$php_code = variable_get('transcripts_id_mapper');
+	$php_code = variable_get('transcripts_node_id_mapper');
 	eval( $php_code );
 	
 	$vars = array();
@@ -69,7 +69,7 @@ function transcripts_node_videotag($entity_id, $trid) {
 	$vars['video_url'] = isset($val['video_url']) ? $val['video_url'] : '';
 	$vars['video_tag'] = isset($val['video_tag']) ? $val['video_tag'] : '';
 
-	return theme('transcripts_video_tag', $vars);
+	return theme('transcripts_ui_video_tag', $vars);
 }
 
 function transcripts_node_transcript_access($nid) {
@@ -79,7 +79,7 @@ function transcripts_node_transcript_access($nid) {
 
 function transcripts_node_has_transcript($node) {
 	//first check node type
-	if (in_array($node->type, array_filter(variable_get('transcripts_node', array())))) {
+	if (in_array($node->type, array_filter(variable_get('transcripts_node_node', array())))) {
 		$fields = transcripts_node_all_file_fields();
 		foreach ($fields as $field) {
 			if (!empty($node->$field) && is_transcript_field($field)) {

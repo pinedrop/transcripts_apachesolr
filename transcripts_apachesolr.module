@@ -12,22 +12,18 @@ function transcripts_apachesolr_environment() {
 function transcripts_apachesolr_get_solr() {
 	return apachesolr_get_solr(transcripts_apachesolr_environment());
 }
-function transcripts_apachesolr_title($trid, $videotag) {
+function transcripts_apachesolr_title($trid, $videotag, $tiers) {
 	// how will options get through when function is not called as part of page request?
 	$options = array(
 		'term' => isset($_GET['term']) ? '"'.$_GET['term'].'"' : '',
                 'justhits' => isset($_GET['justhits']) ? true : false,
         );
 
-        //tiers??
-	$response = transcripts_apachesolr_get($trid, $tiers, $options);
-
-	$ui = transcripts_ui_ui($trid, $response);
+	$ui = transcripts_ui_ui($trid, $options);
+	transcripts_apachesolr_response($ui);
         if ($ui->num_docs > 0) {
                 $vars = array(
                         'trid' => $ui->trid,
-                        'default_mode' => $ui->default_mode,
-                        'hello' => $ui->hello,
                         'video_tag' => $videotag,
 
                         //render arrays
@@ -42,10 +38,16 @@ function transcripts_apachesolr_title($trid, $videotag) {
                 return t("This transcript is still being processed for display.");
         }
 }
-function transcripts_apachesolr_get($trid, $tiers, $options) {
+function transcripts_apachesolr_transcripts_ui_ajax_search(&$ui) {
+	transcripts_apachesolr_response($ui);
+}
+function transcripts_apachesolr_response(&$ui) {
+	$trid = $ui->shorttrid;
+	$tiers = array_keys($ui->tiers);
+	$options = $ui->options;
+
 	$solr = transcripts_apachesolr_get_solr();
 	
-	$tiers = array_keys($tiers);
 	$fl = implode(",", $tiers) . ",id,is_trid,entity_id,ss_speaker,fts_start,fts_end";
 	
 	if ($options['term'] == '') {
@@ -88,7 +90,7 @@ function transcripts_apachesolr_get($trid, $tiers, $options) {
 		'default' => 'asc',
 	));
 	list($final_query, $response) = transcripts_apachesolr_do_query($query);
-	return $response;
+	$ui->processXMLResponse($response);
 }
 function transcripts_apachesolr_do_query(DrupalSolrQueryInterface $current_query) {
         if (!is_object($current_query)) {
@@ -129,11 +131,6 @@ function transcripts_apachesolr_theme_registry_alter(&$theme_registry) {
 function transcripts_apachesolr_theme() {
 	return array(
 		'transcripts_apachesolr_search_snippet' => array(
-			'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
-			'file' => 'transcripts_apachesolr.theme.inc',
-			'render element' => 'element',
-		),
-		'transcripts_apachesolr_goto_tcu' => array(
 			'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
 			'file' => 'transcripts_apachesolr.theme.inc',
 			'render element' => 'element',
@@ -184,7 +181,7 @@ function transcripts_apachesolr_apachesolr_query_prepare($query) {
  */
 function transcripts_apachesolr_apachesolr_query_alter($query) {
   $query->addParams(array('fl' => array('ss_node_label', 'is_eid', 'entity_id', 'fts_start', 'fts_end')));
-  $tiers = transcripts_apachesolr_all_tiers();
+  $tiers = array_keys(transcripts_ui_tiers());
   if (count($tiers) > 0) {
   	$qf = array();
   	foreach ($tiers as $tier) {
@@ -204,7 +201,7 @@ function transcripts_apachesolr_preprocess_tcu_snippet(&$vars) {
 		$doc = $vars['doc'];
 
 		$tiers = array();
-        	foreach (transcripts_apachesolr_all_tiers() as $tier) {
+        	foreach (array_keys(transcripts_ui_tiers()) as $tier) {
         	        if (isset($doc->{$tier})) {
                 	        $variables = array();
                 	        $variables['tier_name'] = $tier;
@@ -271,20 +268,10 @@ function transcripts_apachesolr_form_apachesolr_search_custom_page_search_form_a
 }
 
 function transcripts_apachesolr_permission() {
-	$profiles = transcripts_apachesolr_all_profiles();
 	$permissions = array();
-	$permissions['view transcripts'] = array(
-		'title' => t('View transcripts'),
+	$permissions['administer transcripts apachesolr'] = array(
+		'title' => t('Administer module'),
 	);
-	$permissions['administer transcripts'] = array(
-		'title' => t('Administer transcripts module, including managing profiles'),
-	);
-	foreach ($profiles as $profile) {
-		$pid = $profile['pid'];
-		$permissions["view profile $pid"] = array(
-			'title' => t('View profile %pid', array('%pid' => $profile['pid']))
-		);
-	}
 	return $permissions;
 }
 

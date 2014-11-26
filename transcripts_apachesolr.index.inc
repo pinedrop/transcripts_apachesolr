@@ -1,7 +1,7 @@
 <?php
 
-function transcripts_already_indexed($module, $type, $id, $fid = NULL) {
-	$query = db_select('transcripts_transcript', 'tr')
+function transcripts_apachesolr_already_indexed($module, $type, $id, $fid = NULL) {
+	$query = db_select('transcripts_apachesolr_transcript', 'tr')
 		->fields('tr', array('trid'))
 		->condition('tr.module', $module, '=')
 		->condition('tr.type', $type, '=')
@@ -14,8 +14,8 @@ function transcripts_already_indexed($module, $type, $id, $fid = NULL) {
 	return $result->rowCount() == 0 ? FALSE : $result;
 }
 
-function transcripts_already_indexed_trid($module, $type, $id, $fid = NULL) {
-	$result = transcripts_already_indexed($module, $type, $id, $fid);
+function transcripts_apachesolr_already_indexed_trid($module, $type, $id, $fid = NULL) {
+	$result = transcripts_apachesolr_already_indexed($module, $type, $id, $fid);
 	if ($result) {
 		$arr = $result->fetchAssoc();
 		return $arr['trid'];
@@ -25,8 +25,8 @@ function transcripts_already_indexed_trid($module, $type, $id, $fid = NULL) {
 	}
 }
 
-function transcripts_remove_transcript($module, $type, $id) {
-	$trids = db_select('transcripts_transcript', 'tr')
+function transcripts_apachesolr_remove_transcript($module, $type, $id) {
+	$trids = db_select('transcripts_apachesolr_transcript', 'tr')
 		->fields('tr', array('trid'))
 		->condition('module', $module, '=')
 		->condition('type', $type, '=')
@@ -45,16 +45,16 @@ function transcripts_remove_transcript($module, $type, $id) {
 			tcu_delete_multiple($tcuids);
 		}
 		
-		db_delete('transcripts_transcript')
+		db_delete('transcripts_apachesolr_transcript')
 			->condition('trid', $trids, 'IN')
 			->execute();
 	}
 }
 
-function transcripts_add_transcript($module, $type, $fid, $id, $tcus) {
+function transcripts_apachesolr_add_transcript($module, $type, $fid, $id, $tcus) {
 	//check that tcus have been created
 	if (isset($tcus['tcu'])) {
-                $trid = db_insert('transcripts_transcript')
+                $trid = db_insert('transcripts_apachesolr_transcript')
                         ->fields(array(
                                 'module' => $module,
                                 'type' => $type,
