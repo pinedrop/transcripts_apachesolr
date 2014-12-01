@@ -141,6 +141,20 @@ function transcripts_apachesolr_theme() {
 			'template' => 'transcripts-apachesolr-search-result-tier',
       			'variables' => array('snippets' => NULL, 'tier_name' => NULL),
 		),
+                'transcripts_apachesolr_video_tag' => array(
+                        'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+                        'file' => 'transcripts_apachesolr.theme.inc',
+                        'variables' => array(
+                                'tag_type' => 'video',
+                                'video_url' => array(),
+                                'video_tag' => NULL,
+                        ),
+                ),
+                'transcripts_apachesolr_interactive_transcript' => array(
+                        'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+                        'file' => 'transcripts_apachesolr.theme.inc',
+                        'template' => 'transcripts-apachesolr-interactive-transcript',
+                ),
 	);
 }
 
