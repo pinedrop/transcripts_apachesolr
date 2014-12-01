@@ -32,7 +32,7 @@ function transcripts_apachesolr_title($trid, $videotag, $tiers) {
                         'transcript' => $ui->ui['transcript'],
                         'hits' => $ui->ui['hits'],
                 );
-                return theme('transcripts_ui_interactive_transcript', $vars);
+                return theme('transcripts_apachesolr_interactive_transcript', $vars);
         }
         else {
                 return t("This transcript is still being processed for display.");

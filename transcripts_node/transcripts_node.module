@@ -69,7 +69,7 @@ function transcripts_node_videotag($entity_id, $trid) {
 	$vars['video_url'] = isset($val['video_url']) ? $val['video_url'] : '';
 	$vars['video_tag'] = isset($val['video_tag']) ? $val['video_tag'] : '';
 
-	return theme('transcripts_ui_video_tag', $vars);
+	return theme('transcripts_apachesolr_video_tag', $vars);
 }
 
 function transcripts_node_transcript_access($nid) {
