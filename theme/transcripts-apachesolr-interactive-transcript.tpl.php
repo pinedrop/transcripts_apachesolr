@@ -1,5 +1,5 @@
 <div>
-	<div id='<?php print $trid; ?>' class='transcript-player'>
+	<div class='transcript-player'>
 		<?php print render($transcript_controls); ?>
 		<table>
 			<tr>

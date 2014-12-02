@@ -3,6 +3,9 @@
 function transcripts_apachesolr_init() {
 	drupal_add_js(drupal_get_path('module', 'transcripts_apachesolr') .'/transcripts_apachesolr.js', 'file');
 	module_load_include('inc', 'transcripts_apachesolr', 'transcripts_apachesolr.index');
+
+	//really shouldn't be here
+	drupal_add_css(drupal_get_path('module', 'transcripts_apachesolr') .'/theme/transcripts_apachesolr_interactive_transcript.css', 'file');
 }
 
 function transcripts_apachesolr_environment() {
@@ -90,7 +93,7 @@ function transcripts_apachesolr_response(&$ui) {
 		'default' => 'asc',
 	));
 	list($final_query, $response) = transcripts_apachesolr_do_query($query);
-	$ui->processXMLResponse($response);
+	$ui->processResponse($response);
 }
 function transcripts_apachesolr_do_query(DrupalSolrQueryInterface $current_query) {
         if (!is_object($current_query)) {

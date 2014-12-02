@@ -17,7 +17,7 @@ function theme_transcripts_apachesolr_search_snippet($vars) {
 	return $out;
 }
 function theme_transcripts_apachesolr_video_tag($vars) {
-        $out = "<div class='transcripts-apachesolr-video-tag' data-trid='{$vars['trid']}'>";
+        $out = "<div data-transcripts-role='video' data-transcripts-id='{$vars['trid']}'>";
         if (!$vars['video_tag']) { //use video_url
                 $tag = $vars['tag_type'];
                 $out .= "<div class='transcripts'>";
