@@ -1,10 +1,23 @@
+body {
+	overflow:auto;
+}
 .transcript-player {
         width: 100%;
         padding-bottom:20px;
 }
-.transcript-player td {
-        vertical-align: top;
+.video-wrapper.affix {
+	top:10px;
 }
+.video-wrapper {
+	float:left;
+	width:500px;
+}
+.transcript-wrapper {
+	float:right;
+	margin:0 -505px 0 auto;
+	width:100%;
+}
+/*
 .transcript-content {
         width:100%;
         min-height:500px;
@@ -12,3 +25,4 @@
         overflow-y:scroll;
         position:relative;
 }
+*/

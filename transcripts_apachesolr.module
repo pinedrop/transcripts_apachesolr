@@ -15,6 +15,7 @@ function transcripts_apachesolr_environment() {
 function transcripts_apachesolr_get_solr() {
 	return apachesolr_get_solr(transcripts_apachesolr_environment());
 }
+
 function transcripts_apachesolr_title($trid, $videotag, $tiers) {
 	// how will options get through when function is not called as part of page request?
 	$options = array(
@@ -22,36 +23,27 @@ function transcripts_apachesolr_title($trid, $videotag, $tiers) {
                 'justhits' => isset($_GET['justhits']) ? true : false,
         );
 
-	$ui = transcripts_ui_ui($trid, $options);
-	transcripts_apachesolr_response($ui);
-        if ($ui->num_docs > 0) {
-                $vars = array(
-                        'trid' => $ui->trid,
-                        'video_tag' => $videotag,
-
-                        //render arrays
-                        'video_controls' => $ui->ui['video_controls'],
-                        'transcript_controls' => $ui->ui['transcript_controls'],
-                        'transcript' => $ui->ui['transcript'],
-                        'hits' => $ui->ui['hits'],
-                );
+	$ui = transcripts_ui_ui('transcripts_apachesolr', $trid, $options);
+        if ($ui->tcuCount > 0) {
+		$video = array(
+			'video_tag' => $videotag,
+		);
+		$vars = array_merge($video, transcripts_ui_render($ui));
                 return theme('transcripts_apachesolr_interactive_transcript', $vars);
         }
         else {
                 return t("This transcript is still being processed for display.");
         }
 }
-function transcripts_apachesolr_transcripts_ui_ajax_search(&$ui) {
-	transcripts_apachesolr_response($ui);
-}
-function transcripts_apachesolr_response(&$ui) {
+
+function transcripts_apachesolr_transcripts_ui_transcript($ui) {
 	$trid = $ui->shorttrid;
 	$tiers = array_keys($ui->tiers);
 	$options = $ui->options;
 
 	$solr = transcripts_apachesolr_get_solr();
 	
-	$fl = implode(",", $tiers) . ",id,is_trid,entity_id,ss_speaker,fts_start,fts_end";
+	$fl = implode(",", $tiers) . ",id,trid:is_trid,tcuid:entity_id,speaker:ss_speaker,start:fts_start,end:fts_end";
 	
 	if ($options['term'] == '') {
 		$params = array(
@@ -93,8 +85,13 @@ function transcripts_apachesolr_response(&$ui) {
 		'default' => 'asc',
 	));
 	list($final_query, $response) = transcripts_apachesolr_do_query($query);
-	$ui->processResponse($response);
+
+	$tcus = $response->response->docs;
+	$highlights = isset($response->highlighting) ? $response->highlighting : NULL;
+
+	return array($tcus, $highlights);
 }
+
 function transcripts_apachesolr_do_query(DrupalSolrQueryInterface $current_query) {
         if (!is_object($current_query)) {
                 throw new Exception(t('NULL query object in function apachesolr_do_query()'));
@@ -312,7 +309,7 @@ function transcripts_apachesolr_menu() {
 		'type' => MENU_LOCAL_TASK,
 	);
 	$items['transcript/%'] = array(
-		'page callback' => 'transcripts_redirect',
+		'page callback' => 'transcripts_apachesolr_redirect',
 		'page arguments' => array(1),
 		'access callback' => 'user_access',
 		'access arguments' => array('view transcripts'),
@@ -321,13 +318,13 @@ function transcripts_apachesolr_menu() {
 	return $items;
 }
 
-function transcripts_redirect($trid, $tcuid = '') {
+function transcripts_apachesolr_redirect($trid, $tcuid = '') {
 	$transcript = db_query("SELECT * FROM {transcripts_apachesolr_transcript} WHERE trid=:trid", array(':trid' => $trid))
 		->fetchAssoc();
 		
 	if (count($transcript) > 0) {
 		$fragment = !intval($tcuid) ? NULL : 'tcu/' .$tcuid;
-		$redirect = $transcript['module'].'_redirect_transcript';
+		$redirect = $transcript['module'].'_transcripts_apachesolr_redirect';
 		$redirect($transcript, $fragment);
 	}
 }
