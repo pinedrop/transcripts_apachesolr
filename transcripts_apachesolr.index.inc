@@ -63,20 +63,30 @@ function transcripts_apachesolr_add_transcript($module, $type, $fid, $id, $tcus)
                                 'status' => 1,
                         ))
                         ->execute();
-  
-  		foreach ($tcus['tcu'] as $tcu) {
-        		$insert = tcu_create(
-       			     array(
-                            	'trid' => $trid,
-                            	'speaker' => isset($tcu['speaker']) ? $tcu['speaker'] : '',
-                            	'start' => isset($tcu['start']) ? $tcu['start'] : 0,
-                            	'end' => isset($tcu['end']) ? $tcu['end'] : 0,
-                            	'created' => REQUEST_TIME,
-                            	'changed' => REQUEST_TIME,
-                        	)
-                	);
-               		$insert->setTiers(array_filter(array_map('trim', $tcu['tiers']))); //don't save empty tiers
-                	tcu_save($insert);
-        	}
+
+		//fix for http://tapadoo.com/2011/regular-problem-with-xml-to-json-converters/
+		if (isset($tcus['tcu'][0])) { //numeric array, more than one tcu
+  			foreach ($tcus['tcu'] as $tcu) {
+				transcripts_apachesolr_insert_tcu($trid, $tcu);
+			}
+		}
+		else {
+			transcripts_apachesolr_insert_tcu($trid, $tcus['tcu']); //non-numeric single tcu 
+		}
 	}
+}
+
+function transcripts_apachesolr_insert_tcu($trid, $tcu) {
+	$insert = tcu_create(
+		array(
+			'trid' => $trid,
+			'speaker' => isset($tcu['speaker']) ? $tcu['speaker'] : '',
+			'start' => isset($tcu['start']) ? $tcu['start'] : 0,
+			'end' => isset($tcu['end']) ? $tcu['end'] : 0,
+			'created' => REQUEST_TIME,
+			'changed' => REQUEST_TIME,
+              	)
+	);
+	$insert->setTiers(array_filter(array_map('trim', $tcu['tiers']))); //don't save empty tiers
+	tcu_save($insert);
 }
