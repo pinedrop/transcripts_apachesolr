@@ -74,7 +74,7 @@ function transcripts_node_videotag($entity_id, $trid) {
 
 function transcripts_node_transcript_access($nid) {
 	$node = node_load($nid);
-	return user_access('view transcripts') && transcripts_node_has_transcript($node) && node_access('view', $node) ? true : false;
+	return transcripts_node_has_transcript($node) && node_access('view', $node) ? true : false;
 }
 
 function transcripts_node_has_transcript($node) {

@@ -311,8 +311,7 @@ function transcripts_apachesolr_menu() {
 	$items['transcript/%'] = array(
 		'page callback' => 'transcripts_apachesolr_redirect',
 		'page arguments' => array(1),
-		'access callback' => 'user_access',
-		'access arguments' => array('view transcripts'),
+		'access callback' => TRUE,
 	);
 	
 	return $items;
