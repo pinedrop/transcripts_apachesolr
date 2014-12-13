@@ -42,9 +42,12 @@ function transcripts_apachesolr_transcripts_ui_transcript($ui) {
 	$options = $ui->options;
 
 	$solr = transcripts_apachesolr_get_solr();
+
+	//field aliasing (Solr 4.x): http://wiki.apache.org/solr/CommonQueryParameters#Field_alias	
+	//$fl = implode(",", $tiers) . ",id,trid:is_trid,tcuid:entity_id,speaker:ss_speaker,start:fts_start,end:fts_end";
 	
-	$fl = implode(",", $tiers) . ",id,trid:is_trid,tcuid:entity_id,speaker:ss_speaker,start:fts_start,end:fts_end";
-	
+	$fl = implode(",", $tiers) . ",id,is_trid,entity_id,ss_speaker,fts_start,fts_end";
+
 	if ($options['term'] == '') {
 		$params = array(
 			'q' => '*:*', 
@@ -87,6 +90,13 @@ function transcripts_apachesolr_transcripts_ui_transcript($ui) {
 	list($final_query, $response) = transcripts_apachesolr_do_query($query);
 
 	$tcus = $response->response->docs;
+	foreach ($tcus as &$tcu) {
+		$tcu->trid = $tcu->is_trid;
+		$tcu->tcuid = $tcu->entity_id;
+		$tcu->speaker = $tcu->ss_speaker;
+		$tcu->start = $tcu->fts_start;
+		$tcu->end = $tcu->fts_end;
+	}
 	$highlights = isset($response->highlighting) ? $response->highlighting : NULL;
 
 	return array($tcus, $highlights);
