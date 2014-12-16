@@ -1,7 +1,6 @@
 <?php
 
 function transcripts_apachesolr_init() {
-	drupal_add_js(drupal_get_path('module', 'transcripts_apachesolr') .'/transcripts_apachesolr.js', 'file');
 	module_load_include('inc', 'transcripts_apachesolr', 'transcripts_apachesolr.index');
 
 	//really shouldn't be here
