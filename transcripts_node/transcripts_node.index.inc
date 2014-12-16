@@ -12,12 +12,14 @@ function transcripts_node_node_insert($node) {
     $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
     
     foreach ($fields as $field_name) {
-        $field = $node->$field_name;
+	if (isset($node->$field_name)) {
+	        $field = $node->$field_name;
         
-        if (!(empty($field) || empty($field[$node->language]))) {
-            $fid = $field[$node->language][0]['fid'];
-            transcripts_node_add_transcript(file_load($fid), node_load($node->nid));
-        }
+	        if (!(empty($field) || empty($field[$node->language]))) {
+	            $fid = $field[$node->language][0]['fid'];
+	            transcripts_node_add_transcript(file_load($fid), node_load($node->nid));
+	        }
+	}
     }
 }
 
