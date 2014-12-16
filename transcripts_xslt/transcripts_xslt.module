@@ -54,7 +54,7 @@ function transcripts_xslt_as_tcus($file, $node) {
         }
         $params = array();
         $params['file'] = $filepath;
-        $params['tierNames'] = variable_get('transcripts_apachesolr_toolbox_mappings', 'tx|ts_content_even, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_eng, ru|ts_content_rus');
+        $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
         drupal_alter('transcripts_xslt_saxon_params', $params, $node);
         $xml = transcripts_xslt_saxon_transform($xslt, '', 'toolbox', $params);
 

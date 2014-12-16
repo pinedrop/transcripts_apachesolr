@@ -41,6 +41,16 @@ function transcripts_xslt_settings_form() {
                 '#description' => t($message),
                 '#default_value' => variable_get('transcripts_xslt_transformer_field', 'field_transcripts_xsl'),
         );
-	
+        $desc = 'Enter a comma-separated list of Toolbox tier mappings, '
+                . 'each in the form TOOLBOX_TIER|TRANSCRIPTS_TIER. '
+                . 'You can ignore this field if you are not importing transcripts from Toolbox.';
+        $form['transcripts_xslt_settings']['transcripts_xslt_toolbox_mappings'] = array(
+                '#title' => t('Toolbox mappings'),
+                '#type' => 'textarea',
+                '#rows' => 3,
+                '#default_value' => variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo'),
+                '#description' => t($desc),
+                '#required' => TRUE,
+        );
 	return system_settings_form($form);
 }
