@@ -87,9 +87,7 @@ function transcripts_node_has_transcript($node) {
 			}
 		}
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 /**
