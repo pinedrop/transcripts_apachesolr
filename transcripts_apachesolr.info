@@ -6,5 +6,5 @@ dependencies[] = tcu
 dependencies[] = transcripts_node
 package = Pinedrop Transcripts
 core = 7.x
-files[] = transcripts.module
-files[] = transcripts.install
+files[] = transcripts_apachesolr.module
+files[] = transcripts_apachesolr.install
