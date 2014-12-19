@@ -1,28 +1,20 @@
-body {
-	overflow:auto;
-}
-.transcript-player {
+.transcripts-interactive-transcript .transcript-player {
         width: 100%;
         padding-bottom:20px;
 }
-.video-wrapper.affix {
-	top:10px;
-}
-.video-wrapper {
+.transcripts-interactive-transcript .video-wrapper {
 	float:left;
 	width:500px;
 }
-.transcript-wrapper {
+.transcripts-interactive-transcript .transcript-wrapper {
 	float:right;
 	margin:0 -505px 0 auto;
 	width:100%;
 }
-/*
-.transcript-content {
+.transcripts-interactive-transcript .transcript-content {
         width:100%;
         min-height:500px;
         max-height:500px;
         overflow-y:scroll;
         position:relative;
 }
-*/
