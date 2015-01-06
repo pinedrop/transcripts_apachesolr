@@ -209,7 +209,7 @@ function transcripts_apachesolr_apachesolr_query_prepare($query) {
  * Implements hook_apachesolr_query_alter().
  */
 function transcripts_apachesolr_apachesolr_query_alter($query) {
-  $query->addParams(array('fl' => array('ss_node_label', 'is_eid', 'entity_id', 'fts_start', 'fts_end')));
+  $query->addParams(array('fl' => array('is_trid', 'entity_id', 'fts_start', 'fts_end')));
   $tiers = array_keys(transcripts_ui_tiers());
   if (count($tiers) > 0) {
   	$qf = array();
