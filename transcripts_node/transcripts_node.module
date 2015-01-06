@@ -32,7 +32,7 @@ function transcripts_node_menu() {
 		'page arguments' => array(1),
 		'access callback' => 'transcripts_node_transcript_access',
 		'access arguments' => array(1),
-		'type' => MENU_LOCAL_TASK,
+		'type' => MENU_CALLBACK,
 		'weight' => 80,
 	);
 	
