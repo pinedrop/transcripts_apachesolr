@@ -2,7 +2,6 @@
 	<div class='transcript-player'>
 		<div class='video-wrapper' data-spy='affix' data-offset-top='100'>
 			<?php print $video_tag; ?>
-			<?php print render($video_controls); ?>
 			<?php print render($transcript_controls); ?>
 		</div>
 		<div class='transcript-wrapper'>

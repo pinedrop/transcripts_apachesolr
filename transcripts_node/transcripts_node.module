@@ -40,7 +40,7 @@ function transcripts_node_menu() {
 }
 
 function transcripts_node_transcripts_apachesolr_redirect($transcript, $fragment = NULL) {
-	$path = 'node/'.$transcript['id'].'/transcript';
+	$path = 'node/'.$transcript['id'];
 	if ($fragment === NULL) {
 		drupal_goto($path);
 	}
