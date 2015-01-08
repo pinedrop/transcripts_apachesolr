@@ -3,6 +3,7 @@
 		<div class='video-wrapper' data-spy='affix' data-offset-top='100'>
 			<?php print $video_tag; ?>
 			<?php print render($transcript_controls); ?>
+			<?php print render($tier_selector); ?>
 		</div>
 		<div class='transcript-wrapper'>
 			<ul class='nav nav-tabs' role='tablist'>
