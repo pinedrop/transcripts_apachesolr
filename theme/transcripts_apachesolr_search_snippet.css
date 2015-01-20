@@ -1,18 +1,21 @@
 .search-results {
-	list-style-type: none;
+    list-style-type: none;
 }
 
 /* sentence display in search results */
 .transcripts-apachesolr-search-snippet {
-	clear: both;
+    clear: both;
 }
+
 .transcripts-apachesolr-search-snippet .controls {
-        float: left;
-        width: 70px;
+    float: left;
+    width: 70px;
 }
-.transcripts-apachesolr-search-snippet .tiers{
-        margin-left: 75px;
+
+.transcripts-apachesolr-search-snippet .tiers {
+    margin-left: 75px;
 }
+
 .untimed {
-	color:grey;
+    color: grey;
 }

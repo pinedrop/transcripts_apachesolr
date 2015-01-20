@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xsl:stylesheet version="2.0"	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     <xml:output method="xml" encoding="UTF-8" indent="yes"/>
-    
+
     <xsl:param name="file" select="'Even_Top09_Golikova_Slepcov-Conversation.txt'"/>
     <xsl:param name="tcuData" select="'ELANBegin|start, ELANEnd|end, ELANParticipant|speaker'"/>
-    <xsl:param name="tierNames" select="'tx|ts_content_even, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_eng, ru|ts_content_rus'"/>
-    
+    <xsl:param name="tierNames"
+               select="'tx|ts_content_even, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_eng, ru|ts_content_rus'"/>
+
     <xsl:template match="/">
         <xsl:call-template name="toolbox"/>
     </xsl:template>
@@ -21,7 +22,7 @@
                 <tcus>
                     <xsl:for-each select="tokenize($tcus, '\\block')[position()>1]">
                         <xsl:variable name="tcu" select="."/>
-                        
+
                         <tcu>
                             <xsl:for-each select="$tculevel">
                                 <xsl:variable name="meta">
@@ -36,7 +37,7 @@
                                         <xsl:if test="not($meta='')">
                                             <xsl:element name="{$cat}">
                                                 <xsl:call-template name="convert-time">
-                                                    <xsl:with-param name="time" select="$meta" />
+                                                    <xsl:with-param name="time" select="$meta"/>
                                                 </xsl:call-template>
                                             </xsl:element>
                                         </xsl:if>
@@ -55,7 +56,8 @@
                                     <xsl:variable name="res">
                                         <xsl:call-template name="getTier">
                                             <xsl:with-param name="tcu" select="$tcu"/>
-                                            <xsl:with-param name="tier" select="normalize-space(substring-before(.,'|'))"/>
+                                            <xsl:with-param name="tier"
+                                                            select="normalize-space(substring-before(.,'|'))"/>
                                         </xsl:call-template>
                                     </xsl:variable>
                                     <xsl:if test="not($res='')">
@@ -71,16 +73,16 @@
             </xsl:when>
             <xsl:otherwise>
                 <error>
-                     <xsl:text>Cannot locate : </xsl:text><xsl:value-of select="$file"/>    
+                    <xsl:text>Cannot locate : </xsl:text><xsl:value-of select="$file"/>
                 </error>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-    
+
     <xsl:template name="getTier">
         <xsl:param name="tcu" select="''"/>
         <xsl:param name="tier" select="''"/>
-        
+
         <xsl:variable name="return">
             <xsl:for-each select="tokenize($tcu, '\n')">
                 <xsl:variable name="tag" select="concat('\', $tier, ' ')"/>
@@ -89,18 +91,19 @@
                 </xsl:if>
             </xsl:for-each>
         </xsl:variable>
-        
+
         <xsl:value-of select="normalize-space($return)"/>
     </xsl:template>
 
     <xsl:template name="convert-time">
-        <xsl:param name="time" select="'0'" />
+        <xsl:param name="time" select="'0'"/>
 
-        <xsl:variable name="h" select="number(substring($time,1,2))" />
-        <xsl:variable name="m" select="number(substring($time,4,2))" />
-        <xsl:variable name="s" select="number(substring($time,7,6))" /> <!-- ss.msec -->
+        <xsl:variable name="h" select="number(substring($time,1,2))"/>
+        <xsl:variable name="m" select="number(substring($time,4,2))"/>
+        <xsl:variable name="s" select="number(substring($time,7,6))"/>
+        <!-- ss.msec -->
 
-        <xsl:value-of select="format-number($h*3600 + $m*60 + $s,'0.000')" />
-   </xsl:template>
-    
+        <xsl:value-of select="format-number($h*3600 + $m*60 + $s,'0.000')"/>
+    </xsl:template>
+
 </xsl:stylesheet>
