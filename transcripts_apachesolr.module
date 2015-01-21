@@ -23,7 +23,6 @@ function transcripts_apachesolr_title($trid, $videotag, $tiers)
     // how will options get through when function is not called as part of page request?
     $options = array(
         'term' => isset($_GET['term']) ? '"' . $_GET['term'] . '"' : '',
-        'justhits' => isset($_GET['justhits']) ? true : false,
     );
 
     $ui = transcripts_ui_ui('transcripts_apachesolr', $trid, $options);
@@ -65,9 +64,7 @@ function transcripts_apachesolr_transcripts_ui_transcript($ui)
             $arr[] = "$tier:" . $options['term'];
         }
         $q = implode(" OR ", $arr);
-        if (!$options['justhits']) {
-            $q .= " OR *:*";
-        }
+        $q .= " OR *:*";
         $params = array(
             'q' => $q,
             'start' => 0,
