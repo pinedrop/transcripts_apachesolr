@@ -224,8 +224,12 @@ function transcripts_apachesolr_apachesolr_query_alter($query)
             $qf[] = $tier . "^1.0";
         }
         $query->addParam('qf', implode(" ", $qf));
-        $query->addParams(array('fl' => $tiers));
-        $query->addParams(array('hl.fl' => $tiers));
+        $query->addParams(array(
+            'fl' => $tiers,
+            'hl.fl' => $tiers,
+            'hl.simple.pre' => "<mark>",
+            'hl.simple.post' => "</mark>",
+        ));
     }
     $query->replaceParam('hl.fragsize', 0);
     $query->addParam('f.content.hl.fragsize', 100);
