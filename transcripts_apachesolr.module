@@ -168,6 +168,11 @@ function transcripts_apachesolr_theme()
             'file' => 'transcripts_apachesolr.theme.inc',
             'template' => 'transcripts-apachesolr-interactive-transcript',
         ),
+        'transcripts_apachesolr_link_tcu' => array(
+            'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+            'file' => 'transcripts_apachesolr.theme.inc',
+            'render element' => 'element',
+        ),
     );
 }
 
@@ -263,7 +268,7 @@ function transcripts_apachesolr_preprocess_tcu_snippet(&$vars)
             '#suffix' => "</div>",
             'tiers' => $tiers,
             'link' => array(
-                '#theme' => 'transcripts_ui_goto_tcu',
+                '#theme' => 'transcripts_apachesolr_link_tcu',
                 '#linkurl' => url($doc->path),
                 '#time' => $doc->fts_start,
             ),
