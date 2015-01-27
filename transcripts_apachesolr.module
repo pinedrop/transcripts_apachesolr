@@ -64,7 +64,9 @@ function transcripts_apachesolr_transcripts_ui_transcript($ui)
             $arr[] = "$tier:" . $options['term'];
         }
         $q = implode(" OR ", $arr);
-        $q .= " OR *:*";
+        if (!$options['hits_only']) {
+            $q .= " OR *:*";
+        }
         $params = array(
             'q' => $q,
             'start' => 0,
