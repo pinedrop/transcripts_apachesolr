@@ -32,10 +32,12 @@ function theme_transcripts_apachesolr_video_tag($vars)
 }
 
 function theme_transcripts_apachesolr_link_tcu($vars) {
-    $mins = floor ($vars['element']['#time'] / 60);
+    $minutes = floor ($vars['element']['#time'] / 60);
     $secs = $vars['element']['#time'] % 60;
-    $time = sprintf ("%d:%02d", $mins, $secs);
-    $out = "<a href='" . $vars['element']['#linkurl'] . "' class='btn btn-default' role='button'>";
+    $time = sprintf ("%d:%02d", $minutes, $secs);
+    $classes = 'btn btn-default';
+    $classes .= $vars['element']['#timecoded'] ? ' timed' : ' untimed';
+    $out = "<a href='" . $vars['element']['#linkurl'] . "' class='" . $classes ."' role='button'>";
     $out .= "<span class='glyphicon glyphicon-play'></span> ";
     $out .= $time;
     if (isset($vars['element']['#text'])) {

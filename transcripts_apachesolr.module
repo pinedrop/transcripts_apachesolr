@@ -270,6 +270,7 @@ function transcripts_apachesolr_preprocess_tcu_snippet(&$vars)
             'link' => array(
                 '#theme' => 'transcripts_apachesolr_link_tcu',
                 '#linkurl' => url($doc->path),
+                '#timecoded' => $doc->fts_end == 0 ? FALSE : TRUE,
                 '#time' => $doc->fts_start,
             ),
         );
