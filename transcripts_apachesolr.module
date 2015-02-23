@@ -3,9 +3,6 @@
 function transcripts_apachesolr_init()
 {
     module_load_include('inc', 'transcripts_apachesolr', 'transcripts_apachesolr.index');
-
-    //really shouldn't be here
-    drupal_add_css(drupal_get_path('module', 'transcripts_apachesolr') . '/theme/transcripts_apachesolr_interactive_transcript.css', 'file');
 }
 
 function transcripts_apachesolr_environment()
@@ -31,7 +28,7 @@ function transcripts_apachesolr_title($trid, $videotag, $tiers)
             'video_tag' => $videotag,
         );
         $vars = array_merge($video, transcripts_ui_render($ui));
-        return theme('transcripts_apachesolr_interactive_transcript', $vars);
+	return t("Error");
     } else {
         return t("This transcript is still being processed for display.");
     }
@@ -164,11 +161,6 @@ function transcripts_apachesolr_theme()
                 'video_url' => array(),
                 'video_tag' => NULL,
             ),
-        ),
-        'transcripts_apachesolr_interactive_transcript' => array(
-            'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
-            'file' => 'transcripts_apachesolr.theme.inc',
-            'template' => 'transcripts-apachesolr-interactive-transcript',
         ),
         'transcripts_apachesolr_link_tcu' => array(
             'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
