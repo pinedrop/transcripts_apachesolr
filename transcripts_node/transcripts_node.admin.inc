@@ -37,47 +37,10 @@ function transcripts_node_node_settings()
     return $form;
 }
 
-function transcripts_node_videotag_settings()
-{
-    /* interpret id - should permissions check for PHP writing ability */
-    $form = array();
-
-    $form['transcripts_node_videotag_settings'] = array(
-        '#title' => t('Video tag'),
-        '#type' => 'fieldset',
-        '#collapsed' => FALSE,
-    );
-    $form['transcripts_node_videotag_settings']['transcripts_node_id_mapper'] = array(
-        '#title' => t('Id mapper'),
-        '#description' => t('<p>PHP code that interprets unique (node) ids as passed to URLs, and converts them to data used by the
-							transcript players. Do not begin this code with <code>&lt;?php</code>. Code should end with:
-							<div>
-							    <code>
-								    $val = array(<br/>
-									&nbsp;&nbsp;"video_tag" => "HTML 5 VIDEO TAG",<br/>
-									&nbsp;&nbsp;"video_url" => array(URL1, URL2, ...),<br/>
-									);<br/>
-								</code>
-							</div>
-  						</p>
-  						<p>
-  						  The id to be mapped by this code is contained in the variable <code>$entity_id</code>.
-  						  If <code>video_url</code> is returned, then a video tag will be constructed from
-  						  the supplied array. Otherwise, <code>video_tag</code> will be used.
-  						</p>'),
-        '#type' => 'textarea',
-        '#rows' => 10,
-        '#default_value' => variable_get('transcripts_node_id_mapper', ''),
-    );
-
-    return $form;
-}
-
 function transcripts_node_site_settings_form($form, &$form_state)
 {
     return system_settings_form(array_merge(
         $form,
-        transcripts_node_node_settings(),
-        transcripts_node_videotag_settings()
+        transcripts_node_node_settings()
     ));
 }
