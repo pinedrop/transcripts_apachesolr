@@ -1,3 +1,3 @@
 <div>
-<?php print $transcript; ?>
+<?php print render($transcript); ?>
 </div>
