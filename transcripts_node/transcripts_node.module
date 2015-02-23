@@ -59,7 +59,7 @@ function transcripts_node_get_player($nid)
     if ($trid) {
         $videotag = transcripts_node_videotag($nid, $trid);
         $tiers = transcripts_ui_tiers();
-        return transcripts_apachesolr_title($trid, $videotag, $tiers);
+        return transcripts_apachesolr_scroller($trid, $videotag, $tiers);
     }
 }
 
@@ -151,7 +151,7 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
             if ($trid) {
             	$videotag = transcripts_node_videotag($nid, $trid);
                 $tiers = transcripts_ui_tiers();
-                $element[$delta] = array('#markup' => transcripts_apachesolr_title($trid, $videotag, $tiers));
+                $element[$delta] = array('#markup' => transcripts_apachesolr_scroller($trid, $videotag, $tiers));
             }
         }
     }

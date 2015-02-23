@@ -15,7 +15,7 @@ function transcripts_apachesolr_get_solr()
     return apachesolr_get_solr(transcripts_apachesolr_environment());
 }
 
-function transcripts_apachesolr_title($trid, $videotag, $tiers)
+function transcripts_apachesolr_scroller($trid, $videotag, $tiers)
 {
     // how will options get through when function is not called as part of page request?
     $options = array(
@@ -24,11 +24,7 @@ function transcripts_apachesolr_title($trid, $videotag, $tiers)
 
     $ui = transcripts_ui_ui('transcripts_apachesolr', $trid, $options);
     if ($ui->tcuCount > 0) {
-        $video = array(
-            'video_tag' => $videotag,
-        );
-        $vars = array_merge($video, transcripts_ui_render($ui));
-	return t("Error");
+        return theme('transcripts_apachesolr_scroller', transcripts_ui_render($ui));
     } else {
         return t("This transcript is still being processed for display.");
     }
@@ -161,6 +157,11 @@ function transcripts_apachesolr_theme()
                 'video_url' => array(),
                 'video_tag' => NULL,
             ),
+        ),
+        'transcripts_apachesolr_scroller' => array(
+            'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+            'file' => 'transcripts_apachesolr.theme.inc',
+	    'template' => 'transcripts-apachesolr-scroller',
         ),
         'transcripts_apachesolr_link_tcu' => array(
             'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
