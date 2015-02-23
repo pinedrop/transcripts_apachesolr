@@ -15,7 +15,7 @@ function transcripts_apachesolr_get_solr()
     return apachesolr_get_solr(transcripts_apachesolr_environment());
 }
 
-function transcripts_apachesolr_scroller($trid, $videotag, $tiers)
+function transcripts_apachesolr_scroller($trid, $tiers)
 {
     // how will options get through when function is not called as part of page request?
     $options = array(
