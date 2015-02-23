@@ -161,7 +161,7 @@ function transcripts_apachesolr_theme()
         'transcripts_apachesolr_scroller' => array(
             'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
             'file' => 'transcripts_apachesolr.theme.inc',
-	    'template' => 'transcripts-apachesolr-scroller',
+            'template' => 'transcripts-apachesolr-scroller',
         ),
         'transcripts_apachesolr_link_tcu' => array(
             'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',

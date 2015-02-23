@@ -64,9 +64,18 @@ function transcripts_node_get_player($nid)
 
 function transcripts_node_videotag($entity_id, $trid)
 {
-    //note: var $id is passed and made available to eval, array $val is returned
-    $php_code = variable_get('transcripts_node_id_mapper');
-    eval($php_code);
+    $node = node_load($entity_id);
+
+    if ($node->type == 'video') {
+        foreach ($node->field_video_compressed['und'] as $vid) {
+            $val['video_url'][] = file_create_url($vid['uri']);
+        }
+    }
+    else if ($node->type == 'audio') {
+        foreach ($node->field_audio_compressed['und'] as $vid) {
+            $val['video_url'][] = file_create_url($vid['uri']);
+        }
+    }
 
     $vars = array();
     $vars['trid'] = 'trid-' . $trid;
