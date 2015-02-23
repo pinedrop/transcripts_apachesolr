@@ -1,3 +1,3 @@
 <div>
-testing
+<?php print $transcript; ?>
 </div>
