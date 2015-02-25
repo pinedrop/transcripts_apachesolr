@@ -14,15 +14,13 @@ function theme_transcripts_apachesolr_video_tag($vars)
     $out = "<div data-transcripts-role='video' data-transcripts-id='{$vars['trid']}'>";
     if (!$vars['video_tag']) { //use video_url
         $tag = $vars['tag_type'];
-        $out .= "<div class='transcripts'>";
-        $out .= "<div class='transcripts-apachesolr-html5-media embed-responsive embed-responsive-16by9'>";
+        $out .= "<div align='center' class='embed-responsive embed-responsive-16by9'>";
         $out .= "<$tag class='embed-responsive-item' controls>";
         foreach ($vars['video_url'] as $vurl) {
             $out .= "<source src='$vurl' />";
             //$out .= "<source type='video/$src->type' src='$src->src' width='$src->width' height='$src->height' />";
         }
         $out .= "</$tag>";
-        $out .= "</div>";
         $out .= "</div>";
     } else {
         $out .= $vars['video_tag'];
