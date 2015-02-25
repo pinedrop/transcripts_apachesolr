@@ -70,8 +70,7 @@ function transcripts_node_videotag($entity_id, $trid)
         foreach ($node->field_video_compressed['und'] as $vid) {
             $val['video_url'][] = file_create_url($vid['uri']);
         }
-    }
-    else if ($node->type == 'audio') {
+    } else if ($node->type == 'audio') {
         foreach ($node->field_audio_compressed['und'] as $vid) {
             $val['video_url'][] = file_create_url($vid['uri']);
         }
@@ -139,8 +138,12 @@ function is_transcript_field($field_name)
 function transcripts_node_field_formatter_info()
 {
     return array(
-        'transcripts_node_default_player' => array(
-            'label' => t('Transcript player embed'),
+        'transcripts_scroller_with_controls' => array(
+            'label' => t('Scrolling transcript with controls'),
+            'field types' => array('file'),
+        ),
+        'transcripts_html5_video' => array(
+            'label' => t('HTML 5 video'),
             'field types' => array('file'),
         ),
     );
@@ -152,16 +155,40 @@ function transcripts_node_field_formatter_info()
 function transcripts_node_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display)
 {
     $element = array();
-    if (is_transcript_field($field['field_name'])) {
-        foreach ($items as $delta => $item) {
-            $nid = arg(1);
+
+    switch ($display['type']) {
+        case 'transcripts_scroller_with_controls':
+            if (is_transcript_field($field['field_name'])) {
+                foreach ($items as $delta => $item) {
+                    $nid = arg(1);
+                    $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
+                    if ($trid) {
+                        $tiers = transcripts_ui_tiers();
+                        $element[$delta] = array('#markup' => transcripts_apachesolr_scroller($trid, $tiers));
+                    }
+                }
+            }
+            break;
+
+        case 'transcripts_html5_video':
+            $nid = $entity->id;
             $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
             if ($trid) {
-                $tiers = transcripts_ui_tiers();
-                $element[$delta] = array('#markup' => transcripts_apachesolr_scroller($trid, $tiers));
+                $vurl = array();
+                foreach ($items as $delta => $item) {
+                    $vurl[] = file_create_url($item['uri']);
+                }
+                $vars = array();
+                $vars['trid'] = 'trid-' . $trid;
+                $vars['tag_type'] = $entity->type == 'audio' ? 'audio' : 'video';
+                $vars['video_url'] = $vurl;
+                $vars['video_tag'] = '';
+
+                $element[0] = array('#markup' => theme('transcripts_apachesolr_video_tag', $vars));
             }
-        }
+            break;
     }
+
     return $element;
 }
 
