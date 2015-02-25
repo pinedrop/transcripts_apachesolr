@@ -149,13 +149,20 @@ function transcripts_apachesolr_theme()
             'template' => 'transcripts-apachesolr-search-result-tier',
             'variables' => array('snippets' => NULL, 'tier_name' => NULL),
         ),
-        'transcripts_apachesolr_video_tag' => array(
+        'transcripts_apachesolr_html5_audio' => array(
             'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
             'file' => 'transcripts_apachesolr.theme.inc',
             'variables' => array(
-                'tag_type' => 'video',
-                'video_url' => array(),
-                'video_tag' => NULL,
+                'trid' => '',
+                'urls' => array(),
+            ),
+        ),
+        'transcripts_apachesolr_html5_video' => array(
+            'path' => drupal_get_path('module', 'transcripts_apachesolr') . '/theme',
+            'file' => 'transcripts_apachesolr.theme.inc',
+            'variables' => array(
+                'trid' => '',
+                'urls' => array(),
             ),
         ),
         'transcripts_apachesolr_scroller' => array(

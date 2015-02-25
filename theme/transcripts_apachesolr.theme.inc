@@ -9,22 +9,28 @@ function theme_transcripts_apachesolr_search_snippet($vars)
     return $out;
 }
 
-function theme_transcripts_apachesolr_video_tag($vars)
+function theme_transcripts_apachesolr_html5_audio($vars)
 {
     $out = "<div data-transcripts-role='video' data-transcripts-id='{$vars['trid']}'>";
-    if (!$vars['video_tag']) { //use video_url
-        $tag = $vars['tag_type'];
-        $out .= "<div align='center' class='embed-responsive embed-responsive-16by9'>";
-        $out .= "<$tag class='embed-responsive-item' controls>";
-        foreach ($vars['video_url'] as $vurl) {
-            $out .= "<source src='$vurl' />";
-            //$out .= "<source type='video/$src->type' src='$src->src' width='$src->width' height='$src->height' />";
-        }
-        $out .= "</$tag>";
-        $out .= "</div>";
-    } else {
-        $out .= $vars['video_tag'];
+    $out .= "<audio class='embed-responsive-item' controls>";
+    foreach ($vars['urls'] as $url) {
+        $out .= "<source src='$url' />";
     }
+    $out .= "</audio>";
+    $out .= "</div>";
+    return $out;
+}
+
+function theme_transcripts_apachesolr_html5_video($vars)
+{
+    $out = "<div data-transcripts-role='video' data-transcripts-id='{$vars['trid']}'>";
+    $out .= "<div align='center' class='embed-responsive embed-responsive-16by9'>";
+    $out .= "<video class='embed-responsive-item' controls>";
+    foreach ($vars['urls'] as $url) {
+        $out .= "<source src='$url' />";
+    }
+    $out .= "</video>";
+    $out .= "</div>";
     $out .= "</div>";
     return $out;
 }

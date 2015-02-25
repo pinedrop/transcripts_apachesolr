@@ -174,17 +174,21 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
             list($nid,,) = entity_extract_ids($entity_type, $entity);
             $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
             if ($trid) {
-                $vurl = array();
+                $urls = array();
                 foreach ($items as $delta => $item) {
-                    $vurl[] = file_create_url($item['uri']);
+                    $urls[] = file_create_url($item['uri']);
                 }
                 $vars = array();
                 $vars['trid'] = 'trid-' . $trid;
-                $vars['tag_type'] = $entity->type == 'audio' ? 'audio' : 'video';
-                $vars['video_url'] = $vurl;
-                $vars['video_tag'] = '';
+                $vars['urls'] = $urls;
 
-                $element[0] = array('#markup' => theme('transcripts_apachesolr_video_tag', $vars));
+                if ($entity->type == 'audio') {
+                    $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_audio', $vars));
+                }
+                else if ($entity->type == 'video') {
+                    $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_video', $vars));
+                }
+
             }
             break;
     }
