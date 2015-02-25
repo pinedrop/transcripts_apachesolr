@@ -15,7 +15,7 @@ function theme_transcripts_apachesolr_video_tag($vars)
     if (!$vars['video_tag']) { //use video_url
         $tag = $vars['tag_type'];
         $out .= "<div class='transcripts'>";
-        $out .= "<div class='transcripts-apachesolr-html5-media'>";
+        $out .= "<div class='transcripts-apachesolr-html5-media embed-responsive embed-responsive-16by9'>";
         $out .= "<$tag controls>";
         foreach ($vars['video_url'] as $vurl) {
             $out .= "<source src='$vurl' />";
