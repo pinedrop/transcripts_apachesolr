@@ -143,7 +143,7 @@ function transcripts_node_field_formatter_info()
             'field types' => array('file'),
         ),
         'transcripts_html5_video' => array(
-            'label' => t('HTML 5 video'),
+            'label' => t('HTML 5 audio or video tag'),
             'field types' => array('file'),
         ),
     );
