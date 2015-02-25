@@ -171,7 +171,7 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
             break;
 
         case 'transcripts_html5_video':
-            $nid = $entity->eid;
+            list($nid,,) = entity_extract_ids($entity_type, $entity);
             $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
             if ($trid) {
                 $vurl = array();
