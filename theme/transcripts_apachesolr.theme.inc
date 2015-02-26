@@ -24,7 +24,7 @@ function theme_transcripts_apachesolr_html5_audio($vars)
 function theme_transcripts_apachesolr_html5_video($vars)
 {
     $out = "<div data-transcripts-role='video' data-transcripts-id='{$vars['trid']}'>";
-    $out .= "<div align='center' class='embed-responsive embed-responsive-16by9'>";
+    $out .= "<div align='center' class='embed-responsive embed-responsive-4by3'>";
     $out .= "<video class='embed-responsive-item' controls>";
     foreach ($vars['urls'] as $url) {
         $out .= "<source src='$url' />";
