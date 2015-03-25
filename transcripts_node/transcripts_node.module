@@ -5,7 +5,7 @@ function transcripts_node_init()
     module_load_include('inc', 'transcripts_node', 'transcripts_node.index');
 }
 
-function transcripts_node_default_transcript_extensions()
+function transcripts_node_default_file_extensions()
 {
     $default = array('eaf', 'trs', 'xml');
     return $default;
@@ -13,8 +13,8 @@ function transcripts_node_default_transcript_extensions()
 
 function transcripts_node_check_extension($ext)
 {
-    $default = implode(' ', transcripts_default_transcript_extensions());
-    return in_array($ext, explode(' ', variable_get('transcripts_transcript_extensions', $default)));
+    $default = implode(' ', transcripts_node_default_file_extensions());
+    return in_array($ext, explode(' ', variable_get('transcripts_node_file_extensions', $default)));
 }
 
 function transcripts_node_menu()

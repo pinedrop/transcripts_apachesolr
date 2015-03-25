@@ -9,7 +9,7 @@ function transcripts_node_node_settings()
         '#type' => 'fieldset',
         '#collapsed' => FALSE,
     );
-    $default = implode(' ', transcripts_node_default_transcript_extensions());
+    $default = implode(' ', transcripts_node_default_file_extensions());
     $form['transcripts_node_node_settings']['transcripts_node_file_extensions'] = array(
         '#type' => 'textfield',
         '#title' => t('Permissible file extensions'),
