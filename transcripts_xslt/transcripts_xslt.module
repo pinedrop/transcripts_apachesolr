@@ -33,8 +33,8 @@ function transcripts_xslt_as_tcus($file, $node)
         $xslfield = variable_get('transcripts_xslt_transformer_field', 'field_transcripts_xsl');
         if ($node->{$xslfield}) {
             $field = $node->{$xslfield};
-            $uri = $field[$node->language][0]['uri'];
-            $xslt = drupal_realpath($node->{$xslfield}[$node->language][0]['uri']);
+            $uri = $field['und'][0]['uri'];
+            $xslt = drupal_realpath($node->{$xslfield}['und'][0]['uri']);
         } else {
             $xslt = realpath($saxon_path . '/' . variable_get('transcripts_xslt_default_transformer', 'transcripts.xsl'));
         }

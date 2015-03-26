@@ -17,8 +17,8 @@ function transcripts_node_node_insert($node)
         if (isset($node->$field_name)) {
             $field = $node->$field_name;
 
-            if (!(empty($field) || empty($field[$node->language]))) {
-                $fid = $field[$node->language][0]['fid'];
+            if (!(empty($field) || empty($field['und']))) {
+                $fid = $field['und'][0]['fid'];
                 transcripts_node_add_transcript(file_load($fid), node_load($node->nid));
             }
         }
@@ -33,10 +33,10 @@ function transcripts_node_node_update($node)
         if (isset($node->$field_name)) {
             $field = $node->$field_name;
 
-            if (empty($field) || empty($field[$node->language])) {
+            if (empty($field) || empty($field['und'])) {
                 transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
             } else {
-                $fid = $field[$node->language][0]['fid'];
+                $fid = $field['und'][0]['fid'];
                 if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $fid)) {
                     transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
                     transcripts_node_add_transcript(file_load($fid), node_load($node->nid));
