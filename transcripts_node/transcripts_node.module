@@ -5,31 +5,9 @@ function transcripts_node_init()
     module_load_include('inc', 'transcripts_node', 'transcripts_node.index');
 }
 
-function transcripts_node_default_file_extensions()
-{
-    $default = array('eaf', 'trs', 'xml');
-    return $default;
-}
-
-function transcripts_node_check_extension($ext)
-{
-    $default = implode(' ', transcripts_node_default_file_extensions());
-    return in_array($ext, explode(' ', variable_get('transcripts_node_file_extensions', $default)));
-}
-
 function transcripts_node_menu()
 {
     $items = array();
-
-    $items['admin/config/user-interface/transcripts/transcripts_node'] = array(
-        'title' => 'Transcripts Node',
-        'description' => t('Transcripts Node settings'),
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('transcripts_node_site_settings_form'),
-        'access arguments' => array('administer transcripts'),
-        'file' => 'transcripts_node.admin.inc',
-        'type' => MENU_LOCAL_TASK,
-    );
     $items['node/%/transcript'] = array(
         'title' => 'Transcript',
         'page callback' => 'transcripts_node_get_player',
@@ -93,13 +71,10 @@ function transcripts_node_transcript_access($nid)
 
 function transcripts_node_has_transcript($node)
 {
-    //first check node type
-    if (in_array($node->type, array_filter(variable_get('transcripts_node_node', array())))) {
-        $fields = transcripts_node_all_file_fields();
-        foreach ($fields as $field) {
-            if (!empty($node->$field) && is_transcript_field($field)) {
-                return true;
-            }
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+    foreach ($fields as $field) {
+        if (!empty($node->$field)) {
+            return true;
         }
     }
     return false;
@@ -171,7 +146,7 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
             break;
 
         case 'transcripts_html5_video':
-            list($nid,,) = entity_extract_ids($entity_type, $entity);
+            list($nid, ,) = entity_extract_ids($entity_type, $entity);
             $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
             if ($trid) {
                 $urls = array();
@@ -184,8 +159,7 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
 
                 if ($entity->type == 'audio') {
                     $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_audio', $vars));
-                }
-                else if ($entity->type == 'video') {
+                } else if ($entity->type == 'video') {
                     $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_video', $vars));
                 }
 
