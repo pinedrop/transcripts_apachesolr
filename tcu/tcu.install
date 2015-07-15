@@ -55,12 +55,6 @@ function tcu_schema() {
 			'tcuid' => array('tcuid'),
 		),
 		'primary key' => array('tcuid'),
-		/*'foreign keys' => array(
-			'trid' => array(
-				'table' => 'transcripts_transcript',
-				'columns' => array('trid' => 'trid'),
-			),
-		),*/
 	);
   
   $schema['tcu_tier'] = array(
