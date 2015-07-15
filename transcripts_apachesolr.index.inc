@@ -83,13 +83,15 @@ function transcripts_apachesolr_insert_tcu($trid, $tcu)
     $insert = tcu_create(
         array(
             'trid' => $trid,
-            'speaker' => isset($tcu['speaker']) ? $tcu['speaker'] : '',
             'start' => isset($tcu['start']) ? $tcu['start'] : 0,
             'end' => isset($tcu['end']) ? $tcu['end'] : 0,
             'created' => REQUEST_TIME,
             'changed' => REQUEST_TIME,
         )
     );
+    if (isset($tcu['speakers'])) {
+        $insert->setSpeakers(array_filter(array_map('trim', $tcu['speakers']))); //don't save empty speaker tiers
+    }
     $insert->setTiers(array_filter(array_map('trim', $tcu['tiers']))); //don't save empty tiers
     tcu_save($insert);
 }

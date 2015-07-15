@@ -23,17 +23,25 @@
                     </xsl:call-template>
                 </xsl:variable>
                 <tcu>
-                    <xsl:if test="normalize-space(@speaker)">
-                        <speaker>
-                            <xsl:value-of select="@speaker"/>
-                        </speaker>
-                    </xsl:if>
                     <start>
                         <xsl:value-of select="normalize-space($begintime)"/>
                     </start>
                     <end>
                         <xsl:value-of select="normalize-space($endtime)"/>
                     </end>
+                    <xsl:if test="normalize-space(@speaker)">
+                        <speakers>
+                            <xsl:choose>
+                                <xsl:when test="contains(@speaker, '|')">
+                                    <ss_speaker_bod><xsl:value-of select="substring-before(@speaker, '|')"/></ss_speaker_bod>
+                                    <ss_speaker_phon><xsl:value-of select="substring-after(@speaker, '|')"/></ss_speaker_phon>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <ss_speaker_bod><xsl:value-of select="@speaker"/></ss_speaker_bod>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </speakers>
+                    </xsl:if>
                     <tiers>
                         <xsl:variable name="bod" select="normalize-space(replace(.,'[^\p{IsTibetan}\s]+',''))"/>
                         <xsl:if test="$bod">
