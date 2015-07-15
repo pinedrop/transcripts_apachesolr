@@ -33,7 +33,7 @@ function transcripts_apachesolr_scroller($trid, $tiers)
 function transcripts_apachesolr_transcripts_ui_transcript($ui)
 {
     $trid = $ui->shorttrid;
-    $speakers = array_keys($ui->speakers);
+    $speakers = array_keys($ui->speakernames);
     $tiers = array_keys($ui->tiers);
     $options = $ui->options;
 
