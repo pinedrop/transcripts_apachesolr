@@ -29,14 +29,6 @@
     <xsl:template match="S">
         <xsl:variable name="sid" select="@id"/>
         <tcu>
-            <xsl:variable name="speaker">
-                <xsl:value-of select="substring(//SPEAKER[@personId=current()/@who]/name_bod,1,255)"/>
-            </xsl:variable>
-            <xsl:if test="normalize-space($speaker)">
-                <speaker>
-                    <xsl:value-of select="$speaker"/>
-                </speaker>
-            </xsl:if>
             <xsl:if test="string(AUDIO/@start)">
                 <start>
                     <xsl:value-of select="format-number(AUDIO/@start,'0.000')"/>
@@ -46,6 +38,14 @@
                         <xsl:value-of select="format-number(AUDIO/@end,'0.000')"/>
                     </end>
                 </xsl:if>
+            </xsl:if>
+            <xsl:variable name="speaker">
+                <xsl:value-of select="substring(//SPEAKER[@personId=current()/@who]/name_bod,1,255)"/>
+            </xsl:variable>
+            <xsl:if test="normalize-space($speaker)">
+                <speakers>
+                    <ss_speaker_bod><xsl:value-of select="$speaker"/></ss_speaker_bod>
+                </speakers>
             </xsl:if>
             <tiers>
                 <xsl:if test="normalize-space(FORM[@xml:lang='bo'])">
