@@ -55,6 +55,13 @@ function tcu_load_multiple($tcuids = array(), $conditions = array(), $reset = FA
             $tiers[$record->tier] = $record->value;
         }
         $tcu->setTiers($tiers);
+
+        $speakers = array();
+        $result = db_query('SELECT * FROM {tcu_speaker} WHERE tcuid = :tcuid', array(':tcuid' => $tcuid));
+        foreach ($result as $record) {
+            $tiers[$record->tier] = $record->value;
+        }
+        $tcu->setSpeakers($tiers);
     }
 
     return $tcus;
@@ -69,6 +76,9 @@ function tcu_delete_multiple(array $tcuids)
 {
     entity_get_controller('tcu')->delete($tcuids);
     db_delete('tcu_tier')
+        ->condition('tcuid', $tcuids, 'IN')
+        ->execute();
+    db_delete('tcu_speaker')
         ->condition('tcuid', $tcuids, 'IN')
         ->execute();
 }
@@ -102,6 +112,16 @@ class Tcu extends Entity
         return $this->_tiers;
     }
 
+    public function setSpeakers($speakers)
+    {
+        $this->_speakers = $speakers;
+    }
+
+    public function getSpeakers()
+    {
+        return $this->_speakers;
+    }
+
     protected function defaultLabel()
     {
         return $this->tcuid;
@@ -123,7 +143,6 @@ class TcuController extends EntityAPIController
         $values += array(
             'tcuid' => '',
             'trid' => '',
-            'speaker' => '',
             'start' => '',
             'end' => '',
             'created' => '',
@@ -143,11 +162,13 @@ function tcu_solr_document(ApacheSolrDocument $document, $tcu, $entity_type)
     unset($document->content);
     $document->label = $tcu->tcuid;
     $document->is_trid = $tcu->trid;
-    $document->ss_speaker = $tcu->speaker;
     $document->fts_start = $tcu->start;
     $document->fts_end = $tcu->end;
     $document->fts_duration = $tcu->end - $tcu->start;
     foreach ($tcu->getTiers() as $tier => $value) {
+        $document->$tier = $value;
+    }
+    foreach ($tcu->getSpeakers() as $tier => $value) {
         $document->$tier = $value;
     }
     $documents = array();
@@ -202,6 +223,16 @@ function tcu_entity_insert($entity, $type)
                 ))
                 ->execute();
         }
+        $speakers = $entity->getSpeakers();
+        foreach ($speakers as $tier => $value) {
+            db_insert('tcu_speaker')
+                ->fields(array(
+                    'tcuid' => $entity->tcuid,
+                    'tier' => $tier,
+                    'value' => $value,
+                ))
+                ->execute();
+        }
     }
 }
 
@@ -219,6 +250,19 @@ function tcu_entity_update($entity, $type)
         $tiers = $entity->getTiers();
         foreach ($tiers as $tier => $value) {
             db_merge('tcu_tier')
+                ->key(array(
+                    'tcuid' => $entity->tcuid,
+                    'tier' => $tier,
+                ))
+                ->fields(array(
+                    'value' => $value,
+                ))
+                ->execute();
+        }
+
+        $speakers = $entity->getSpeakers();
+        foreach ($speakers as $tier => $value) {
+            db_merge('tcu_speaker')
                 ->key(array(
                     'tcuid' => $entity->tcuid,
                     'tier' => $tier,

@@ -103,12 +103,12 @@ function tcu_schema() {
           'unsigned' => TRUE,
           'not null' => TRUE,
         ),
-        'field' => array(
+        'tier' => array(
           'type' => 'varchar',
           'length' => 128,
           'not null' => TRUE,
           'default' => '',
-          'description' => 'The speaker name field',
+          'description' => 'The speaker name tier',
         ),
         'value' => array(
           'type' => 'text',
@@ -116,7 +116,7 @@ function tcu_schema() {
           'description' => 'The speaker name value',
         ),
       ),
-      'primary key' => array('tcuid', 'field'),
+      'primary key' => array('tcuid', 'tier'),
       'foreign keys' => array(
         'tcu' => array(
           'table' => 'tcu',
