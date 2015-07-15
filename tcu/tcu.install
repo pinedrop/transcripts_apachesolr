@@ -1,5 +1,11 @@
 <?php
 
+function tcu_update_7001() {
+    db_drop_field('tcu', 'speaker');
+    $schema = tcu_schema();
+    db_create_table('tcu_speaker', $schema['tcu_speaker']);
+}
+
 /**
  * Implements hook_schema().
  */
@@ -87,7 +93,38 @@ function tcu_schema() {
       ),
     ),
   );
-  
+
+    $schema['tcu_speaker'] = array(
+      'description' => 'Stores speaker names for tcus',
+      'fields' => array(
+        'tcuid' => array(
+          'description' => 'Foreign Key: tcu id',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'field' => array(
+          'type' => 'varchar',
+          'length' => 128,
+          'not null' => TRUE,
+          'default' => '',
+          'description' => 'The speaker name field',
+        ),
+        'value' => array(
+          'type' => 'text',
+          'not null' => TRUE,
+          'description' => 'The speaker name value',
+        ),
+      ),
+      'primary key' => array('tcuid', 'field'),
+      'foreign keys' => array(
+        'tcu' => array(
+          'table' => 'tcu',
+          'columns' => array('tcuid' => 'tcuid'),
+        ),
+      ),
+    );
+
   $schema['apachesolr_index_entities_tcu'] = array(
   	'description' => t('Stores a record of when a tcu changed to determine if it needs indexing by Solr'),
 		'fields' => array(
