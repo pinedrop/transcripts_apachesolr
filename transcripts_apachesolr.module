@@ -33,6 +33,7 @@ function transcripts_apachesolr_scroller($trid, $tiers)
 function transcripts_apachesolr_transcripts_ui_transcript($ui)
 {
     $trid = $ui->shorttrid;
+    $speakers = array_keys($ui->speakers);
     $tiers = array_keys($ui->tiers);
     $options = $ui->options;
 
@@ -41,7 +42,7 @@ function transcripts_apachesolr_transcripts_ui_transcript($ui)
     //field aliasing (Solr 4.x): http://wiki.apache.org/solr/CommonQueryParameters#Field_alias
     //$fl = implode(",", $tiers) . ",id,trid:is_trid,tcuid:entity_id,speaker:ss_speaker,start:fts_start,end:fts_end";
 
-    $fl = implode(",", $tiers) . ",id,is_trid,entity_id,ss_speaker,fts_start,fts_end";
+    $fl = implode(",", $tiers) . "," . implode(",", $speakers) . ",id,is_trid,entity_id,fts_start,fts_end";
 
     if ($options['term'] == '') {
         $params = array(
@@ -88,7 +89,6 @@ function transcripts_apachesolr_transcripts_ui_transcript($ui)
     foreach ($tcus as &$tcu) {
         $tcu->trid = $tcu->is_trid;
         $tcu->tcuid = $tcu->entity_id;
-        $tcu->speaker = $tcu->ss_speaker;
         $tcu->start = $tcu->fts_start;
         $tcu->end = $tcu->fts_end;
     }
