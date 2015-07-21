@@ -84,10 +84,12 @@ function transcripts_xslt_transformer_submit($form, $form_state)
 function transcripts_xslt_remove_transformer($transformer, $object_type) {
     $file = $transformer ? file_load($transformer) : FALSE;
     if ($file) {
+        drupal_set_message('About to delete usage and file');
         file_usage_delete($file, 'transcripts_xslt'); //, $object_type, $file->fid);
         file_delete($file);
         drupal_set_message(t('The transformer @transformer was removed.', array('@transformer' => $file->filename)));
     }
+    drupal_set_message('Here we are');
 }
 
 function transcripts_xslt_add_transformer($transformer, $object_type) {
