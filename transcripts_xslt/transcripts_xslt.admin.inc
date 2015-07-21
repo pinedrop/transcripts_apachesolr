@@ -67,7 +67,7 @@ function transcripts_xslt_transformer_submit($form, $form_state)
     $transformers = array('transcripts_xslt_xml_transformer', 'transcripts_xslt_txt_transformer');
 
     foreach ($transformers as $field) {
-drupal_set_message("Field = $field\nTransformer = " . $form[$field]['#default_value']) . "\nNew value = " .$form_state['values'][$field]));
+drupal_set_message("Field = $field\nTransformer = " . $form[$field]['#default_value'] . "\nNew value = " .$form_state['values'][$field]);
         $transformer = (!empty($form[$field]['#default_value'])) ? $form[$field]['#default_value'] : 0;
         if (isset($form_state['values'][$field]) && $form_state['values'][$field]) {
             if (isset($transformer) && $transformer != $form_state['values'][$field]) {
