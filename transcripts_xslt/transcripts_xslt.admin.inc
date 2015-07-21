@@ -28,7 +28,7 @@ function transcripts_xslt_settings_form()
         '#type' => 'managed_file',
         '#title' => 'XML transformer',
         '#default_value' => variable_get('transcripts_xml_transformer', ''),
-        '#upload_location' => 'public://transcript-transformers',
+        '#upload_location' => 'public://transcripts_transformers',
         '#upload_validators' => array(
             'file_validate_extensions' => array('xsl'),
         ),
@@ -38,7 +38,7 @@ function transcripts_xslt_settings_form()
         '#type' => 'managed_file',
         '#title' => 'TXT transformer',
         '#default_value' => variable_get('transcripts_txt_transformer', ''),
-        '#upload_location' => 'public://transcript-transformers',
+        '#upload_location' => 'public://transcripts_transformers',
         '#upload_validators' => array(
             'file_validate_extensions' => array('xsl'),
         ),
