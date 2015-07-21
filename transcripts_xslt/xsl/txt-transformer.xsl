@@ -47,7 +47,7 @@
                                             <xsl:choose>
                                                 <xsl:when test="$cat='speakers'">
                                                     <speakers>
-                                                        <ss_speaker
+                                                        <ss_speaker><xsl:value-of select="$meta"/></ss_speaker>
                                                     </speakers>
                                                 </xsl:when>
                                                 <xsl:otherwise>
