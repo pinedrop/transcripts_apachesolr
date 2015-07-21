@@ -30,7 +30,7 @@ function transcripts_xslt_settings_form()
         '#default_value' => variable_get('transcripts_xml_transformer', ''),
         '#upload_location' => 'public://transcript-transformers',
         '#upload_validators' => array(
-            'file_validate_extensions' => array('xml'),
+            'file_validate_extensions' => array('xsl'),
         ),
         '#description' => t("Upload an XSLT stylesheet that will be used to transform incoming XML transcripts into time code units."),
     );
@@ -40,7 +40,7 @@ function transcripts_xslt_settings_form()
         '#default_value' => variable_get('transcripts_txt_transformer', ''),
         '#upload_location' => 'public://transcript-transformers',
         '#upload_validators' => array(
-            'file_validate_extensions' => array('xml'),
+            'file_validate_extensions' => array('xsl'),
         ),
         '#description' => t("Upload an XSLT stylesheet that will be used to transform incoming TXT transcripts into time code units."),
     );
