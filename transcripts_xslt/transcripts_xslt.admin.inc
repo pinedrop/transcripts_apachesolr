@@ -67,7 +67,7 @@ function transcripts_xslt_transformer_submit($form, $form_state)
     $transformers = array('transcripts_xslt_xml_transformer', 'transcripts_xslt_txt_transformer');
 
     foreach ($transformers as $field) {
-        drupal_set_message("Field = " dprint_r($field, TRUE));
+        drupal_set_message("Field = " .dprint_r($field, TRUE));
         drupal_set_message("Form = " .dprint_r($form['transcripts_xslt_xml_transformer'], TRUE));
         drupal_set_message("Form state = " .dprint_r($form_state, TRUE));
         $transformer = (!empty($form[$field]['#default_value'])) ? $form[$field]['#default_value'] : 0;
