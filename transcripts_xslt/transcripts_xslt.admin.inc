@@ -67,7 +67,8 @@ function transcripts_xslt_transformer_submit($form, $form_state)
     $transformers = array('transcripts_xslt_xml_transformer', 'transcripts_xslt_txt_transformer');
 
     foreach ($transformers as $field) {
-drupal_set_message("Field = $field\nTransformer = " . $form[$field]['#default_value'] . "\nNew value = " .$form_state['values'][$field]);
+drupal_set_message("Form = " .dprint_r($form[$field], TRUE));
+        drupal_set_message("Form state = " .dprint_r($form_state, TRUE));
         $transformer = (!empty($form[$field]['#default_value'])) ? $form[$field]['#default_value'] : 0;
         if (isset($form_state['values'][$field]) && $form_state['values'][$field]) {
             if (isset($transformer) && $transformer != $form_state['values'][$field]) {
@@ -85,12 +86,10 @@ drupal_set_message("Field = $field\nTransformer = " . $form[$field]['#default_va
 function transcripts_xslt_remove_transformer($transformer, $object_type) {
     $file = $transformer ? file_load($transformer) : FALSE;
     if ($file) {
-        drupal_set_message('About to delete usage and file');
         file_usage_delete($file, 'transcripts_xslt'); //, $object_type, $file->fid);
         file_delete($file);
         drupal_set_message(t('The transformer @transformer was removed.', array('@transformer' => $file->filename)));
     }
-    drupal_set_message('Here we are');
 }
 
 function transcripts_xslt_add_transformer($transformer, $object_type) {
