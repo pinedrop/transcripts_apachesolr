@@ -44,25 +44,6 @@ function transcripts_xslt_settings_form()
         ),
         '#description' => t("Upload an XSLT stylesheet that will be used to transform incoming TXT transcripts into time code units."),
     );
-    /*
-    $form['transcripts_xslt_settings']['transcripts_xslt_default_transformer'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Default XSLT'),
-        '#size' => 20,
-        '#description' => t("The default XSLT file to be used to transform incoming transcripts into a format to be used by Drupal and Solr."),
-        '#default_value' => variable_get('transcripts_xslt_default_transformer', 'transcripts.xsl'),
-    );
-    $message = 'On occasion, you may wish to use custom XSLT files to transform incoming transcripts into time code units. '
-        . 'If this is the case, then specify a file field here. '
-        . 'The field should be attached to one or more of the "permissible node types" above. '
-        . 'You can then upload alternative stylesheets to the field on a node by node basis.';
-    $form['transcripts_xslt_settings']['transcripts_xslt_transformer_field'] = array(
-        '#type' => 'textfield',
-        '#title' => t('XSLT overrides'),
-        '#size' => 20,
-        '#description' => t($message),
-        '#default_value' => variable_get('transcripts_xslt_transformer_field', 'field_transcripts_xsl'),
-    );*/
     $desc = 'Enter a comma-separated list of Toolbox tier mappings, '
         . 'each in the form TOOLBOX_TIER|TRANSCRIPTS_TIER. '
         . 'You can ignore this field if you are not importing transcripts from Toolbox.';
@@ -103,7 +84,7 @@ function transcripts_xslt_transformer_submit($form, $form_state)
 function transcripts_xslt_remove_transformer($transformer, $object_type) {
     $file = $transformer ? file_load($transformer) : FALSE;
     if ($file) {
-        file_usage_delete($file, 'transcripts_xslt', $object_type, $file->fid);
+        file_usage_delete($file, 'transcripts_xslt'); //, $object_type, $file->fid);
         file_delete($file);
         drupal_set_message(t('The transformer @transformer was removed.', array('@transformer' => $file->filename)));
     }
