@@ -5,7 +5,8 @@
     <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
 
     <xsl:template match="/">
-        <xsl:apply-templates select="TITLE"/>
+        <xsl:apply-templates select="TITLE"/> <!-- QuillDriver -->
+        <xsl:apply-templates select="transcript"/> <!-- InqScribe -->
     </xsl:template>
 
     <xsl:template match="TITLE">
