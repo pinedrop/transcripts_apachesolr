@@ -15,7 +15,6 @@
     </xsl:template>
 
     <!-- Here's what a transcript sentence looks like:
-
           <S who="N400005" id="d148e29">
              <FORM xml:lang="bo">དེ་རིང་གནམ་ཡག་པོ་ར་ཅིག་༿འདྲ་ཅིག༾མི་འདུག་གས།</FORM>
              <FORM xml:lang="bo-Latn">de ring gnam yag po ra cig {'dra cig}mi 'dug gas/</FORM>
@@ -99,7 +98,7 @@
                         <speakers>
                             <xsl:variable name="bod" select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
                             <xsl:if test="$bod">
-                                <ss_speaker_bod><xsl:value-of select="$bod"/></ss_speaker_bod>
+                                <ss_speaker_dzo><xsl:value-of select="$bod"/></ss_speaker_dzo>
                             </xsl:if>
                             <xsl:variable name="eng" select="normalize-space(replace($speaker,'[\p{IsTibetan}]+',''))"/>
                             <xsl:if test="$eng">
@@ -110,9 +109,9 @@
                     <tiers>
                         <xsl:variable name="bod" select="normalize-space(replace(.,'[^\p{IsTibetan}\s]+',''))"/>
                         <xsl:if test="$bod">
-                            <content_bod>
+                            <dzo_bod>
                                 <xsl:value-of select="$bod"/>
-                            </content_bod>
+                            </dzo_bod>
                         </xsl:if>
                         <xsl:variable name="eng" select="normalize-space(replace(.,'[\p{IsTibetan}]+',''))"/>
                         <xsl:if test="$eng">
@@ -132,10 +131,10 @@
         <xsl:variable name="h" select="number(substring($time,1,2))"/>
         <xsl:variable name="m" select="number(substring($time,4,2))"/>
         <xsl:variable name="s" select="number(substring($time,7,2))"/>
-        <xsl:variable name="f" select="number(substring($time,10,2))"/>
-        <!-- assume 30 fps -->
+        <xsl:variable name="x" select="number(substring($time,10,3))"/>
+        <!-- x is milliseconds -->
 
-        <xsl:value-of select="format-number($h*3600 + $m*60 + $s + $f div 30,'0.000')"/>
+        <xsl:value-of select="format-number($h*3600 + $m*60 + $s + $x div 1000,'0.000')"/>
 
     </xsl:template>
 

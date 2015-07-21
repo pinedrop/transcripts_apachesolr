@@ -34,6 +34,9 @@ function transcripts_xslt_settings_form()
         ),
         '#description' => t("Upload an XSLT stylesheet that will be used to transform incoming XML transcripts into time code units."),
     );
+    $desc = 'Upload an XSLT stylesheet that will be used to transform incoming TXT transcripts into time code units. '
+        . 'This stylesheet should use the unparsed-text() function to load in a text file and transform it into XML. '
+        . 'For example, you could use this file to convert Toolbox transcripts into XML.';
     $form['transcripts_xslt_settings']['transcripts_xslt_txt_transformer'] = array(
         '#type' => 'managed_file',
         '#title' => 'TXT transformer',
@@ -42,7 +45,7 @@ function transcripts_xslt_settings_form()
         '#upload_validators' => array(
             'file_validate_extensions' => array('xsl'),
         ),
-        '#description' => t("Upload an XSLT stylesheet that will be used to transform incoming TXT transcripts into time code units."),
+        '#description' => t($desc),
     );
     $desc = 'Enter a comma-separated list of Toolbox tier mappings, '
         . 'each in the form TOOLBOX_TIER|TRANSCRIPTS_TIER. '
@@ -86,7 +89,7 @@ function transcripts_xslt_remove_transformer($transformer, $object_type) {
     if ($file) {
         file_usage_delete($file, 'transcripts_xslt', $object_type, $file->fid);
         file_delete($file);
-        drupal_set_message(t('The transformer @transformer was removed.', array('@transformer' => $file->filename)));
+        drupal_set_message(t('Transformer @transformer was removed.', array('@transformer' => $file->filename)));
     }
 }
 
@@ -97,6 +100,7 @@ function transcripts_xslt_add_transformer($transformer, $object_type) {
         $file->status = FILE_STATUS_PERMANENT;
         file_save($file);
         file_usage_add($file, 'transcripts_xslt', $object_type, $transformer);
+        drupal_set_message(t('Transformer @transformer was added.', array('@transformer' => $file->filename)));
         unset($file);
     }
 }
