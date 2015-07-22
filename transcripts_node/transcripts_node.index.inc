@@ -19,7 +19,12 @@ function transcripts_node_node_insert($node)
 
             if (!(empty($field) || empty($field['und']))) {
                 $fid = $field['und'][0]['fid'];
-                transcripts_node_add_transcript(file_load($fid), node_load($node->nid));
+                if (transcripts_node_add_transcript(file_load($fid), node_load($node->nid))) {
+                    drupal_set_message(t('The transcript has been successfully queued for indexing.'));
+                }
+                else {
+                    drupal_set_message(t('ERROR: The transcript could not be queued for indexing.'));
+                }
             }
         }
     }
@@ -39,7 +44,12 @@ function transcripts_node_node_update($node)
                 $fid = $field['und'][0]['fid'];
                 if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $fid)) {
                     transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
-                    transcripts_node_add_transcript(file_load($fid), node_load($node->nid));
+                    if (transcripts_node_add_transcript(file_load($fid), node_load($node->nid))) {
+                        drupal_set_message(t('The transcript has been successfully queued for indexing.'));
+                    }
+                    else {
+                        drupal_set_message(t('ERROR: The transcript could not be queued for indexing.'));
+                    }
                 }
             }
         }
@@ -49,7 +59,11 @@ function transcripts_node_node_update($node)
 function transcripts_node_add_transcript($file, $node)
 {
     $tcus = transcripts_xslt_as_tcus($file, $node);
-    if ($tcus !== false) {
+    if ($tcus === false) {
+        return false;
+    }
+    else {
         transcripts_apachesolr_add_transcript('transcripts_node', 'node', $file->fid, $node->nid, $tcus);
+        return true;
     }
 }
