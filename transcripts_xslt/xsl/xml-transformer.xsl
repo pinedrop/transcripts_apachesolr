@@ -119,9 +119,9 @@
                     <tiers>
                         <xsl:variable name="bod" select="normalize-space(replace(.,'[^\p{IsTibetan}\s]+',''))"/>
                         <xsl:if test="$bod">
-                            <dzo_bod>
+                            <content_bod>
                                 <xsl:value-of select="$bod"/>
-                            </dzo_bod>
+                            </content_bod>
                         </xsl:if>
                         <xsl:variable name="eng" select="normalize-space(replace(.,'[\p{IsTibetan}]+',''))"/>
                         <xsl:if test="$eng">
