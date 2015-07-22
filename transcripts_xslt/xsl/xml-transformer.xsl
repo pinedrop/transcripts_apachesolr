@@ -5,8 +5,10 @@
     <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
 
     <xsl:template match="/">
-        <xsl:apply-templates select="TITLE"/> <!-- QuillDriver -->
-        <xsl:apply-templates select="transcript"/> <!-- InqScribe -->
+        <xsl:apply-templates select="TITLE"/>
+        <!-- QuillDriver -->
+        <xsl:apply-templates select="transcript"/>
+        <!-- InqScribe -->
     </xsl:template>
 
     <xsl:template match="TITLE">
@@ -42,7 +44,9 @@
             </xsl:variable>
             <xsl:if test="normalize-space($speaker)">
                 <speakers>
-                    <ss_speaker_bod><xsl:value-of select="$speaker"/></ss_speaker_bod>
+                    <ss_speaker_bod>
+                        <xsl:value-of select="$speaker"/>
+                    </ss_speaker_bod>
                 </speakers>
             </xsl:if>
             <tiers>
@@ -97,13 +101,18 @@
                     <xsl:if test="normalize-space(@speaker)">
                         <xsl:variable name="speaker" select="normalize-space(replace(@speaker, '/', ''))"/>
                         <speakers>
-                            <xsl:variable name="bod" select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
+                            <xsl:variable name="bod"
+                                          select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
                             <xsl:if test="$bod">
-                                <ss_speaker_dzo><xsl:value-of select="$bod"/></ss_speaker_dzo>
+                                <ss_speaker_dzo>
+                                    <xsl:value-of select="$bod"/>
+                                </ss_speaker_dzo>
                             </xsl:if>
                             <xsl:variable name="eng" select="normalize-space(replace($speaker,'[\p{IsTibetan}]+',''))"/>
                             <xsl:if test="$eng">
-                                <ss_speaker_phon><xsl:value-of select="$eng"/></ss_speaker_phon>
+                                <ss_speaker_phon>
+                                    <xsl:value-of select="$eng"/>
+                                </ss_speaker_phon>
                             </xsl:if>
                         </speakers>
                     </xsl:if>
@@ -129,16 +138,23 @@
     <xsl:template name="convert-time">
         <xsl:param name="time" select="'0'"/>
 
-        <xsl:variable name="h" select="number(substring($time,1,2))"/>
-        <xsl:variable name="m" select="number(substring($time,4,2))"/>
-        <xsl:variable name="s" select="number(substring($time,7,2))"/>
-        <xsl:variable name="x" select="number(substring($time,10,3))"/>
-        <!-- x is milliseconds -->
-
-        <xsl:value-of select="format-number($h*3600 + $m*60 + $s + $x div 1000,'0.000')"/>
+        <xsl:choose>
+            <xsl:when test="matches($time, '[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{2}')"> <!-- frames (30fps) -->
+                <xsl:variable name="h" select="number(substring($time,1,2))"/>
+                <xsl:variable name="m" select="number(substring($time,4,2))"/>
+                <xsl:variable name="s" select="number(substring($time,7,2))"/>
+                <xsl:variable name="f" select="number(substring($time,10,2))"/>
+                <xsl:value-of select="format-number($h*3600 + $m*60 + $s + $f div 30,'0.000')"/>
+            </xsl:when>
+            <xsl:when test="matches($time, '[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}')"> <!-- milliseconds -->
+                <xsl:variable name="h" select="number(substring($time,1,2))"/>
+                <xsl:variable name="m" select="number(substring($time,4,2))"/>
+                <xsl:variable name="s" select="number(substring($time,7,2))"/>
+                <xsl:variable name="x" select="number(substring($time,10,3))"/>
+                <xsl:value-of select="format-number($h*3600 + $m*60 + $s + $x div 1000,'0.000')"/>
+            </xsl:when>
+        </xsl:choose>
 
     </xsl:template>
 
 </xsl:stylesheet>
-
-

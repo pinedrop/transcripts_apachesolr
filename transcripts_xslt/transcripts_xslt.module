@@ -34,15 +34,16 @@ function transcripts_xslt_as_tcus($file, $node)
             $xslt = drupal_realpath($transformer->uri);
             $xml = transcripts_xslt_saxon_transform($xslt, $file);
             if ($xml === false) {
-                watchdog('Transcripts XSLT', "[%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
+                watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
                 return false;
             }
             else {
-                watchdog('Transcripts XSLT', "[%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
+                watchdog('Transcripts XSLT', "[node/%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
                 return json_decode(json_encode($xml), TRUE);
             }
         }
         else {
+            watchdog('Transcripts XSLT', "[node/%nid] No transformer found.", array('%nid' => $node->nid), WATCHDOG_INFO);
             return false;
         }
     } else if ($ext == 'txt') {
@@ -63,15 +64,16 @@ function transcripts_xslt_as_tcus($file, $node)
             drupal_alter('transcripts_xslt_saxon_params', $params, $node);
             $xml = transcripts_xslt_saxon_transform($xslt, '', 'toolbox', $params);
             if ($xml === false) {
-                watchdog('Transcripts XSLT', "[%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
+                watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
                 return false;
             }
             else {
-                watchdog('Transcripts XSLT', "[%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
+                watchdog('Transcripts XSLT', "[node/%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
                 return json_decode(json_encode($xml), TRUE);
             }
         }
         else {
+            watchdog('Transcripts XSLT', "[node/%nid] No transformer found.", array('%nid' => $node->nid), WATCHDOG_INFO);
             return false;
         }
     }
