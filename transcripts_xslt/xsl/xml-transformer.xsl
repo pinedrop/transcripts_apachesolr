@@ -104,9 +104,9 @@
                             <xsl:variable name="bod"
                                           select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
                             <xsl:if test="$bod">
-                                <ss_speaker_dzo>
+                                <ss_speaker_bod>
                                     <xsl:value-of select="$bod"/>
-                                </ss_speaker_dzo>
+                                </ss_speaker_bod>
                             </xsl:if>
                             <xsl:variable name="eng" select="normalize-space(replace($speaker,'[\p{IsTibetan}]+',''))"/>
                             <xsl:if test="$eng">
@@ -139,14 +139,14 @@
         <xsl:param name="time" select="'0'"/>
 
         <xsl:choose>
-            <xsl:when test="matches($time, '[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{2}')"> <!-- frames (30fps) -->
+            <xsl:when test="matches($time, '^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{2}$')"> <!-- frames (30fps) -->
                 <xsl:variable name="h" select="number(substring($time,1,2))"/>
                 <xsl:variable name="m" select="number(substring($time,4,2))"/>
                 <xsl:variable name="s" select="number(substring($time,7,2))"/>
                 <xsl:variable name="f" select="number(substring($time,10,2))"/>
                 <xsl:value-of select="format-number($h*3600 + $m*60 + $s + $f div 30,'0.000')"/>
             </xsl:when>
-            <xsl:when test="matches($time, '[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}')"> <!-- milliseconds -->
+            <xsl:when test="matches($time, '^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}$')"> <!-- milliseconds -->
                 <xsl:variable name="h" select="number(substring($time,1,2))"/>
                 <xsl:variable name="m" select="number(substring($time,4,2))"/>
                 <xsl:variable name="s" select="number(substring($time,7,2))"/>
