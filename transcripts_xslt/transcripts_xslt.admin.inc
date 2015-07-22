@@ -65,6 +65,7 @@ function transcripts_xslt_settings_form()
     return $form;
 }
 
+/* http://www.michaelbagnall.com/blogs/managed-files-within-drupal-7 */
 function transcripts_xslt_transformer_submit($form, $form_state)
 {
     $transformers = array('transcripts_xslt_xml_transformer', 'transcripts_xslt_txt_transformer');

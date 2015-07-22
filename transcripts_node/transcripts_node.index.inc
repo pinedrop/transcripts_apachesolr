@@ -49,5 +49,7 @@ function transcripts_node_node_update($node)
 function transcripts_node_add_transcript($file, $node)
 {
     $tcus = transcripts_xslt_as_tcus($file, $node);
-    transcripts_apachesolr_add_transcript('transcripts_node', 'node', $file->fid, $node->nid, $tcus);
+    if ($tcus !== false) {
+        transcripts_apachesolr_add_transcript('transcripts_node', 'node', $file->fid, $node->nid, $tcus);
+    }
 }

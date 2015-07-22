@@ -32,11 +32,18 @@ function transcripts_xslt_as_tcus($file, $node)
         if ($transformer_fid) {
             $transformer = file_load($transformer_fid);
             $xslt = drupal_realpath($transformer->uri);
-
-            watchdog('Transcripts XSLT', "Indexing transcript at node/%nid", array('%nid' => $node->nid), WATCHDOG_INFO);
-
             $xml = transcripts_xslt_saxon_transform($xslt, $file);
-            return json_decode(json_encode(simplexml_load_string($xml)), TRUE);
+            if ($xml === false) {
+                watchdog('Transcripts XSLT', "[%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
+                return false;
+            }
+            else {
+                watchdog('Transcripts XSLT', "[%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
+                return json_decode(json_encode($xml), TRUE);
+            }
+        }
+        else {
+            return false;
         }
     } else if ($ext == 'txt') {
         $transformer_fid = variable_get('transcripts_xslt_txt_transformer', '');
@@ -55,8 +62,17 @@ function transcripts_xslt_as_tcus($file, $node)
             $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
             drupal_alter('transcripts_xslt_saxon_params', $params, $node);
             $xml = transcripts_xslt_saxon_transform($xslt, '', 'toolbox', $params);
-
-            return json_decode(json_encode(simplexml_load_string($xml)), TRUE);
+            if ($xml === false) {
+                watchdog('Transcripts XSLT', "[%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
+                return false;
+            }
+            else {
+                watchdog('Transcripts XSLT', "[%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
+                return json_decode(json_encode($xml), TRUE);
+            }
+        }
+        else {
+            return false;
         }
     }
 }
@@ -108,5 +124,6 @@ function transcripts_xslt_saxon_transform($xsl, $source = '', $it = '', $params 
 
     watchdog('Transcripts XSLT', "$cmd", NULL, WATCHDOG_DEBUG);
     $document = shell_exec($cmd);
-    return $document;
+
+    return simplexml_load_string($document);
 }
