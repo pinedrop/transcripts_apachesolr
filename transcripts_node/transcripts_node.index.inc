@@ -18,12 +18,11 @@ function transcripts_node_node_insert($node)
             $field = $node->$field_name;
 
             if (!(empty($field) || empty($field['und']))) {
-                $fid = $field['und'][0]['fid'];
-                if (transcripts_node_add_transcript(file_load($fid), node_load($node->nid))) {
-                    drupal_set_message(t('The transcript has been queued for indexing.'), 'status');
-                }
-                else {
-                    drupal_set_message(t('The transcript could not be queued for indexing.'), 'warning');
+                $file = file_load($field['und'][0]['fid']);
+                if (transcripts_node_add_transcript($file, node_load($node->nid))) {
+                    drupal_set_message("The transcript " . $file->filename . " has been queued for indexing.", 'status');
+                } else {
+                    drupal_set_message("The transcript " . $file->filename . " could not be queued for indexing.", 'warning');
                 }
             }
         }
@@ -41,14 +40,14 @@ function transcripts_node_node_update($node)
             if (empty($field) || empty($field['und'])) {
                 transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
             } else {
-                $fid = $field['und'][0]['fid'];
-                if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $fid)) {
+                $file = file_load($field['und'][0]['fid']);
+                if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $file->fid)) {
                     transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
-                    if (transcripts_node_add_transcript(file_load($fid), node_load($node->nid))) {
-                        drupal_set_message(t('The transcript has been queued for indexing.'), 'status');
-                    }
-                    else {
-                        drupal_set_message(t('The transcript could not be queued for indexing.'), 'warning');
+
+                    if (transcripts_node_add_transcript($file, node_load($node->nid))) {
+                        drupal_set_message("The transcript " . $file->filename . " has been queued for indexing.", 'status');
+                    } else {
+                        drupal_set_message("The transcript " . $file->filename . " could not be queued for indexing.", 'warning');
                     }
                 }
             }
@@ -61,8 +60,7 @@ function transcripts_node_add_transcript($file, $node)
     $tcus = transcripts_xslt_as_tcus($file, $node);
     if ($tcus === false) {
         return false;
-    }
-    else {
+    } else {
         transcripts_apachesolr_add_transcript('transcripts_node', 'node', $file->fid, $node->nid, $tcus);
         return true;
     }
