@@ -40,7 +40,7 @@ function transcripts_node_node_update($node)
         if (isset($node->$field_name)) {
             $field = $node->$field_name;
 
-            if (empty($field) || (empty($field[$node->language]) && empty($field['und'])) {
+            if (empty($field) || (empty($field[$node->language]) && empty($field['und']))) {
                 transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
                 drupal_set_message("Your transcript has been removed.", 'status');
             } else {
