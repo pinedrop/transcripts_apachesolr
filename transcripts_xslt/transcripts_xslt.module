@@ -81,9 +81,8 @@ function transcripts_xslt_as_tcus($file, $node)
 
 function transcripts_xslt_saxon_transform($xsl, $source = '', $it = '', $params = array())
 {
-    $saxon_path = realpath(variable_get('transcripts_xslt_saxon_path', 'sites/all/libraries/saxon'));
-
-    $saxon = realpath($saxon_path . '/' . variable_get('transcripts_xslt_saxon_jar', 'saxon9he.jar'));
+    //$saxon_path = realpath(variable_get('transcripts_xslt_saxon_path', 'sites/all/libraries/saxon'));
+    $saxon = realpath(variable_get('transcripts_xslt_saxon_jar', 'sites/all/libraries/saxon/saxon9he.jar'));
     if (!$saxon || !is_file($saxon)) {
         throw new Exception(t('Invalid path or filename for saxon application jar.'));
     }
