@@ -21,7 +21,7 @@ function transcripts_xslt_settings_form()
     $form['transcripts_xslt_settings']['transcripts_xslt_saxon_jar'] = array(
         '#type' => 'textfield',
         '#title' => t('Saxon jar'),
-        '#size' => 20,
+        '#size' => 100,
         '#description' => t("Enter the name of the Saxon application jar file, specified as a relative path from the Drupal root (e.g. sites/all/libraries/saxon/saxon9he.jar)."),
         '#default_value' => variable_get('transcripts_xslt_saxon_jar', 'sites/all/libraries/saxon/saxon9he.jar'),
     );
