@@ -18,12 +18,14 @@ function transcripts_node_node_insert($node)
         if (isset($node->$field_name)) {
             $field = $node->$field_name;
 
-            if (!(empty($field) || empty($field['und']))) {
-                $file = file_load($field['und'][0]['fid']);
+            if (!(empty($field) || (empty($field[$node->language]) && empty($field['und'])))) {
+                $lang = empty($field[$node->language]) ? 'und' : $node->language;
+
+                $file = file_load($field[$lang][0]['fid']);
                 if (transcripts_node_add_transcript($file, node_load($node->nid))) {
-                    drupal_set_message("Your transcript has been uploaded, and will become visible once it is processed.", 'status');
+                    drupal_set_message(t("Your transcript has been uploaded, and will become visible once it is processed."), 'status');
                 } else {
-                    drupal_set_message("There was a problem and your transcript could not be uploaded.", 'warning');
+                    drupal_set_message(t("There was a problem and your transcript could not be uploaded."), 'warning');
                 }
             }
         }
@@ -38,17 +40,20 @@ function transcripts_node_node_update($node)
         if (isset($node->$field_name)) {
             $field = $node->$field_name;
 
-            if (empty($field) || empty($field['und'])) {
+            if (empty($field) || (empty($field[$node->language]) && empty($field['und'])) {
                 transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+                drupal_set_message("Your transcript has been removed.", 'status');
             } else {
-                $file = file_load($field['und'][0]['fid']);
+                $lang = empty($field[$node->language]) ? 'und' : $node->language;
+
+                $file = file_load($field[$lang][0]['fid']);
                 if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $file->fid)) {
                     transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
 
                     if (transcripts_node_add_transcript($file, node_load($node->nid))) {
-                        drupal_set_message("Your replacement transcript has been uploaded, and will become visible once it is processed.", 'status');
+                        drupal_set_message(t("Your replacement transcript has been uploaded, and will become visible once it is processed."), 'status');
                     } else {
-                        drupal_set_message("Your original transcript was removed, but there was a problem and your replacement transcript could not be uploaded.", 'warning');
+                        drupal_set_message(t("Your original transcript was removed, but there was a problem and your replacement transcript could not be uploaded."), 'warning');
                     }
                 }
             }
