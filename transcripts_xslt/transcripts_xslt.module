@@ -22,66 +22,72 @@ function transcripts_xslt_menu()
     return $items;
 }
 
-function transcripts_xslt_as_tcus($file, $node)
+function transcripts_xslt_get_transformer($file)
 {
     $dot = strrpos($file->uri, '.');
     $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
 
+    $transformer_fid = $ext == 'xml' ? variable_get('transcripts_xslt_xml_transformer', '') : variable_get('transcripts_xslt_txt_transformer', '');
+    if ($transformer_fid) {
+        return file_load($transformer_fid);
+    } else {
+        return false;
+    }
+}
+
+function transcripts_xslt_as_tcus($file, $node)
+{
+    $transformer = transcripts_xslt_get_transformer($file);
+    if (!$transformer) {
+        watchdog('Transcripts XSLT', "[node/%nid] No transformer found.", array('%nid' => $node->nid), WATCHDOG_INFO);
+        return false;
+    }
+
+    $dot = strrpos($file->uri, '.');
+    $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
+
     if ($ext == 'xml') {
-        $transformer_fid = variable_get('transcripts_xslt_xml_transformer', '');
-        if ($transformer_fid) {
-            $transformer = file_load($transformer_fid);
-            $xslt = drupal_realpath($transformer->uri);
-            $xml = transcripts_xslt_saxon_transform($xslt, $file);
-            if ($xml === false) {
-                watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
-                return false;
-            }
-            else {
-                watchdog('Transcripts XSLT', "[node/%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
-                return json_decode(json_encode($xml), TRUE);
-            }
-        }
-        else {
-            watchdog('Transcripts XSLT', "[node/%nid] No transformer found.", array('%nid' => $node->nid), WATCHDOG_INFO);
+        $xslt = drupal_realpath($transformer->uri);
+        $xml = transcripts_xslt_saxon_transform($xslt, $file);
+        if ($xml === false) {
+            watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
             return false;
+        } else {
+            watchdog('Transcripts XSLT', "[node/%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
+            return json_decode(json_encode($xml), TRUE);
         }
     } else if ($ext == 'txt') {
-        $transformer_fid = variable_get('transcripts_xslt_txt_transformer', '');
-        if ($transformer_fid) {
-            $transformer = file_load($transformer_fid);
-            $xslt = drupal_realpath($transformer->uri);
+        $xslt = drupal_realpath($transformer->uri);
 
-            $filepath = drupal_realpath($file->uri);
-            // Check that we have a valid filepath.
-            if (!$filepath || !is_file($filepath)) {
-                watchdog('Transcripts XSLT', '%filepath is not a valid file path', array('%filepath' => $file->uri), WATCHDOG_WARNING);
-                return FALSE;
-            }
-            $params = array();
-            $params['file'] = $filepath;
-            $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
-            drupal_alter('transcripts_xslt_saxon_params', $params, $node);
-            $xml = transcripts_xslt_saxon_transform($xslt, '', 'toolbox', $params);
-            if ($xml === false) {
-                watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
-                return false;
-            }
-            else {
-                watchdog('Transcripts XSLT', "[node/%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
-                return json_decode(json_encode($xml), TRUE);
-            }
-        }
-        else {
-            watchdog('Transcripts XSLT', "[node/%nid] No transformer found.", array('%nid' => $node->nid), WATCHDOG_INFO);
+        $filepath = drupal_realpath($file->uri);
+        // Check that we have a valid filepath.
+        if (!$filepath || !is_file($filepath)) {
+            watchdog('Transcripts XSLT', '%filepath is not a valid file path', array('%filepath' => $file->uri), WATCHDOG_WARNING);
             return false;
+        }
+        $params = array();
+        $params['file'] = $filepath;
+        $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
+        drupal_alter('transcripts_xslt_saxon_params', $params, $node);
+        $xml = transcripts_xslt_saxon_transform($xslt, '', 'toolbox', $params);
+        if ($xml === false) {
+            watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
+            return false;
+        } else {
+            watchdog('Transcripts XSLT', "[node/%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
+            return json_decode(json_encode($xml), TRUE);
         }
     }
 }
 
-function transcripts_xslt_saxon_transform($xsl, $source = '', $it = '', $params = array())
+function transcripts_xslt_saxon_shell_xml($xsl, $source = '', $it = '', $params = array())
 {
-    //$saxon_path = realpath(variable_get('transcripts_xslt_saxon_path', 'sites/all/libraries/saxon'));
+    $output = transcripts_xslt_saxon_shell_xml($xsl, $source, $it, $params);
+    return simplexml_load_string($output);
+}
+
+function transcripts_xslt_saxon_shell($xsl, $source = '', $it = '', $params = array())
+{
     $saxon = realpath(variable_get('transcripts_xslt_saxon_jar', 'sites/all/libraries/saxon/saxon9he.jar'));
     if (!$saxon || !is_file($saxon)) {
         throw new Exception(t('Invalid path or filename for saxon application jar.'));
@@ -124,7 +130,5 @@ function transcripts_xslt_saxon_transform($xsl, $source = '', $it = '', $params 
     //. ' 2>&1'; //for debugging
 
     watchdog('Transcripts XSLT', "$cmd", NULL, WATCHDOG_DEBUG);
-    $document = shell_exec($cmd);
-
-    return simplexml_load_string($document);
+    return shell_exec($cmd);
 }
