@@ -206,3 +206,32 @@ function transcripts_node_form_submit($form, &$form_state)
     $transcript_fields[$field_name] = $is_transcript;
     variable_set('transcripts_transcript_fields', $transcript_fields);
 }
+
+/**
+ * Implements hook_element_info().
+ */
+function transcripts_node_element_info()
+{
+    $elements = array();
+    $elements['managed_file']['#process'] = array('transcripts_node_file_field_process');
+    return $elements;
+}
+
+function transcripts_node_file_field_process($element, &$form_state, $form)
+{
+    $item = $element['#value'];
+    $item['fid'] = $element['fid']['#value'];
+    $nid = $form['nid']['#value'];
+
+    $field = field_widget_field($element, $form_state);
+    $instance = field_widget_instance($element, $form_state);
+    $settings = $instance['widget']['settings'];
+
+    if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
+        $element['preview_transcript'] = array(
+            '#markup' => "<div class='transcripts-preview-transcript'>Preview transcript</div>",
+            '#weight' => 0,
+        );
+    }
+    return $element;
+}
