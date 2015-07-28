@@ -47,8 +47,8 @@ function transcripts_xslt_as_tcus($file, $node)
     $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
 
     if ($ext == 'xml') {
-        $xslt = drupal_realpath($transformer->uri);
-        $xml = transcripts_xslt_saxon_transform($xslt, $file);
+        $xsl = drupal_realpath($transformer->uri);
+        $xml = transcripts_xslt_saxon_shell_xml($xsl, $file);
         if ($xml === false) {
             watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
             return false;
@@ -57,7 +57,7 @@ function transcripts_xslt_as_tcus($file, $node)
             return json_decode(json_encode($xml), TRUE);
         }
     } else if ($ext == 'txt') {
-        $xslt = drupal_realpath($transformer->uri);
+        $xsl = drupal_realpath($transformer->uri);
 
         $filepath = drupal_realpath($file->uri);
         // Check that we have a valid filepath.
@@ -69,7 +69,7 @@ function transcripts_xslt_as_tcus($file, $node)
         $params['file'] = $filepath;
         $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
         drupal_alter('transcripts_xslt_saxon_params', $params, $node);
-        $xml = transcripts_xslt_saxon_transform($xslt, '', 'toolbox', $params);
+        $xml = transcripts_xslt_saxon_shell_xml($xsl, '', 'toolbox', $params);
         if ($xml === false) {
             watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
             return false;
