@@ -82,7 +82,7 @@ function transcripts_xslt_as_tcus($file, $node)
 
 function transcripts_xslt_saxon_shell_xml($xsl, $source = '', $it = '', $params = array())
 {
-    $output = transcripts_xslt_saxon_shell_xml($xsl, $source, $it, $params);
+    $output = transcripts_xslt_saxon_shell($xsl, $source, $it, $params);
     return simplexml_load_string($output);
 }
 
