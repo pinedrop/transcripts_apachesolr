@@ -228,8 +228,6 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     $settings = $instance['widget']['settings'];
 
     if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
-        dpm($form);
-        dpm($form_state);
         $element['preview_transcript'] = drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
