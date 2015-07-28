@@ -232,6 +232,7 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
             '#markup' => "<div id='transcripts-preview-transcript'></div>",
+            '#weight' => 91,
         );
     }
     return $element;
@@ -246,10 +247,11 @@ function transcripts_node_preview_transcript_form($form, &$form_state) {
             'wrapper' => 'transcripts-preview-transcript',
             'method' => 'replace',
         ),
+        '#weight' => 90,
     );
     return $form;
 }
 
 function transcripts_node_preview_transcript_callback($form, $form_state) {
-    return "Debug: " .dprint_r($form, TRUE);
+    return dprint_r($form, TRUE);
 }
