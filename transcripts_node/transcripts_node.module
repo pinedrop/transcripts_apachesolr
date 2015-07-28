@@ -277,5 +277,11 @@ function transcripts_node_preview_transcript_callback($form, $form_state) {
     $file = file_load($form_state['values']['transcript_fid']);
     $node = node_load($form_state['values']['transcript_nid']);
     watchdog("transcripts_node", "File=".$file->uri." Node=".$node->nid, NULL, WATCHDOG_INFO);
-    return "Returning " .dprint_r(transcripts_xslt_as_tcus($file, $node), TRUE);
+    $tcus = transcripts_xslt_as_tcus($file, $node);
+    if ($tcus == false) {
+        return "False";
+    }
+    else {
+        return "True";
+    }
 }
