@@ -228,10 +228,28 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     $settings = $instance['widget']['settings'];
 
     if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
-        $element['preview_transcript'] = array(
-            '#markup' => "<div class='transcripts-preview-transcript'>Preview transcript</div>",
-            '#weight' => 0,
+        $element['preview_transcript'] = drupal_get_form('transcripts_node_preview_transcript_form');
+        $element['preview_wrapper'] = array(
+            '#type' => 'markup',
+            '#markup' => "<div id='transcripts-preview-transcript'></div>",
         );
     }
     return $element;
+}
+
+function transcripts_node_preview_transcript_form($form, &$form_state) {
+    $form['preview_button'] = array(
+        '#type' => 'button',
+        '#value' => t('Preview'),
+        '#ajax' => array(
+            'callback' => 'transcripts_node_preview_transcript_callback',
+            'wrapper' => 'transcripts-preview-transcript',
+            'method' => 'replace',
+        ),
+    );
+    return $form;
+}
+
+function transcripts_node_preview_transcript_callback($form, $form_state) {
+    return "Debug: " .dprint_r($form, TRUE);
 }
