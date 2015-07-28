@@ -279,9 +279,9 @@ function transcripts_node_preview_transcript_callback($form, $form_state) {
     watchdog("transcripts_node", "File=".$file->uri." Node=".$node->nid, NULL, WATCHDOG_INFO);
     $tcus = transcripts_xslt_as_tcus($file, $node);
     if ($tcus == false) {
-        return "False";
+        return "false";
     }
     else {
-        return "True";
+        return dprint_r($tcus, TRUE);
     }
 }
