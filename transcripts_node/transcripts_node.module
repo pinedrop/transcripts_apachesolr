@@ -266,12 +266,10 @@ function transcripts_node_preview_transcript_callback($form, $form_state)
 {
     $file = file_load($form_state['values']['field_transcript']['en'][0]['fid']);
     $node = node_load($form_state['values']['nid']);
-    watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
-    return "Ok";
-    /*$tcus = transcripts_xslt_as_tcus($file, $node);
+    $tcus = transcripts_xslt_as_tcus($file, $node);
     if ($tcus == false) {
         return "false";
     } else {
         return dprint_r($tcus, TRUE);
-    }*/
+    }
 }
