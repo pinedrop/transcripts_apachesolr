@@ -240,7 +240,39 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
         $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
         $element['remove_button']['#submit'][] = 'transcripts_node_file_submit';
 
-        $element['preview_transcript'] = drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
+        $element['preview_transcript'] = array(
+            '#type' => 'button',
+            '#value' => t('Preview'),
+                /*        '#ajax' => array(
+                            'callback' => 'transcripts_node_preview_transcript_callback',
+                            'wrapper' => 'transcripts-preview-transcript',
+                            'method' => 'replace',
+                        ),
+                */
+                /*        '#attached' => array(
+                            'js' => array(
+                                variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug') .'Saxonce.nocache.js',
+                                array(
+                                    'data' => array(
+                                        'transcripts_source' => $file->uri,
+                                        'transcripts_xsl' => $xsl->uri,
+                                        'transcripts_replace' =>
+                                    ),
+                                    'type' => 'setting',
+                                ),
+                            ),
+                        ),*/
+            '#weight' => 90,
+        );
+        /*$form['transcript_fid'] = array(
+            '#type' => 'hidden',
+            '#value' => $fid,
+        );
+        $form['transcript_nid'] = array(
+            '#type' => 'hidden',
+            '#value' => $nid,
+        );
+        );*/ // drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
             '#markup' => "<div id='transcripts-preview-transcript'></div>",
