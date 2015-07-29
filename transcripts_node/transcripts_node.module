@@ -229,6 +229,7 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
 
     if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
         $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
+        $element['remove_button']['#submit'][] = 'transcripts_node_file_submit';
 
         $element['preview_transcript'] = drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
         $element['preview_wrapper'] = array(
