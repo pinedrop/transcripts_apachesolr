@@ -230,7 +230,7 @@ function transcripts_node_file_pre_render($element)
         $element['preview_transcript']['#access'] = FALSE;
     } else {
         $fid = $element['#value']['fid'];
-        if ($element['preview_transcript']) {
+        if (isset($element['preview_transcript'])) {
             watchdog("transcripts_node", "Val = " .dprint_r($element, TRUE), NULL, WATCHDOG_INFO);
             $element['preview_transcript']['#ajax']['path'] = 'transcripts/preview/' . $fid;
         }
