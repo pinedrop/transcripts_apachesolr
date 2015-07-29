@@ -242,7 +242,7 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
         );
         $element['transcript_fid'] = array(
             '#type' => 'hidden',
-            '#value' => $element['fid']['#value'],
+            '#value' => $element['#value']['fid'],
         );
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
