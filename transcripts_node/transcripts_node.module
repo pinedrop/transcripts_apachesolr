@@ -213,7 +213,7 @@ function transcripts_node_form_submit($form, &$form_state)
 function transcripts_node_element_info()
 {
     $elements = array();
-    $elements['managed_file']['#process'] = array('transcripts_node_file_field_process');
+    $elements['managed_file']['#process'][] = 'transcripts_node_file_field_process';
     return $elements;
 }
 
