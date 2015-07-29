@@ -218,7 +218,8 @@ function transcripts_node_element_info()
     return $elements;
 }
 
-function transcripts_node_file_pre_render($element) {
+function transcripts_node_file_pre_render($element)
+{
     if (empty($element['#value']['fid'])) {
         $element['preview_transcript']['#access'] = FALSE;
     }
@@ -243,36 +244,36 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
         $element['preview_transcript'] = array(
             '#type' => 'button',
             '#value' => t('Preview'),
-                /*        '#ajax' => array(
-                            'callback' => 'transcripts_node_preview_transcript_callback',
-                            'wrapper' => 'transcripts-preview-transcript',
-                            'method' => 'replace',
-                        ),
-                */
-                /*        '#attached' => array(
-                            'js' => array(
-                                variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug') .'Saxonce.nocache.js',
-                                array(
-                                    'data' => array(
-                                        'transcripts_source' => $file->uri,
-                                        'transcripts_xsl' => $xsl->uri,
-                                        'transcripts_replace' =>
-                                    ),
-                                    'type' => 'setting',
+            '#ajax' => array(
+                'callback' => 'transcripts_node_preview_transcript_callback',
+                'wrapper' => 'transcripts-preview-transcript',
+                'method' => 'replace',
+            ),
+
+            /*        '#attached' => array(
+                        'js' => array(
+                            variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug') .'Saxonce.nocache.js',
+                            array(
+                                'data' => array(
+                                    'transcripts_source' => $file->uri,
+                                    'transcripts_xsl' => $xsl->uri,
+                                    'transcripts_replace' =>
                                 ),
+                                'type' => 'setting',
                             ),
-                        ),*/
+                        ),
+                    ),*/
             '#weight' => 90,
         );
-        /*$form['transcript_fid'] = array(
+        $element['transcript_fid'] = array(
             '#type' => 'hidden',
-            '#value' => $fid,
+            '#value' => $item['fid'],
         );
-        $form['transcript_nid'] = array(
+        $element['transcript_nid'] = array(
             '#type' => 'hidden',
             '#value' => $nid,
         );
-        );*/ // drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
+        // drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
             '#markup' => "<div id='transcripts-preview-transcript'></div>",
@@ -282,7 +283,8 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     return $element;
 }
 
-function transcripts_node_file_submit($form, &$form_state) {
+function transcripts_node_file_submit($form, &$form_state)
+{
     $parents = $form_state['triggering_element']['#array_parents'];
     $button_key = array_pop($parents);
     $element = drupal_array_get_nested_value($form, $parents);
@@ -293,36 +295,36 @@ function transcripts_node_file_submit($form, &$form_state) {
         $commands[] = ajax_command_replace('#transcripts-preview-transcript', 'Upload successful');
         return array('#type' => 'ajax', '#commands' => $commands);
 //        dpm($form_state);
-    }
-    else if ($button_key == 'remove_button') {
+    } else if ($button_key == 'remove_button') {
         watchdog('transcripts_node', 'Remove pressed.', NULL, WATCHDOG_INFO);
 //        dpm($form_state);
     }
 }
 
-function transcripts_node_preview_transcript_form($form, &$form_state, $fid, $nid) {
+function transcripts_node_preview_transcript_form($form, &$form_state, $fid, $nid)
+{
     $form['preview_button'] = array(
         '#type' => 'button',
         '#value' => t('Preview'),
-/*        '#ajax' => array(
-            'callback' => 'transcripts_node_preview_transcript_callback',
-            'wrapper' => 'transcripts-preview-transcript',
-            'method' => 'replace',
-        ),
-*/
-/*        '#attached' => array(
-            'js' => array(
-                variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug') .'Saxonce.nocache.js',
-                array(
-                    'data' => array(
-                        'transcripts_source' => $file->uri,
-                        'transcripts_xsl' => $xsl->uri,
-                        'transcripts_replace' =>
-                    ),
-                    'type' => 'setting',
+        /*        '#ajax' => array(
+                    'callback' => 'transcripts_node_preview_transcript_callback',
+                    'wrapper' => 'transcripts-preview-transcript',
+                    'method' => 'replace',
                 ),
-            ),
-        ),*/
+        */
+        /*        '#attached' => array(
+                    'js' => array(
+                        variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug') .'Saxonce.nocache.js',
+                        array(
+                            'data' => array(
+                                'transcripts_source' => $file->uri,
+                                'transcripts_xsl' => $xsl->uri,
+                                'transcripts_replace' =>
+                            ),
+                            'type' => 'setting',
+                        ),
+                    ),
+                ),*/
         '#weight' => 90,
     );
     $form['transcript_fid'] = array(
@@ -336,15 +338,15 @@ function transcripts_node_preview_transcript_form($form, &$form_state, $fid, $ni
     return $form;
 }
 
-function transcripts_node_preview_transcript_callback($form, $form_state) {
+function transcripts_node_preview_transcript_callback($form, $form_state)
+{
     $file = file_load($form_state['values']['transcript_fid']);
     $node = node_load($form_state['values']['transcript_nid']);
-    watchdog("transcripts_node", "File=".$file->uri." Node=".$node->nid, NULL, WATCHDOG_INFO);
+    watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
     $tcus = transcripts_xslt_as_tcus($file, $node);
     if ($tcus == false) {
         return "false";
-    }
-    else {
+    } else {
         return dprint_r($tcus, TRUE);
     }
 }
