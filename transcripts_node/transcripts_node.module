@@ -247,9 +247,11 @@ function transcripts_node_file_submit($form, &$form_state) {
     $element = drupal_array_get_nested_value($form, $parents);
 
     if ($button_key == 'upload_button') {
+        watchdog('transcripts_node', 'Upload pressed.', NULL, WATCHDOG_INFO);
         dpm($form_state);
     }
     else if ($button_key == 'remove_button') {
+        watchdog('transcripts_node', 'Remove pressed.', NULL, WATCHDOG_INFO);
         dpm($form_state);
     }
 }
