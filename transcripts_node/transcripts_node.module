@@ -224,12 +224,12 @@ function transcripts_node_file_pre_render($element)
     if (empty($element['#value']['fid'])) {
         $element['preview_transcript']['#access'] = FALSE;
     }
-    //else {
-    //    $element['transcript_fid'] = array(
-    //        '#type' => 'hidden',
-    //        '#value' => $element['#value']['fid'],
-    //    );
-    //}
+    else {
+        $element['transcript_fid'] = array(
+            '#type' => 'hidden',
+            '#value' => $element['#value']['fid'],
+        );
+    }
     return $element;
 }
 
@@ -273,10 +273,6 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
             '#weight' => 90,
         );
 
-        $element['transcript_nid'] = array(
-            '#type' => 'hidden',
-            '#value' => $nid,
-        );
         // drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
@@ -344,12 +340,10 @@ function transcripts_node_preview_transcript_form($form, &$form_state, $fid, $ni
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
 {
-    watchdog('transcripts_node', "Form = " .dprint_r($form, TRUE), NULL, WATCHDOG_INFO);
-    watchdog('transcripts_node', "Form state = " .dprint_r($form_state, TRUE), NULL, WATCHDOG_INFO);
-    /*$file = file_load($form_state['values']['transcript_fid']);
-    $node = node_load($form_state['values']['transcript_nid']);
+    $file = file_load($form_state['values']['transcript_fid']);
+    $node = node_load($form_state['values']['nid']);
     watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
-    $tcus = transcripts_xslt_as_tcus($file, $node);
+    /*$tcus = transcripts_xslt_as_tcus($file, $node);
     if ($tcus == false) {
         return "false";
     } else {
