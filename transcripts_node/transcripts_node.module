@@ -220,6 +220,7 @@ function transcripts_node_element_info()
 
 function transcripts_node_file_pre_render($element)
 {
+    watchdog("transcripts_node", "File el = " .dprint_r($element), NULL, WATCHDOG_INFO);
     if (empty($element['#value']['fid'])) {
         $element['preview_transcript']['#access'] = FALSE;
     }
