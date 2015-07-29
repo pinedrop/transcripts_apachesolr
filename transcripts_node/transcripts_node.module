@@ -255,7 +255,7 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
             '#value' => t('Preview'),
             '#ajax' => array(
                 //'path' => 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'],
-                'path' => 'transcripts/preview',
+                //'path' => 'transcripts/preview',
                 'wrapper' => 'transcripts-preview-transcript',
                 'method' => 'replace',
             ),
