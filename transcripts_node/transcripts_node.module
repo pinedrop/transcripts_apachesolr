@@ -270,6 +270,8 @@ function transcripts_node_file_submit($form, &$form_state)
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
 {
+    watchdog("transcripts_node", "form state=" .dprint_r($form_state, TRUE), NULL, WATCHDOG_INFO);
+    watchdog("transcripts_node", "form=" .dprint_r($form, TRUE), NULL, WATCHDOG_INFO);
     //$file = file_load($fid);
     //watchdog("transcripts_node", "File=" . $file->uri, NULL, WATCHDOG_INFO);
     return "Ok";
