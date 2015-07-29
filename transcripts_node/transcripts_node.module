@@ -240,10 +240,6 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
             ),
             '#weight' => 90,
         );
-        $element['transcript_fid'] = array(
-            '#type' => 'hidden',
-            '#value' => $element['#value']['fid'],
-        );
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
             '#markup' => "<div id='transcripts-preview-transcript'></div>",
@@ -261,21 +257,17 @@ function transcripts_node_file_submit($form, &$form_state)
 
     if ($button_key == 'upload_button') {
         watchdog('transcripts_node', 'Upload pressed.', NULL, WATCHDOG_INFO);
-        //watchdog('transcripts_node', dprint_r($form_state, TRUE), NULL, WATCHDOG_INFO);
     } else if ($button_key == 'remove_button') {
         watchdog('transcripts_node', 'Remove pressed.', NULL, WATCHDOG_INFO);
-        //watchdog('transcripts_node', dprint_r($form_state, TRUE), NULL, WATCHDOG_INFO);
     }
 }
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
 {
-    watchdog("transcripts_node", "form state=" .dprint_r($form_state, TRUE), NULL, WATCHDOG_INFO);
-    //$file = file_load($fid);
-    //watchdog("transcripts_node", "File=" . $file->uri, NULL, WATCHDOG_INFO);
+    $file = file_load($form_state['values']['field_transcript']['en'][0]['fid']);
+    $node = node_load($form_state['values']['nid']);
+    watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
     return "Ok";
-    //$node = node_load($form_state['values']['nid']);
-    //watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
     /*$tcus = transcripts_xslt_as_tcus($file, $node);
     if ($tcus == false) {
         return "false";
