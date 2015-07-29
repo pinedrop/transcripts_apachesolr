@@ -227,7 +227,8 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     $instance = field_widget_instance($element, $form_state);
     $settings = $instance['widget']['settings'];
 
-    if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
+    //if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
+    if (is_transcript_field($element['#field_name'])) {
         $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
         $element['remove_button']['#submit'][] = 'transcripts_node_file_submit';
 
