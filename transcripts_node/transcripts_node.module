@@ -237,17 +237,14 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
 {
     $item = $element['#value'];
     $item['fid'] = $element['fid']['#value'];
-    $nid = $form['nid']['#value'];
 
     $field = field_widget_field($element, $form_state);
     $instance = field_widget_instance($element, $form_state);
     $settings = $instance['widget']['settings'];
 
-    //if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
     if (is_transcript_field($element['#field_name'])) {
         $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
         $element['remove_button']['#submit'][] = 'transcripts_node_file_submit';
-
         $element['preview_transcript'] = array(
             '#type' => 'button',
             '#value' => t('Preview'),
@@ -256,24 +253,8 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
                 'wrapper' => 'transcripts-preview-transcript',
                 'method' => 'replace',
             ),
-
-            /*        '#attached' => array(
-                        'js' => array(
-                            variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug') .'Saxonce.nocache.js',
-                            array(
-                                'data' => array(
-                                    'transcripts_source' => $file->uri,
-                                    'transcripts_xsl' => $xsl->uri,
-                                    'transcripts_replace' =>
-                                ),
-                                'type' => 'setting',
-                            ),
-                        ),
-                    ),*/
             '#weight' => 90,
         );
-
-        // drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
             '#markup' => "<div id='transcripts-preview-transcript'></div>",
@@ -291,51 +272,9 @@ function transcripts_node_file_submit($form, &$form_state)
 
     if ($button_key == 'upload_button') {
         watchdog('transcripts_node', 'Upload pressed.', NULL, WATCHDOG_INFO);
-        $commands = array();
-        $commands[] = ajax_command_replace('#transcripts-preview-transcript', 'Upload successful');
-        return array('#type' => 'ajax', '#commands' => $commands);
-//        dpm($form_state);
     } else if ($button_key == 'remove_button') {
         watchdog('transcripts_node', 'Remove pressed.', NULL, WATCHDOG_INFO);
-//        dpm($form_state);
     }
-}
-
-function transcripts_node_preview_transcript_form($form, &$form_state, $fid, $nid)
-{
-    $form['preview_button'] = array(
-        '#type' => 'button',
-        '#value' => t('Preview'),
-        /*        '#ajax' => array(
-                    'callback' => 'transcripts_node_preview_transcript_callback',
-                    'wrapper' => 'transcripts-preview-transcript',
-                    'method' => 'replace',
-                ),
-        */
-        /*        '#attached' => array(
-                    'js' => array(
-                        variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug') .'Saxonce.nocache.js',
-                        array(
-                            'data' => array(
-                                'transcripts_source' => $file->uri,
-                                'transcripts_xsl' => $xsl->uri,
-                                'transcripts_replace' =>
-                            ),
-                            'type' => 'setting',
-                        ),
-                    ),
-                ),*/
-        '#weight' => 90,
-    );
-    $form['transcript_fid'] = array(
-        '#type' => 'hidden',
-        '#value' => $fid,
-    );
-    $form['transcript_nid'] = array(
-        '#type' => 'hidden',
-        '#value' => $nid,
-    );
-    return $form;
 }
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
