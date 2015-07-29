@@ -228,6 +228,8 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     $settings = $instance['widget']['settings'];
 
     if ($item['fid'] && $nid && is_transcript_field($element['#field_name']) && transcripts_node_transcript_access($nid)) {
+        $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
+
         $element['preview_transcript'] = drupal_get_form('transcripts_node_preview_transcript_form', $item['fid'], $nid);
         $element['preview_wrapper'] = array(
             '#type' => 'markup',
@@ -236,6 +238,19 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
         );
     }
     return $element;
+}
+
+function transcripts_node_file_submit($form, &$form_state) {
+    $parents = $form_state['triggering_element']['#array_parents'];
+    $button_key = array_pop($parents);
+    $element = drupal_array_get_nested_value($form, $parents);
+
+    if ($button_key == 'upload_button') {
+        dpm($form_state);
+    }
+    else if ($button_key == 'remove_button') {
+        dpm($form_state);
+    }
 }
 
 function transcripts_node_preview_transcript_form($form, &$form_state, $fid, $nid) {
