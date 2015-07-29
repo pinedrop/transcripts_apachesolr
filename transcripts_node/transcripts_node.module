@@ -231,8 +231,8 @@ function transcripts_node_file_pre_render($element)
     } else {
         $fid = $element['#value']['fid'];
         if (isset($element['preview_transcript'])) {
-            watchdog("transcripts_node", "Val = " .dprint_r($element, TRUE), NULL, WATCHDOG_INFO);
             $element['preview_transcript']['#ajax']['path'] = 'transcripts/preview/' . $fid;
+            watchdog("transcripts_node", "Val = " .dprint_r($element, TRUE), NULL, WATCHDOG_INFO);
         }
     }
     return $element;
