@@ -17,6 +17,12 @@ function transcripts_node_menu()
         'type' => MENU_CALLBACK,
         'weight' => 80,
     );
+    $items['transcripts/preview/%'] = array(
+        'page callback' => 'transcripts_node_preview_transcript_callback',
+        'page arguments' => array(2),
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
 
     return $items;
 }
@@ -220,15 +226,14 @@ function transcripts_node_element_info()
 
 function transcripts_node_file_pre_render($element)
 {
-    //watchdog("transcripts_node", "File el = " .dprint_r($element, TRUE), NULL, WATCHDOG_INFO);
     if (empty($element['#value']['fid'])) {
         $element['preview_transcript']['#access'] = FALSE;
-    }
-    else {
-        $element['transcript_fid'] = array(
-            '#type' => 'hidden',
-            '#value' => $element['#value']['fid'],
-        );
+    } else {
+        $fid = $element['#value']['fid'];
+        if ($element['preview_transcript']) {
+            watchdog("transcripts_node", "Val = " .dprint_r($element, TRUE), NULL, WATCHDOG_INFO);
+            $element['preview_transcript']['#ajax']['path'] = 'transcripts/preview/' . $fid;
+        }
     }
     return $element;
 }
@@ -249,7 +254,8 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
             '#type' => 'button',
             '#value' => t('Preview'),
             '#ajax' => array(
-                'callback' => 'transcripts_node_preview_transcript_callback',
+                //'path' => 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'],
+                'path' => 'transcripts/preview',
                 'wrapper' => 'transcripts-preview-transcript',
                 'method' => 'replace',
             ),
@@ -277,11 +283,13 @@ function transcripts_node_file_submit($form, &$form_state)
     }
 }
 
-function transcripts_node_preview_transcript_callback($form, $form_state)
+function transcripts_node_preview_transcript_callback($fid)
 {
-    $file = file_load($form_state['values']['transcript_fid']);
-    $node = node_load($form_state['values']['nid']);
-    watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
+    $file = file_load($fid);
+    watchdog("transcripts_node", "File=" . $file->uri, NULL, WATCHDOG_INFO);
+    return "Ok";
+    //$node = node_load($form_state['values']['nid']);
+    //watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
     /*$tcus = transcripts_xslt_as_tcus($file, $node);
     if ($tcus == false) {
         return "false";
