@@ -17,13 +17,6 @@ function transcripts_node_menu()
         'type' => MENU_CALLBACK,
         'weight' => 80,
     );
-    $items['transcripts/preview/%'] = array(
-        'page callback' => 'transcripts_node_preview_transcript_callback',
-        'page arguments' => array(2),
-        'access callback' => TRUE,
-        'type' => MENU_CALLBACK,
-    );
-
     return $items;
 }
 
@@ -226,26 +219,14 @@ function transcripts_node_element_info()
 
 function transcripts_node_file_pre_render($element)
 {
-    if (empty($element['#value']['fid'])) {
+    if (empty($element['#value']['fid']) && isset($element['preview_transcript'])) {
         $element['preview_transcript']['#access'] = FALSE;
-    } else {
-        $fid = $element['#value']['fid'];
-        if (isset($element['preview_transcript'])) {
-            $element['preview_transcript']['#ajax']['path'] = 'transcripts/preview/' . $fid;
-        }
     }
     return $element;
 }
 
 function transcripts_node_file_field_process($element, &$form_state, $form)
 {
-    $item = $element['#value'];
-    $item['fid'] = $element['fid']['#value'];
-
-    $field = field_widget_field($element, $form_state);
-    $instance = field_widget_instance($element, $form_state);
-    $settings = $instance['widget']['settings'];
-
     if (is_transcript_field($element['#field_name'])) {
         $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
         $element['remove_button']['#submit'][] = 'transcripts_node_file_submit';
@@ -253,8 +234,7 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
             '#type' => 'button',
             '#value' => t('Preview'),
             '#ajax' => array(
-                //'path' => 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'],
-                //'path' => 'transcripts/preview',
+                'callback' => 'transcripts_node_preview_transcript_callback',
                 'wrapper' => 'transcripts-preview-transcript',
                 'method' => 'replace',
             ),
@@ -277,15 +257,17 @@ function transcripts_node_file_submit($form, &$form_state)
 
     if ($button_key == 'upload_button') {
         watchdog('transcripts_node', 'Upload pressed.', NULL, WATCHDOG_INFO);
+        watchdog('transcripts_node', dprint_r($form_state, TRUE), NULL, WATCHDOG_INFO);
     } else if ($button_key == 'remove_button') {
         watchdog('transcripts_node', 'Remove pressed.', NULL, WATCHDOG_INFO);
+        watchdog('transcripts_node', dprint_r($form_state, TRUE), NULL, WATCHDOG_INFO);
     }
 }
 
-function transcripts_node_preview_transcript_callback($fid)
+function transcripts_node_preview_transcript_callback($form, $form_state)
 {
-    $file = file_load($fid);
-    watchdog("transcripts_node", "File=" . $file->uri, NULL, WATCHDOG_INFO);
+    //$file = file_load($fid);
+    //watchdog("transcripts_node", "File=" . $file->uri, NULL, WATCHDOG_INFO);
     return "Ok";
     //$node = node_load($form_state['values']['nid']);
     //watchdog("transcripts_node", "File=" . $file->uri . " Node=" . $node->nid, NULL, WATCHDOG_INFO);
