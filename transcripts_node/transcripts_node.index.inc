@@ -6,7 +6,6 @@ function transcripts_node_node_delete($node)
 
     if (count($fields) > 0) {
         transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
-        drupal_set_message("Your transcript has been removed.", 'status');
     }
 }
 
@@ -24,9 +23,9 @@ function transcripts_node_node_insert($node)
                 $file = file_load($field[$lang][0]['fid']);
                 if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $file->fid)) {
                     if (transcripts_node_add_transcript($file, node_load($node->nid))) {
-                        drupal_set_message(t("Your transcript has been uploaded, and will become visible once it is processed."), 'status');
+                        watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was uploaded and indexed.', NULL, WATCHDOG_DEBUG);
                     } else {
-                        drupal_set_message(t("There was a problem and your transcript could not be uploaded."), 'warning');
+                        watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was uploaded but could not be indexed.', NULL, WATCHDOG_DEBUG);
                     }
                 }
             }
@@ -54,9 +53,9 @@ function transcripts_node_node_update($node)
                     transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
 
                     if (transcripts_node_add_transcript($file, node_load($node->nid))) {
-                        drupal_set_message(t("Your replacement transcript has been uploaded, and will become visible once it is processed."), 'status');
+                        watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was removed, replaced, and indexed.', NULL, WATCHDOG_DEBUG);
                     } else {
-                        drupal_set_message(t("Your original transcript was removed, but there was a problem and your replacement transcript could not be uploaded."), 'warning');
+                        watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was removed and replaced, but could not be indexed.', NULL, WATCHDOG_DEBUG);
                     }
                 }
             }
