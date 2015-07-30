@@ -247,6 +247,7 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
             '#weight' => 91,
         );
     }
+    watchdog('transcripts_node', 'Element = ' .dprint_r($element, TRUE), NULL, WATCHDOG_DEBUG);
     return $element;
 }
 
