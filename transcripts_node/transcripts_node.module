@@ -230,6 +230,10 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     if (is_transcript_field($element['#field_name'])) {
         $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
         $element['remove_button']['#submit'][] = 'transcripts_node_file_submit';
+        $element['transcript_field'] = array(
+            '#type' => 'hidden',
+            '#value' => $element['#field_name'],
+        );
         $element['preview_transcript'] = array(
             '#type' => 'button',
             '#value' => t('Preview'),
@@ -264,8 +268,7 @@ function transcripts_node_file_submit($form, &$form_state)
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
 {
-    dpm($form_state);
-    dpm($form);
+    watchdog('transcripts_node', $form_state['values']['field_transcript'], NULL, WATCHDOG_INFO);
     $file = file_load($form_state['values']['field_transcript']['en'][0]['fid']);
     $node = node_load($form_state['values']['nid']);
     $tcus = transcripts_xslt_as_tcus($file, $node);
