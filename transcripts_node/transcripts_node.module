@@ -262,6 +262,9 @@ function transcripts_node_file_submit($form, &$form_state) {
         if ($element['#file']) {// && $element['#file']->status == 0) {;
             $node = $form_state['node'];
             transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+
+            //logging
+            drupal_set_message("The transcript " .$element['#file']->filename . " has been removed.", 'status');
             watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was removed.', NULL, WATCHDOG_DEBUG);
         }
     }
