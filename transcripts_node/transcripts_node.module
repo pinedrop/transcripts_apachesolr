@@ -253,22 +253,32 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     return $element;
 }
 
-function transcripts_node_file_submit($form, &$form_state)
-{
+function transcripts_node_file_submit($form, &$form_state) {
     $parents = $form_state['triggering_element']['#array_parents'];
     $button_key = array_pop($parents);
     $element = drupal_array_get_nested_value($form, $parents);
 
     if ($button_key == 'upload_button') {
-        watchdog('transcripts_node', 'Upload pressed.', NULL, WATCHDOG_INFO);
-    } else if ($button_key == 'remove_button') {
-        watchdog('transcripts_node', 'Remove pressed.', NULL, WATCHDOG_INFO);
+
     }
+    else if ($button_key == 'remove_button') {
+        if ($element['#file'] && $element['#file']->status == 0) {
+            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $form_state['values']['nid']);
+        }
+    }
+
+    // Set the form to rebuild so that $form is correctly updated in response to
+    // processing the file removal. Since this function did not change $form_state
+    // if the upload button was clicked, a rebuild isn't necessary in that
+    // situation and setting $form_state['redirect'] to FALSE would suffice.
+    // However, we choose to always rebuild, to keep the form processing workflow
+    // consistent between the two buttons.
+    $form_state['rebuild'] = TRUE;
 }
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
 {
-    watchdog('transcripts_node', 'Triggering parent ' .dprint_r($form_state['triggering_element'], TRUE), NULL, WATCHDOG_INFO);
+    watchdog('transcripts_node', 'Triggering parent ' .dprint_r($form_state['triggering_element'], TRUE), NULL, WATCHDOG_DEBUG);
 
     $trigger = $form_state['triggering_element'];
     $field = $trigger['#parents'][0];

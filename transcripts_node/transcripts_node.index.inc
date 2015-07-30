@@ -22,10 +22,12 @@ function transcripts_node_node_insert($node)
                 $lang = empty($field[$node->language]) ? 'und' : $node->language;
 
                 $file = file_load($field[$lang][0]['fid']);
-                if (transcripts_node_add_transcript($file, node_load($node->nid))) {
-                    drupal_set_message(t("Your transcript has been uploaded, and will become visible once it is processed."), 'status');
-                } else {
-                    drupal_set_message(t("There was a problem and your transcript could not be uploaded."), 'warning');
+                if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $file->fid)) {
+                    if (transcripts_node_add_transcript($file, node_load($node->nid))) {
+                        drupal_set_message(t("Your transcript has been uploaded, and will become visible once it is processed."), 'status');
+                    } else {
+                        drupal_set_message(t("There was a problem and your transcript could not be uploaded."), 'warning');
+                    }
                 }
             }
         }
@@ -41,8 +43,9 @@ function transcripts_node_node_update($node)
             $field = $node->$field_name;
 
             if (empty($field) || (empty($field[$node->language]) && empty($field['und']))) {
+                //should check to make sure was not empty before update, otherwise no point in removing
                 transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
-                drupal_set_message("Your transcript has been removed.", 'status');
+                //drupal_set_message("Your transcript has been removed.", 'status');
             } else {
                 $lang = empty($field[$node->language]) ? 'und' : $node->language;
 
