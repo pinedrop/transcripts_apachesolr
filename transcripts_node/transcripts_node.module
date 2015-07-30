@@ -228,12 +228,9 @@ function transcripts_node_file_pre_render($element)
 function transcripts_node_file_field_process($element, &$form_state, $form)
 {
     if (is_transcript_field($element['#field_name'])) {
-        $element['upload_button']['#submit'][] = 'transcripts_node_file_submit';
-        $element['remove_button']['#submit'][] = 'transcripts_node_file_submit';
-        $element['transcript_field'] = array(
-            '#type' => 'hidden',
-            '#value' => $element['#field_name'],
-        );
+        array_unshift($element['upload_button']['#submit'], 'transcripts_node_file_submit');
+        array_unshift($element['remove_button']['#submit'], 'transcripts_node_file_submit');
+
         $element['preview_transcript'] = array(
             '#type' => 'button',
             '#value' => t('Preview'),
