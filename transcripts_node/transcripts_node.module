@@ -246,8 +246,9 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
             '#markup' => "<div id='transcripts-preview-transcript'></div>",
             '#weight' => 91,
         );
+
+        watchdog('transcripts_node', 'Element = ' .dprint_r($element, TRUE), NULL, WATCHDOG_DEBUG);
     }
-    watchdog('transcripts_node', 'Element = ' .dprint_r($element, TRUE), NULL, WATCHDOG_DEBUG);
     return $element;
 }
 
