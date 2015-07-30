@@ -264,10 +264,10 @@ function transcripts_node_file_submit($form, &$form_state) {
             $node = $form_state['node'];
 
             if (transcripts_node_add_transcript($element['#file'], node_load($node->nid))) {
-                drupal_set_message(t("The transcript has been indexed and will be visible after processing."), 'status');
+                drupal_set_message(t("The transcript {$element['#file']->filename} has been indexed and will be visible after processing."), 'status');
                 watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was indexed.', NULL, WATCHDOG_DEBUG);
             } else {
-                drupal_set_message(t("There was an error and your transcript could not be indexed. Please alert the site administrator."), 'error');
+                drupal_set_message(t("There was an error and the transcript {$element['#file']->filename} could not be indexed. Please alert the site administrator."), 'error');
                 watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' could not be indexed.', NULL, WATCHDOG_DEBUG);
             }
         }
