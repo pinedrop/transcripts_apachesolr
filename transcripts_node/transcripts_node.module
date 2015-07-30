@@ -260,6 +260,7 @@ function transcripts_node_file_submit($form, &$form_state) {
     }
     else if ($button_key == 'remove_button') {
         if ($element['#file']) {// && $element['#file']->status == 0) {;
+            watchdog('transcripts_node', 'Form state=' .dprint_r($form_state, TRUE), NULL, WATCHDOG_DEBUG);
             transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $form_state['values']['nid']);
             watchdog('transcripts_node', 'Transcript at node/' .$form_state['values']['nid']. ' was removed.', NULL, WATCHDOG_DEBUG);
         }
