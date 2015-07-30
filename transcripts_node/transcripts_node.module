@@ -296,8 +296,7 @@ function transcripts_node_file_submit($form, &$form_state) {
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
 {
-    watchdog('transcripts_node', 'Triggering parent ' .dprint_r($form_state['triggering_element'], TRUE), NULL, WATCHDOG_DEBUG);
-
+    //watchdog('transcripts_node', 'Triggering parent ' .dprint_r($form_state['triggering_element'], TRUE), NULL, WATCHDOG_DEBUG);
     $trigger = $form_state['triggering_element'];
     $field = $trigger['#parents'][0];
     $language = $trigger['#parents'][1];
