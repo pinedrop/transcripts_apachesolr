@@ -268,7 +268,7 @@ function transcripts_node_file_submit($form, &$form_state)
 
 function transcripts_node_preview_transcript_callback($form, $form_state)
 {
-    watchdog('transcripts_node', $form_state['values']['field_transcript'], NULL, WATCHDOG_INFO);
+    watchdog('transcripts_node', dprint_r($form_state['values']['field_transcript'], TRUE), NULL, WATCHDOG_INFO);
     $file = file_load($form_state['values']['field_transcript']['en'][0]['fid']);
     $node = node_load($form_state['values']['nid']);
     $tcus = transcripts_xslt_as_tcus($file, $node);
