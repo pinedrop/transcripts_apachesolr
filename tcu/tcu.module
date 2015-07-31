@@ -96,6 +96,7 @@ function tcu_save(Tcu $tcu)
 class Tcu extends Entity
 {
     protected $_tiers = array();
+    protected $_speakers = array();
 
     public function __construct($values = array())
     {
