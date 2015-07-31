@@ -59,9 +59,9 @@ function tcu_load_multiple($tcuids = array(), $conditions = array(), $reset = FA
         $speakers = array();
         $result = db_query('SELECT * FROM {tcu_speaker} WHERE tcuid = :tcuid', array(':tcuid' => $tcuid));
         foreach ($result as $record) {
-            $tiers[$record->tier] = $record->value;
+            $speakers[$record->tier] = $record->value;
         }
-        $tcu->setSpeakers($tiers);
+        $tcu->setSpeakers($speakers);
     }
 
     return $tcus;
