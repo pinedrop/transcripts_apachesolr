@@ -213,16 +213,7 @@ function transcripts_node_element_info()
 {
     $elements = array();
     $elements['managed_file']['#process'][] = 'transcripts_node_file_field_process';
-    $elements['managed_file']['#pre_render'][] = 'transcripts_node_file_pre_render';
     return $elements;
-}
-
-function transcripts_node_file_pre_render($element)
-{
-    if (empty($element['#value']['fid']) && isset($element['preview_transcript'])) {
-        $element['preview_transcript']['#access'] = FALSE;
-    }
-    return $element;
 }
 
 function transcripts_node_file_field_process($element, &$form_state, $form)
@@ -230,22 +221,6 @@ function transcripts_node_file_field_process($element, &$form_state, $form)
     if (isset($element['#field_name']) && is_transcript_field($element['#field_name'])) {
         array_unshift($element['upload_button']['#submit'], 'transcripts_node_file_submit');
         array_unshift($element['remove_button']['#submit'], 'transcripts_node_file_submit');
-
-        $element['preview_transcript'] = array(
-            '#type' => 'button',
-            '#value' => t('Preview'),
-            '#ajax' => array(
-                'callback' => 'transcripts_node_preview_transcript_callback',
-                'wrapper' => 'transcripts-preview-transcript',
-                'method' => 'replace',
-            ),
-            '#weight' => 90,
-        );
-        $element['preview_wrapper'] = array(
-            '#type' => 'markup',
-            '#markup' => "<div id='transcripts-preview-transcript'></div>",
-            '#weight' => 91,
-        );
     }
     return $element;
 }
@@ -292,21 +267,4 @@ function transcripts_node_file_submit($form, &$form_state) {
     // However, we choose to always rebuild, to keep the form processing workflow
     // consistent between the two buttons.
     $form_state['rebuild'] = TRUE;
-}
-
-function transcripts_node_preview_transcript_callback($form, $form_state)
-{
-    //watchdog('transcripts_node', 'Triggering parent ' .dprint_r($form_state['triggering_element'], TRUE), NULL, WATCHDOG_DEBUG);
-    $trigger = $form_state['triggering_element'];
-    $field = $trigger['#parents'][0];
-    $language = $trigger['#parents'][1];
-    $index = $trigger['#parents'][2];
-    $file = file_load($form_state['values'][$field][$language][$index]['fid']);
-    $node = node_load($form_state['values']['nid']);
-    $tcus = transcripts_xslt_as_tcus($file, $node);
-    if ($tcus == false) {
-        return "false";
-    } else {
-        return dprint_r($tcus, TRUE);
-    }
 }
