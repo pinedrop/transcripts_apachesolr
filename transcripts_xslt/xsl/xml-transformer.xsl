@@ -4,7 +4,7 @@
 
     <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
 
-    <xsl:param name="script" select="'bod'"/>
+    <xsl:param name="alphabet" select="'bod'"/>
 
     <xsl:template match="/">
         <xsl:apply-templates select="TITLE"/>
@@ -107,12 +107,12 @@
                                           select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
                             <xsl:if test="$bod">
                                 <xsl:choose>
-                                    <xsl:when test="$script = 'bod'">
+                                    <xsl:when test="$alphabet = 'bod'">
                                         <ss_speaker_bod>
                                             <xsl:value-of select="$bod"/>
                                         </ss_speaker_bod>
                                     </xsl:when>
-                                    <xsl:when test="$script = 'dzo'">
+                                    <xsl:when test="$alphabet = 'dzo'">
                                         <ss_speaker_dzo>
                                             <xsl:value-of select="$bod"/>
                                         </ss_speaker_dzo>
@@ -131,12 +131,12 @@
                         <xsl:variable name="bod" select="normalize-space(replace(.,'[^\p{IsTibetan}\s]+',''))"/>
                         <xsl:if test="$bod">
                             <xsl:choose>
-                                <xsl:when test="$script = 'bod'">
+                                <xsl:when test="$alphabet = 'bod'">
                                     <content_bod>
                                         <xsl:value-of select="$bod"/>
                                     </content_bod>
                                 </xsl:when>
-                                <xsl:when test="$script = 'dzo'">
+                                <xsl:when test="$alphabet = 'dzo'">
                                     <dzo_bod>
                                         <xsl:value-of select="$bod"/>
                                     </dzo_bod>
