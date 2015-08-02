@@ -103,13 +103,14 @@
                     <xsl:if test="normalize-space(@speaker)">
                         <xsl:variable name="speaker" select="normalize-space(replace(@speaker, '/', ''))"/>
                         <speakers>
-                            <xsl:variable name="bod" select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
+                            <xsl:variable name="bod"
+                                          select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
                             <xsl:if test="$bod">
                                 <xsl:choose>
                                     <xsl:when test="$script = 'bod'">
-                                <ss_speaker_bod>
-                                    <xsl:value-of select="$bod"/>
-                                </ss_speaker_bod>
+                                        <ss_speaker_bod>
+                                            <xsl:value-of select="$bod"/>
+                                        </ss_speaker_bod>
                                     </xsl:when>
                                     <xsl:when test="$script = 'dzo'">
                                         <ss_speaker_dzo>
