@@ -4,6 +4,8 @@
 
     <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
 
+    <xsl:param name="script" select="'bod'"/>
+
     <xsl:template match="/">
         <xsl:apply-templates select="TITLE"/>
         <!-- QuillDriver -->
@@ -101,12 +103,20 @@
                     <xsl:if test="normalize-space(@speaker)">
                         <xsl:variable name="speaker" select="normalize-space(replace(@speaker, '/', ''))"/>
                         <speakers>
-                            <xsl:variable name="bod"
-                                          select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
+                            <xsl:variable name="bod" select="normalize-space(replace($speaker,'[^\p{IsTibetan}\s]+',''))"/>
                             <xsl:if test="$bod">
+                                <xsl:choose>
+                                    <xsl:when test="$script = 'bod'">
                                 <ss_speaker_bod>
                                     <xsl:value-of select="$bod"/>
                                 </ss_speaker_bod>
+                                    </xsl:when>
+                                    <xsl:when test="$script = 'dzo'">
+                                        <ss_speaker_dzo>
+                                            <xsl:value-of select="$bod"/>
+                                        </ss_speaker_dzo>
+                                    </xsl:when>
+                                </xsl:choose>
                             </xsl:if>
                             <xsl:variable name="eng" select="normalize-space(replace($speaker,'[\p{IsTibetan}]+',''))"/>
                             <xsl:if test="$eng">
@@ -119,9 +129,18 @@
                     <tiers>
                         <xsl:variable name="bod" select="normalize-space(replace(.,'[^\p{IsTibetan}\s]+',''))"/>
                         <xsl:if test="$bod">
-                            <content_bod>
-                                <xsl:value-of select="$bod"/>
-                            </content_bod>
+                            <xsl:choose>
+                                <xsl:when test="$script = 'bod'">
+                                    <content_bod>
+                                        <xsl:value-of select="$bod"/>
+                                    </content_bod>
+                                </xsl:when>
+                                <xsl:when test="$script = 'dzo'">
+                                    <dzo_bod>
+                                        <xsl:value-of select="$bod"/>
+                                    </dzo_bod>
+                                </xsl:when>
+                            </xsl:choose>
                         </xsl:if>
                         <xsl:variable name="eng" select="normalize-space(replace(.,'[\p{IsTibetan}]+',''))"/>
                         <xsl:if test="$eng">
