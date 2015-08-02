@@ -213,7 +213,7 @@ function transcripts_node_element_info()
 {
     $elements = array();
     $elements['managed_file']['#process'][] = 'transcripts_node_file_field_process';
-    $elements['managed_file']['#pre_render'][] = 'transcripts_node_file_pre_render';
+    //$elements['managed_file']['#pre_render'][] = 'transcripts_node_file_pre_render';
     return $elements;
 }
 
