@@ -1,5 +1,10 @@
 <?php
 
+function transcripts_node_file_delete($file) {
+    //remove transcript if file is an orphaned transcript
+    transcripts_apachesolr_remove_transcript('transcripts_node', 'node', 0, $file->fid);
+}
+
 function transcripts_node_node_delete($node)
 {
     $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');

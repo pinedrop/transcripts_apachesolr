@@ -35,15 +35,27 @@ function transcripts_apachesolr_insert_id($module, $type, $id, $fid) {
         ->execute();
 }
 
-function transcripts_apachesolr_remove_transcript($module, $type, $id)
+function transcripts_apachesolr_remove_transcript($module, $type, $id, $fid = NULL)
 {
-    $trids = db_select('transcripts_apachesolr_transcript', 'tr')
-        ->fields('tr', array('trid'))
-        ->condition('module', $module, '=')
-        ->condition('type', $type, '=')
-        ->condition('id', $id, '=')
-        ->execute()
-        ->fetchCol();
+    if ($fid == NULL) {
+        $trids = db_select('transcripts_apachesolr_transcript', 'tr')
+            ->fields('tr', array('trid'))
+            ->condition('module', $module, '=')
+            ->condition('type', $type, '=')
+            ->condition('id', $id, '=')
+            ->execute()
+            ->fetchCol();
+    }
+    else {
+        $trids = db_select('transcripts_apachesolr_transcript', 'tr')
+            ->fields('tr', array('trid'))
+            ->condition('module', $module, '=')
+            ->condition('type', $type, '=')
+            ->condition('id', $id, '=')
+            ->condition('fid', $fid, '=')
+            ->execute()
+            ->fetchCol();
+    }
 
     if (count($trids) > 0) {
         $tcuids = db_select('tcu', 't')
