@@ -74,7 +74,7 @@ function drush_transcripts_apachesolr_transcripts_solr_index()
     }
 }
 
-function drush_transcripts_apachesolr_transcripts_solr_queue($nids)
+function drush_transcripts_apachesolr_transcripts_solr_queue($nids = NULL)
 {
     $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
 
