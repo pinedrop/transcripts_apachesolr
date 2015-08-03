@@ -5,7 +5,7 @@
  */
 
 /**
- * Redirects from transcript/trid/tcuid to custom URL.
+ * Alters parameters sent to the Saxon XSL transformer.
  *
  * @param array &$params
  *   Parameters to send to the stylesheet.
