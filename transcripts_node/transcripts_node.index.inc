@@ -61,13 +61,13 @@ function transcripts_node_node_update($node)
     }
 }
 
-function transcripts_node_add_transcript($file, $node)
+function transcripts_node_add_transcript($file, $nid)
 {
     $tcus = transcripts_xslt_as_tcus($file);
     if ($tcus === false) {
         return false;
     } else {
-        transcripts_apachesolr_add_transcript('transcripts_node', 'node', $file->fid, $node->nid, $tcus);
+        transcripts_apachesolr_add_transcript('transcripts_node', 'node', $file->fid, $nid, $tcus);
         return true;
     }
 }
