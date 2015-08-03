@@ -235,7 +235,7 @@ function transcripts_node_file_submit($form, &$form_state) {
         if ($element['#file']) {
             $nid = isset($form_state['node']->nid) ? $form_state['node']->nid : 0;
 
-            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $nid);
+            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $nid); //prevent multiple uploads without saving node
             if (transcripts_node_add_transcript($element['#file'], $nid)) {
                 drupal_set_message(t("The transcript {$element['#file']->filename} has been indexed and will be visible after processing."), 'status');
                 watchdog('transcripts_node', '[node/%nid] Transcript indexed.', array('%nid' => $nid), WATCHDOG_DEBUG);
