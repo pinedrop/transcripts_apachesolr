@@ -42,9 +42,11 @@ function transcripts_node_node_update($node)
             $field = $node->$field_name;
 
             if (empty($field) || (empty($field[$node->language]) && empty($field['und']))) {
-                //should check to make sure was not empty before update, otherwise no point in removing
-                transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
-                //drupal_set_message("Your transcript has been removed.", 'status');
+                $orig = $node->original->$field_name;
+                if (!(empty($orig) || (empty($orig[$node->language]) && empty($orig['und'])))) {
+                    transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+                    drupal_set_message("Your transcript has been removed.", 'status');
+                }
             } else {
                 $lang = empty($field[$node->language]) ? 'und' : $node->language;
 
