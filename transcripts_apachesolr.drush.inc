@@ -81,6 +81,7 @@ function drush_transcripts_apachesolr_transcripts_solr_queue($nids)
     $result = db_select('transcripts_apachesolr_transcript', 'tr')
         ->fields('tr')
         ->condition('tr.id', 0, '!=')
+        ->condition('tr.status', 1, '=')
         ->execute();
 
     while ($record = $result->fetchAssoc()) {
