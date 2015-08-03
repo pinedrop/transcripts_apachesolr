@@ -33,12 +33,34 @@ function transcripts_apachesolr_drush_command() {
 }
 
 function drush_transcripts_apachesolr_transcripts_solr_index() {
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+
     $result = db_select('transcripts_apachesolr_transcript', 't')
         ->fields('t')
         ->condition('status', 0, '=')
         ->execute();
 
     while ($record = $result->fetchAssoc()) {
-        print_r($record);
+        $node = node_load($record['id']);
+
+        transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+        foreach ($fields as $field_name) {
+            if (isset($node->$field_name)) {
+                $field = $node->$field_name;
+
+                if (!(empty($field) || (empty($field[$node->language]) && empty($field['und'])))) {
+                    $lang = empty($field[$node->language]) ? 'und' : $node->language;
+
+                    $file = file_load($field[$lang][0]['fid']);
+                    transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+                    if (transcripts_node_add_transcript($file, $node->nid)) {
+                        drush_log("[node/{$node->nid}] Indexed {$file->filename}.", 'ok');
+                    }
+                    else {
+                        drush_log("[node/{$node->nid}] FAILED to index {$file->filename}.", 'error');
+                    }
+                }
+            }
+        }
     }
 }
