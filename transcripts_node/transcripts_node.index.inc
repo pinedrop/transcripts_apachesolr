@@ -21,12 +21,8 @@ function transcripts_node_node_insert($node)
                 $lang = empty($field[$node->language]) ? 'und' : $node->language;
 
                 $file = file_load($field[$lang][0]['fid']);
-                if (!transcripts_apachesolr_already_indexed('transcripts_node', 'node', $node->nid, $file->fid)) {
-                    if (transcripts_node_add_transcript($file, node_load($node->nid))) {
-                        watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was uploaded and indexed.', NULL, WATCHDOG_DEBUG);
-                    } else {
-                        watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was uploaded but could not be indexed.', NULL, WATCHDOG_DEBUG);
-                    }
+                if (transcripts_apachesolr_already_indexed('transcripts_node', 'node', 0, $file->fid)) {
+                    transcripts_apachesolr_insert_id('transcripts_node', 'node', $node->nid, $file->fid);
                 }
             }
         }
@@ -67,7 +63,7 @@ function transcripts_node_node_update($node)
 
 function transcripts_node_add_transcript($file, $node)
 {
-    $tcus = transcripts_xslt_as_tcus($file, $node);
+    $tcus = transcripts_xslt_as_tcus($file);
     if ($tcus === false) {
         return false;
     } else {

@@ -35,11 +35,11 @@ function transcripts_xslt_get_transformer($file)
     }
 }
 
-function transcripts_xslt_as_tcus($file, $node)
+function transcripts_xslt_as_tcus($file)
 {
     $transformer = transcripts_xslt_get_transformer($file);
     if (!$transformer) {
-        watchdog('Transcripts XSLT', "[node/%nid] No transformer found.", array('%nid' => $node->nid), WATCHDOG_INFO);
+        watchdog('Transcripts XSLT', "[file/%fid] No transformer found.", array('%fid' => $file->fid), WATCHDOG_INFO);
         return false;
     }
 
@@ -64,15 +64,15 @@ function transcripts_xslt_as_tcus($file, $node)
         $source = $file;
         $it = '';
     }
-    drupal_alter('transcripts_xslt_saxon_params', $params, $node);
+    drupal_alter('transcripts_xslt_saxon_params', $params, $file);
 
     $xsl = drupal_realpath($transformer->uri);
     $xml = transcripts_xslt_saxon_shell_xml($xsl, $source, $it, $params);
     if ($xml === false) {
-        watchdog('Transcripts XSLT', "[node/%nid] Transformation error: invalid XML.", array('%nid' => $node->nid), WATCHDOG_WARNING);
+        watchdog('Transcripts XSLT', "[file/%fid] Transformation error: invalid XML.", array('%fid' => $file->fid), WATCHDOG_WARNING);
         return false;
     } else {
-        watchdog('Transcripts XSLT', "[node/%nid] Transformation successful.", array('%nid' => $node->nid), WATCHDOG_INFO);
+        watchdog('Transcripts XSLT', "[file/%fid] Transformation successful.", array('%fid' => $file->fid), WATCHDOG_INFO);
         return json_decode(json_encode($xml), TRUE);
     }
 }

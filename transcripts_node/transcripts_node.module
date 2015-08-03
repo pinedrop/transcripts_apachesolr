@@ -236,15 +236,14 @@ function transcripts_node_file_submit($form, &$form_state) {
         // but not actually saved to the field. This would be corrected the next time the
         // node is saved.
         if ($element['#file']) {
-            $node = $form_state['node'];
-            watchdog('transcripts_node', dprint_r($node, TRUE), NULL, WATCHDOG_DEBUG);
+            $nid = isset($form_state['node']->nid) ? $form_state['node']->nid : 0;
 
-            if (transcripts_node_add_transcript($element['#file'], node_load($node->nid))) {
+            if (transcripts_node_add_transcript($element['#file'], $nid)) {
                 drupal_set_message(t("The transcript {$element['#file']->filename} has been indexed and will be visible after processing."), 'status');
-                watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was indexed.', NULL, WATCHDOG_DEBUG);
+                watchdog('transcripts_node', 'Transcript at node/' .$nid. ' was indexed.', NULL, WATCHDOG_DEBUG);
             } else {
                 drupal_set_message(t("There was an error and the transcript {$element['#file']->filename} could not be indexed. Please alert the site administrator."), 'error');
-                watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' could not be indexed.', NULL, WATCHDOG_DEBUG);
+                watchdog('transcripts_node', 'Transcript at node/' .$nid. ' could not be indexed.', NULL, WATCHDOG_DEBUG);
             }
         }
     }
@@ -253,11 +252,12 @@ function transcripts_node_file_submit($form, &$form_state) {
         // In this case, the user would need to later save the node, and then the module would
         // detect that it has a transcript which has not been indexed.
         if ($element['#file']) {// && $element['#file']->status == 0) {;
-            $node = $form_state['node'];
-            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+            $nid = isset($form_state['node']->nid) ? $form_state['node']->nid : 0;
+
+            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $nid);
 
             drupal_set_message("The transcript <em>{$element['#file']->filename}</em> has been removed.", 'status');
-            watchdog('transcripts_node', 'Transcript at node/' .$node->nid. ' was removed.', NULL, WATCHDOG_DEBUG);
+            watchdog('transcripts_node', 'Transcript at node/' .$nid. ' was removed.', NULL, WATCHDOG_DEBUG);
         }
     }
 

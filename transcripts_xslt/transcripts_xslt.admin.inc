@@ -16,13 +16,6 @@ function transcripts_xslt_settings_form()
         '#description' => t("Enter the name of the Saxon application jar file, specified as a relative path from the Drupal root (e.g. sites/all/libraries/saxon/saxon9he.jar)."),
         '#default_value' => variable_get('transcripts_xslt_saxon_jar', 'sites/all/libraries/saxon/saxon9he.jar'),
     );
-    /*$form['transcripts_xslt_settings']['transcripts_xslt_saxon_ce'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Saxon-CE'),
-        '#size' => 100,
-        '#description' => t("Enter the Saxon-CE directory, specified as a relative path from the Drupal root (e.g. sites/all/libraries/saxon/ce/SaxonceDebug)."),
-        '#default_value' => variable_get('transcripts_xslt_saxon_ce', 'sites/all/libraries/saxon/ce/SaxonceDebug'),
-    );*/
     $form['transcripts_xslt_settings']['transcripts_xslt_xml_transformer'] = array(
         '#type' => 'managed_file',
         '#title' => 'XML transformer',

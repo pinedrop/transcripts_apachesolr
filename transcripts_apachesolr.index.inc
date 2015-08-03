@@ -26,6 +26,15 @@ function transcripts_apachesolr_already_indexed_trid($module, $type, $id, $fid =
     }
 }
 
+function transcripts_apachesolr_insert_id($module, $type, $id, $fid) {
+    db_update('transcripts_apachesolr_transcript')
+        ->fields(array('id' => $id))
+        ->condition('module', $module)
+        ->condition('type', $type)
+        ->condition('fid', $fid)
+        ->execute();
+}
+
 function transcripts_apachesolr_remove_transcript($module, $type, $id)
 {
     $trids = db_select('transcripts_apachesolr_transcript', 'tr')
