@@ -51,7 +51,7 @@ function transcripts_xslt_as_tcus($file)
         $filepath = drupal_realpath($file->uri);
         // Check that we have a valid filepath.
         if (!$filepath || !is_file($filepath)) {
-            watchdog('Transcripts XSLT', '%filepath is not a valid file path', array('%filepath' => $file->uri), WATCHDOG_WARNING);
+            watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $file->fid, '%filepath' => $file->uri), WATCHDOG_WARNING);
             return false;
         }
         $params['file'] = $filepath;
@@ -69,7 +69,7 @@ function transcripts_xslt_as_tcus($file)
     $xsl = drupal_realpath($transformer->uri);
     $xml = transcripts_xslt_saxon_shell_xml($xsl, $source, $it, $params);
     if ($xml === false) {
-        watchdog('Transcripts XSLT', "[file/%fid] Transformation error: invalid XML.", array('%fid' => $file->fid), WATCHDOG_WARNING);
+        watchdog('Transcripts XSLT', "[file/%fid] Transformation error - invalid XML.", array('%fid' => $file->fid), WATCHDOG_WARNING);
         return false;
     } else {
         watchdog('Transcripts XSLT', "[file/%fid] Transformation successful.", array('%fid' => $file->fid), WATCHDOG_INFO);
@@ -94,7 +94,7 @@ function transcripts_xslt_saxon_shell($xsl, $source = '', $it = '', $params = ar
         $filepath = drupal_realpath($source->uri);
         // Check that we have a valid filepath.
         if (!$filepath || !is_file($filepath)) {
-            watchdog('Transcripts XSLT', '%filepath is not a valid file path', array('%filepath' => $source->uri), WATCHDOG_WARNING);
+            watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $source->fid, '%filepath' => $source->uri), WATCHDOG_WARNING);
             return FALSE;
         }
         // Support UTF-8 encoded filenames.
