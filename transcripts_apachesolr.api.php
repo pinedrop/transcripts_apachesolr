@@ -23,3 +23,19 @@ function hook_transcripts_apachesolr_redirect($transcript, $fragment = NULL)
         drupal_goto($path, array('fragment' => $fragment));
     }
 }
+
+/**
+ * This is invoked for each entity that is being inspected to be added to the
+ * index. if any module returns TRUE, the entity is skipped for indexing.
+ *
+ * @param object $file
+ * @param object $node
+ * @return boolean
+ */
+function hook_transcripts_apachesolr_queue_exclude($file, $node) {
+    // Never index media entities to core_1
+    if ($node->type == 'audio') {
+        return TRUE;
+    }
+    return FALSE;
+}
