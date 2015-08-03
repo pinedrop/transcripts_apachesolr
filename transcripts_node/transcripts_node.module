@@ -237,6 +237,7 @@ function transcripts_node_file_submit($form, &$form_state) {
         // node is saved.
         if ($element['#file']) {
             $node = $form_state['node'];
+            watchdog('transcripts_node', dprint_r($node, TRUE), NULL, WATCHDOG_DEBUG);
 
             if (transcripts_node_add_transcript($element['#file'], node_load($node->nid))) {
                 drupal_set_message(t("The transcript {$element['#file']->filename} has been indexed and will be visible after processing."), 'status');
