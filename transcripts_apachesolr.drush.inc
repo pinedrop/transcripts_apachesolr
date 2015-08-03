@@ -31,3 +31,14 @@ function transcripts_apachesolr_drush_command() {
     );
     return $items;
 }
+
+function drush_transcripts_apachesolr_transcripts_solr_index() {
+    $result = db_select('transcripts_apachesolr_transcript', 't')
+        ->fields('t')
+        ->condition('status', 0, '=')
+        ->execute();
+
+    while ($record = $result->fetchAssoc()) {
+        print_r($record);
+    }
+}
