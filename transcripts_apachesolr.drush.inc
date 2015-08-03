@@ -74,15 +74,21 @@ function drush_transcripts_apachesolr_transcripts_solr_index()
     }
 }
 
-function drush_transcripts_apachesolr_transcripts_solr_queue($nids = NULL)
+function drush_transcripts_apachesolr_transcripts_solr_queue($nids = '')
 {
     $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
 
-    $result = db_select('transcripts_apachesolr_transcript', 'tr')
+    $query = db_select('transcripts_apachesolr_transcript', 'tr')
         ->fields('tr')
-        ->condition('tr.id', 0, '!=')
-        ->condition('tr.status', 1, '=')
-        ->execute();
+        ->condition('tr.status', 1, '=');
+
+    if ($nids) {
+        $query->condition('tr.id', explode('+', $nids), 'IN');
+    }
+    else {
+        $query->condition('tr.id', 0, '!=');
+    }
+    $result = $query->execute();
 
     while ($record = $result->fetchAssoc()) {
         $node = node_load($record['id']);
