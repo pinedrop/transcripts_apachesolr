@@ -8,3 +8,4 @@ package = Pinedrop Transcripts
 core = 7.x
 files[] = transcripts_apachesolr.module
 files[] = transcripts_apachesolr.install
+files[] = transcripts_apachesolr.drush.inc

@@ -5,7 +5,7 @@
     <xml:output method="xml" encoding="UTF-8" indent="yes"/>
 
     <xsl:param name="file" select="'Even_Top09_Golikova_Slepcov-Conversation.txt'"/>
-    <xsl:param name="tcuData" select="'ELANBegin|start, ELANEnd|end, ELANParticipant|speaker'"/>
+    <xsl:param name="tcuData" select="'ELANBegin|start, ELANEnd|end, ELANParticipant|speakers'"/>
     <xsl:param name="tierNames"
                select="'tx|ts_content_even, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_eng, ru|ts_content_rus'"/>
 
@@ -44,9 +44,18 @@
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:if test="not($meta='')">
-                                            <xsl:element name="{$cat}">
-                                                <xsl:value-of select="$meta"/>
-                                            </xsl:element>
+                                            <xsl:choose>
+                                                <xsl:when test="$cat='speakers'">
+                                                    <speakers>
+                                                        <ss_speaker><xsl:value-of select="$meta"/></ss_speaker>
+                                                    </speakers>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:element name="{$cat}">
+                                                        <xsl:value-of select="$meta"/>
+                                                    </xsl:element>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
                                         </xsl:if>
                                     </xsl:otherwise>
                                 </xsl:choose>

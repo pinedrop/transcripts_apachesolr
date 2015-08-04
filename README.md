@@ -5,5 +5,4 @@ Connector for transcripts_ui and apachesolr modules
 
 Documentation forthcoming
 
-[20 July 2015]
-
+4 August, 2015

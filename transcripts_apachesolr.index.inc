@@ -26,15 +26,36 @@ function transcripts_apachesolr_already_indexed_trid($module, $type, $id, $fid =
     }
 }
 
-function transcripts_apachesolr_remove_transcript($module, $type, $id)
+function transcripts_apachesolr_insert_id($module, $type, $id, $fid) {
+    db_update('transcripts_apachesolr_transcript')
+        ->fields(array('id' => $id))
+        ->condition('module', $module)
+        ->condition('type', $type)
+        ->condition('fid', $fid)
+        ->execute();
+}
+
+function transcripts_apachesolr_remove_transcript($module, $type, $id, $fid = NULL)
 {
-    $trids = db_select('transcripts_apachesolr_transcript', 'tr')
-        ->fields('tr', array('trid'))
-        ->condition('module', $module, '=')
-        ->condition('type', $type, '=')
-        ->condition('id', $id, '=')
-        ->execute()
-        ->fetchCol();
+    if ($fid == NULL) {
+        $trids = db_select('transcripts_apachesolr_transcript', 'tr')
+            ->fields('tr', array('trid'))
+            ->condition('module', $module, '=')
+            ->condition('type', $type, '=')
+            ->condition('id', $id, '=')
+            ->execute()
+            ->fetchCol();
+    }
+    else {
+        $trids = db_select('transcripts_apachesolr_transcript', 'tr')
+            ->fields('tr', array('trid'))
+            ->condition('module', $module, '=')
+            ->condition('type', $type, '=')
+            ->condition('id', $id, '=')
+            ->condition('fid', $fid, '=')
+            ->execute()
+            ->fetchCol();
+    }
 
     if (count($trids) > 0) {
         $tcuids = db_select('tcu', 't')
@@ -83,13 +104,17 @@ function transcripts_apachesolr_insert_tcu($trid, $tcu)
     $insert = tcu_create(
         array(
             'trid' => $trid,
-            'speaker' => isset($tcu['speaker']) ? $tcu['speaker'] : '',
             'start' => isset($tcu['start']) ? $tcu['start'] : 0,
             'end' => isset($tcu['end']) ? $tcu['end'] : 0,
             'created' => REQUEST_TIME,
             'changed' => REQUEST_TIME,
         )
     );
-    $insert->setTiers(array_filter(array_map('trim', $tcu['tiers']))); //don't save empty tiers
+    if (isset($tcu['speakers'])) {
+        $insert->setSpeakers(array_filter(array_map('trim', $tcu['speakers']))); //don't save empty speaker tiers
+    }
+    if (isset($tcu['tiers'])) {
+        $insert->setTiers(array_filter(array_map('trim', $tcu['tiers']))); //don't save empty tiers
+    }
     tcu_save($insert);
 }

@@ -5,31 +5,9 @@ function transcripts_node_init()
     module_load_include('inc', 'transcripts_node', 'transcripts_node.index');
 }
 
-function transcripts_node_default_file_extensions()
-{
-    $default = array('eaf', 'trs', 'xml');
-    return $default;
-}
-
-function transcripts_node_check_extension($ext)
-{
-    $default = implode(' ', transcripts_node_default_file_extensions());
-    return in_array($ext, explode(' ', variable_get('transcripts_node_file_extensions', $default)));
-}
-
 function transcripts_node_menu()
 {
     $items = array();
-
-    $items['admin/config/user-interface/transcripts/transcripts_node'] = array(
-        'title' => 'Transcripts Node',
-        'description' => t('Transcripts Node settings'),
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('transcripts_node_site_settings_form'),
-        'access arguments' => array('administer transcripts'),
-        'file' => 'transcripts_node.admin.inc',
-        'type' => MENU_LOCAL_TASK,
-    );
     $items['node/%/transcript'] = array(
         'title' => 'Transcript',
         'page callback' => 'transcripts_node_get_player',
@@ -39,7 +17,6 @@ function transcripts_node_menu()
         'type' => MENU_CALLBACK,
         'weight' => 80,
     );
-
     return $items;
 }
 
@@ -93,13 +70,10 @@ function transcripts_node_transcript_access($nid)
 
 function transcripts_node_has_transcript($node)
 {
-    //first check node type
-    if (in_array($node->type, array_filter(variable_get('transcripts_node_node', array())))) {
-        $fields = transcripts_node_all_file_fields();
-        foreach ($fields as $field) {
-            if (!empty($node->$field) && is_transcript_field($field)) {
-                return true;
-            }
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+    foreach ($fields as $field) {
+        if (!empty($node->$field)) {
+            return true;
         }
     }
     return false;
@@ -171,7 +145,7 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
             break;
 
         case 'transcripts_html5_video':
-            list($nid,,) = entity_extract_ids($entity_type, $entity);
+            list($nid, ,) = entity_extract_ids($entity_type, $entity);
             $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
             if ($trid) {
                 $urls = array();
@@ -184,8 +158,7 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
 
                 if ($entity->type == 'audio') {
                     $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_audio', $vars));
-                }
-                else if ($entity->type == 'video') {
+                } else if ($entity->type == 'video') {
                     $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_video', $vars));
                 }
 
@@ -231,4 +204,63 @@ function transcripts_node_form_submit($form, &$form_state)
     $transcript_fields = variable_get('transcripts_transcript_fields', array());
     $transcript_fields[$field_name] = $is_transcript;
     variable_set('transcripts_transcript_fields', $transcript_fields);
+}
+
+/**
+ * Implements hook_element_info().
+ */
+function transcripts_node_element_info()
+{
+    $elements = array();
+    $elements['managed_file']['#process'][] = 'transcripts_node_file_field_process';
+    return $elements;
+}
+
+function transcripts_node_file_field_process($element, &$form_state, $form)
+{
+    if (isset($element['#field_name']) && is_transcript_field($element['#field_name'])) {
+        array_unshift($element['upload_button']['#submit'], 'transcripts_node_file_submit');
+        array_unshift($element['remove_button']['#submit'], 'transcripts_node_file_submit');
+    }
+    return $element;
+}
+
+function transcripts_node_file_submit($form, &$form_state) {
+    $parents = $form_state['triggering_element']['#array_parents'];
+    $button_key = array_pop($parents);
+    $element = drupal_array_get_nested_value($form, $parents);
+
+    if ($button_key == 'upload_button') {
+        // Transcripts are added even if the operation is canceled by not saving the node.
+        if ($element['#file']) {
+            $nid = isset($form_state['node']->nid) ? $form_state['node']->nid : 0;
+
+            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $nid); //prevent multiple uploads without saving node
+            if (transcripts_node_add_transcript($element['#file'], $nid)) {
+                drupal_set_message(t("The transcript {$element['#file']->filename} has been indexed and will be visible after processing."), 'status');
+                watchdog('transcripts_node', '[node/%nid] Transcript indexed.', array('%nid' => $nid), WATCHDOG_DEBUG);
+            } else {
+                drupal_set_message(t("There was an error and the transcript {$element['#file']->filename} could not be indexed. Please alert the site administrator."), 'error');
+                watchdog('transcripts_node', '[node/%nid] Transcript could not be indexed.', array('%nid' => $nid), WATCHDOG_DEBUG);
+            }
+        }
+    }
+    else if ($button_key == 'remove_button') {
+        // Transcripts are removed even if the operation is canceled by not saving the node.
+        if ($element['#file']) {
+            $nid = isset($form_state['node']->nid) ? $form_state['node']->nid : 0;
+            $fid = $nid == 0 ? $element['#file']->fid : NULL; //delete all pre-existing transcripts if multiple
+            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $nid, $fid);
+            drupal_set_message("The transcript <em>{$element['#file']->filename}</em> has been removed.", 'status');
+            watchdog('transcripts_node', '[node/%nid] Transcript removed.', array('%nid' => $nid), WATCHDOG_DEBUG);
+        }
+    }
+
+    // Set the form to rebuild so that $form is correctly updated in response to
+    // processing the file removal. Since this function did not change $form_state
+    // if the upload button was clicked, a rebuild isn't necessary in that
+    // situation and setting $form_state['redirect'] to FALSE would suffice.
+    // However, we choose to always rebuild, to keep the form processing workflow
+    // consistent between the two buttons.
+    $form_state['rebuild'] = TRUE;
 }
