@@ -15,7 +15,7 @@ function transcripts_apachesolr_configuration_form($form, &$form_state)
     );
     $form['action']['queue_nids'] = array(
         '#type' => 'textarea',
-        '#description' => t('If you only wish to queue some transcripts, enter them here, separated by the plus sign. For example: 185, or 185+240.'),
+        '#description' => t('If you only wish to queue some transcripts, enter their node ids here, separated by the plus sign. For example: 185, or 185+240.'),
     );
     $form['action']['queue'] = array(
         '#prefix' => '<div>',
