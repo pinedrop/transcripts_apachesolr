@@ -76,51 +76,5 @@ function drush_transcripts_apachesolr_transcripts_solr_index()
 
 function drush_transcripts_apachesolr_transcripts_solr_queue($nids = '')
 {
-    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
-
-    $query = db_select('transcripts_apachesolr_transcript', 'tr')
-        ->fields('tr')
-        ->condition('tr.status', 1, '=');
-
-    if ($nids) {
-        $query->condition('tr.id', explode('+', $nids), 'IN');
-    }
-    else {
-        $query->condition('tr.id', 0, '!=');
-    }
-    $result = $query->execute();
-
-    while ($record = $result->fetchAssoc()) {
-        $node = node_load($record['id']);
-
-        foreach ($fields as $field_name) {
-            if (isset($node->$field_name)) {
-                $field = $node->$field_name;
-
-                if (!(empty($field) || (empty($field[$node->language]) && empty($field['und'])))) {
-                    $lang = empty($field[$node->language]) ? 'und' : $node->language;
-
-                    $file = file_load($field[$lang][0]['fid']);
-
-                    $reindex = TRUE;
-                    foreach (module_implements('transcripts_apachesolr_queue_exclude') as $module) {
-                        $exclude = module_invoke($module, 'transcripts_apachesolr_queue_exclude', $file, $node);
-                        // If the hook returns TRUE we should exclude the node
-                        if (!empty($exclude)) {
-                            $reindex = FALSE;
-                        }
-                    }
-
-                    if ($reindex) {
-                        db_update('transcripts_apachesolr_transcript')
-                            ->fields(array('status' => 0))
-                            ->condition('module', 'transcripts_node', '=')
-                            ->condition('type', 'node', '=')
-                            ->condition('id', $node->nid, '=')
-                            ->execute();
-                    }
-                }
-            }
-        }
-    }
+    transcripts_apachesolr_queue_transcripts($nids);
 }
