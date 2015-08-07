@@ -79,21 +79,24 @@ function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form,
 
 function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form, array &$form_state, $nids = '')
 {
-    $limit = $nids == '' ? 'ALL' : str_replace(' ', '+', trim($nids));
+    $message = $nids == '' ? t('All transcripts will be reindexed. ') : t('Transcripts from these nodes will be reindexed: ' .str_replace(' ', '+', trim($nids)). '. ';
 
     return confirm_form($form,
         t('Are you sure you want to queue transcripts for reindexing?'),
         'admin/config/user-interface/transcripts/apachesolr',
-        t('Transcripts from the following nodes will be reindexed: ') .$limit. t('. Any changes in the transcript index will be overwritten.'),
-        t('Queue transcripts')
+        $message. t('. Any changes in the transcript index will be overwritten.'),
+        t('Queue transcripts'),
     );
 }
 
 function transcripts_apachesolr_index_transcripts_form_queue_confirm_submit(array $form, array &$form_state)
 {
-    watchdog('transcripts_apachesolr', 'Form confirm submit = '.dprint_r($form, TRUE), NULL, WATCHDOG_DEBUG);
-    watchdog('transcripts_apachesolr', 'Form state confirm submit = '.dprint_r($form_state, TRUE), NULL, WATCHDOG_DEBUG);
+    if (empty($form_state['build_info']['args'])) { //queue all transcripts
+        transcripts_apachesolr_queue_transcripts();
+    }
+    else { //queue selected transcripts
+        transcripts_apachesolr_queue_transcripts(str_replace(' ', '+', trim($form_state['build_info']['args'][0])));
+    }
     $form_state['redirect'] = 'admin/config/user-interface/transcripts/apachesolr';
-    transcripts_apachesolr_queue_transcripts(trim($form_state['values']['queue_nids']));
     drupal_set_message(t('Transcripts queued for re-indexing. You must now index these transcripts.'));
 }
