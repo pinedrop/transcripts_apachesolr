@@ -138,7 +138,7 @@ function transcripts_apachesolr_index_transcripts_form_index_confirm_submit(arra
         'operations' => array(),
         'finished' => 'transcripts_apachesolr_index_queued_transcripts_finished',
         'title' => t('Index queued transcripts'),
-        'init_message' => t('Indexing...'),
+        'init_message' => t('Indexing'),
         'progress_message' => t('Indexed @current out of @total.'),
         'error_message' => t('Indexing has encountered an error.')
     );
@@ -147,14 +147,4 @@ function transcripts_apachesolr_index_transcripts_form_index_confirm_submit(arra
         $batch['operations'][] = array('transcripts_apachesolr_index_one_transcript', array($node));
     }
     batch_set($batch);
-}
-
-function transcripts_apachesolr_index_queued_transcripts_finished($success, $results, $operations)
-{
-    if ($success) {
-        drupal_set_message(t('Indexed @count transcripts.', array('@count' => count($results))));
-    } else {
-        $error_operation = reset($operations);
-        drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
-    }
 }

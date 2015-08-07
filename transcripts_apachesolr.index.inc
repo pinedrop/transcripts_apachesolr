@@ -173,7 +173,7 @@ function transcripts_apachesolr_queue_transcripts($nids = '')
 function transcripts_apachesolr_index_one_transcript($node, &$context)
 {
     $context['results'][] = $node->nid . ' : ' . check_plain($node->title);
-    $context['message'] = t('[node/@nid] Indexing transcript...', array('@nid' => $node->nid));
+    $context['message'] = t('[node/@nid] Indexing transcript', array('@nid' => $node->nid));
 
     $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
     foreach ($fields as $field_name) {
@@ -198,5 +198,15 @@ function transcripts_apachesolr_index_one_transcript($node, &$context)
                 }
             }
         }
+    }
+}
+
+function transcripts_apachesolr_index_queued_transcripts_finished($success, $results, $operations)
+{
+    if ($success) {
+        drupal_set_message(t('Indexed @count transcripts.', array('@count' => count($results))));
+    } else {
+        $error_operation = reset($operations);
+        drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
     }
 }
