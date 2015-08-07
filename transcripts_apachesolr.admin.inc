@@ -85,7 +85,7 @@ function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form
         t('Are you sure you want to queue transcripts for reindexing?'),
         'admin/config/user-interface/transcripts/apachesolr',
         $message. t('. Any changes in the transcript index will be overwritten.'),
-        t('Queue transcripts'),
+        t('Queue transcripts')
     );
 }
 
