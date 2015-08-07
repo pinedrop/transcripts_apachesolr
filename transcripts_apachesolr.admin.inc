@@ -16,8 +16,21 @@ function transcripts_apachesolr_admin()
         '#description' => t('Select the Apache Solr search environment that this module will use to index time code units.'),
         '#weight' => -30,
     );
+    $form['save_configuration'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save configuration'),
+        '#submit' => 'transcripts_apachesolr_save_configuration',
+    );
 
-    return system_settings_form($form) . drupal_get_form('transcripts_apachesolr_index_transcripts_form');
+    $form['index_transcripts'] = drupal_get_form('transcripts_apachesolr_index_transcripts_form');
+
+    return $form;
+}
+
+function _mymod_form_submit(&$form_state)
+{
+    variable_set('transcripts_apachesolr_env_id', $form_state['values']['transcripts_apachesolr_env_id']);
+    drupal_set_message(t('Your configuration has been saved.'));
 }
 
 function transcripts_apachesolr_index_transcripts_form(array $form, array $form_state)
@@ -48,11 +61,6 @@ function transcripts_apachesolr_index_transcripts_form(array $form, array $form_
     );
 
     return $form;
-}
-
-function transcripts_apachesolr_index_transcripts_form_index_submit(array $form, array &$form_state)
-{
-
 }
 
 function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form, array &$form_state)
