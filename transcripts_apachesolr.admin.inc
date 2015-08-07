@@ -42,7 +42,7 @@ function transcripts_apachesolr_admin()
     $form['save_configuration'] = array(
         '#type' => 'submit',
         '#value' => t('Save configuration'),
-        '#submit' => 'transcripts_apachesolr_save_configuration',
+        '#submit' => array('transcripts_apachesolr_save_configuration'),
     );
 
     return $form;
