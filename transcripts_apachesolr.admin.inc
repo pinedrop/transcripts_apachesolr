@@ -135,6 +135,7 @@ function transcripts_apachesolr_index_transcripts_form_index_confirm_submit(arra
         ->execute();
 
     $batch = array(
+        'file' => drupal_get_path('module', 'transcripts_apachesolr') . '/transcripts_apachesolr.index.inc',
         'operations' => array(),
         'finished' => 'transcripts_apachesolr_index_queued_transcripts_finished',
         'title' => t('Index queued transcripts'),
