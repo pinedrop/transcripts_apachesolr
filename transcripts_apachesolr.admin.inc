@@ -134,16 +134,19 @@ function transcripts_apachesolr_index_transcripts_form_index_confirm_submit(arra
         ->condition('tr.status', 0, '=')
         ->execute();
 
-    $operations = array();
+    $batch = array(
+        'operations' => array(),
+        'finished' => 'transcripts_apachesolr_index_queued_transcripts_finished',
+        'title' => t('Index queued transcripts'),
+        'init_message' => t('Indexing...'),
+        'progress_message' => t('Indexed @current out of @total.'),
+        'error_message' => t('Indexing has encountered an error.')
+    );
     while ($record = $result->fetchAssoc()) {
         $node = node_load($record['id']);
-        $operations[] = array('transcripts_apachesolr_index_one_transcript', array($node));
+        $batch['operations'][] = array('transcripts_apachesolr_index_one_transcript', array($node));
     }
-
-    batch_set(array(
-        'operations' => $operations,
-        'finished' => 'transcripts_apachesolr_index_queued_transcripts_finished',
-    ));
+    batch_set($batch);
 }
 
 function transcripts_apachesolr_index_one_transcript($node, &$context)
