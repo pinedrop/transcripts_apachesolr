@@ -70,19 +70,20 @@ function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form,
         $destination = drupal_get_destination();
         unset($_GET['destination']);
     }
-    $form_state['redirect'] = array('admin/config/user-interface/transcripts/apachesolr/queue', array('query' => $destination));
+    $red = 'admin/config/user-interface/transcripts/apachesolr/queue';
+    $red .= isset($form_state['values']['queue_nids']) ? '/'.$form_state['values']['queue_nids'] : '';
+    $form_state['redirect'] = array($red, array('query' => $destination));
 }
 
 
-function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form, array &$form_state)
+function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form, array &$form_state, $nids = '')
 {
-    $qnids = trim($form_state['values']['queue_nids']);
-    $limit = $qnids == '' ? 'ALL' : $qnids;
+    $limit = $nids == '' ? 'ALL' : trim($nids);
 
     return confirm_form($form,
         t('Are you sure you want to queue transcripts for reindexing?'),
         'admin/config/user-interface/transcripts/apachesolr',
-        t('Transcripts from the following nodes will be reindexed: ') .$qnids. t('. Any changes in the transcript index will be overwritten.'),
+        t('Transcripts from the following nodes will be reindexed: ') .$nids. t('. Any changes in the transcript index will be overwritten.'),
         t('Queue transcripts')
     );
 }
