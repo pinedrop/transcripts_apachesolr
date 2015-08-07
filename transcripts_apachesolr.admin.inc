@@ -51,7 +51,7 @@ function transcripts_apachesolr_configuration_form($form, &$form_state)
     return $form;
 }
 
-function transcripts_apachesolr_configuration_form_submit(&$form_state)
+function transcripts_apachesolr_configuration_form_submit($form, &$form_state)
 {
     if (isset($form_state['values']['transcripts_apachesolr_env_id'])) {
         variable_set('transcripts_apachesolr_env_id', $form_state['values']['transcripts_apachesolr_env_id']);
