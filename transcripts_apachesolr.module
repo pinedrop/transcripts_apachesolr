@@ -359,6 +359,14 @@ function transcripts_apachesolr_menu()
         'access arguments'   => array('administer transcripts'),
         'type'               => MENU_CALLBACK,
     );
+    $items['admin/config/user-interface/transcripts/apachesolr/index'] = array(
+        'title'              => 'Index transcripts',
+        'page callback'      => 'drupal_get_form',
+        'page arguments'     => array('transcripts_apachesolr_index_transcripts_form_index_confirm'),
+        'file'               => 'transcripts_apachesolr.admin.inc',
+        'access arguments'   => array('administer transcripts'),
+        'type'               => MENU_CALLBACK,
+    );
 
     $items['transcript/%'] = array(
         'page callback' => 'transcripts_apachesolr_redirect',

@@ -24,17 +24,17 @@ function transcripts_apachesolr_configuration_form($form, &$form_state)
         '#value' => t('Queue transcripts'),
         '#submit' => array('transcripts_apachesolr_index_transcripts_form_queue_submit'),
     );
-    /*$form['action']['index'] = array(
+    $form['action']['index'] = array(
         '#prefix' => '<div>',
         '#type' => 'submit',
-        '#value' => t('Re-index all queued content'),
+        '#value' => t('Index queued transcripts'),
         '#submit' => array('transcripts_apachesolr_index_transcripts_form_index_submit'),
     );
     $form['action']['index_description'] = array(
         '#prefix' => '<span>',
         '#suffix' => '</span></div>',
-        '#markup' => t('Could take time and could put an increased load on your server.'),
-    );*/
+        '#markup' => t('This could take time and could put an increased load on your server.'),
+    );
 
     $environments = apachesolr_load_all_environments();
     foreach ($environments as $id => $environment) {
@@ -67,7 +67,7 @@ function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form,
 {
     $redirect = 'admin/config/user-interface/transcripts/apachesolr/queue';
     if (isset($form_state['input']['queue_nids'])) {
-        $redirect .= "/".check_plain($form_state['input']['queue_nids']);
+        $redirect .= "/" . check_plain($form_state['input']['queue_nids']);
     }
 
     $destination = array();
@@ -81,12 +81,12 @@ function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form,
 
 function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form, array &$form_state, $nids = '')
 {
-    $message = $nids == '' ? t('All transcripts will be reindexed. ') : t('Transcripts from these nodes will be reindexed: ') .str_replace(' ', '+', trim($nids)). '. ';
+    $message = $nids == '' ? t('All transcripts will be reindexed. ') : t('Transcripts from these nodes will be reindexed: ') . str_replace(' ', '+', trim($nids)) . '. ';
 
     return confirm_form($form,
         t('Are you sure you want to queue transcripts for reindexing?'),
         'admin/config/user-interface/transcripts/apachesolr',
-        $message. t('Any changes in the transcript index will be overwritten.'),
+        $message . t('Any changes in the transcript index will be overwritten.'),
         t('Queue transcripts')
     );
 }
@@ -95,10 +95,90 @@ function transcripts_apachesolr_index_transcripts_form_queue_confirm_submit(arra
 {
     if (empty($form_state['build_info']['args'])) { //queue all transcripts
         transcripts_apachesolr_queue_transcripts();
-    }
-    else { //queue selected transcripts
+    } else { //queue selected transcripts
         transcripts_apachesolr_queue_transcripts(str_replace(' ', '+', trim($form_state['build_info']['args'][0])));
     }
     $form_state['redirect'] = 'admin/config/user-interface/transcripts/apachesolr';
     drupal_set_message(t('Transcripts queued for re-indexing. You must now index these transcripts.'));
+}
+
+function transcripts_apachesolr_index_transcripts_form_index_confirm(array $form, array &$form_state)
+{
+    return confirm_form($form,
+        t('Are you sure you want index the queued transcripts?'),
+        'admin/config/user-interface/transcripts/apachesolr',
+        NULL,
+        t('Index transcripts')
+    );
+}
+
+function transcripts_apachesolr_index_transcripts_form_index_confirm_submit(array $form, array &$form_state)
+{
+    $form_state['redirect'] = 'admin/config/user-interface/transcripts/apachesolr';
+    batch_set(transcripts_apachesolr_index_queued_transcripts());
+}
+
+function transcripts_apachesolr_index_queued_transcripts()
+{
+    drupal_set_message('Indexing queued transcripts...');
+
+    $result = db_select('transcripts_apachesolr_transcript', 'tr')
+        ->fields('tr')
+        ->condition('tr.id', 0, '!=')
+        ->condition('tr.status', 0, '=')
+        ->execute();
+
+    $operations = array();
+    while ($record = $result->fetchAssoc()) {
+        $node = node_load($record['id']);
+        $operations[] = array('transcripts_apachesolr_index_one_transcript', array($node));
+    }
+
+    $batch = array(
+        'operations' => $operations,
+        'finished' => 'transcripts_apachesolr_index_queued_transcripts_finished',
+    );
+
+    return $batch;
+}
+
+function transcripts_apachesolr_index_one_transcript($node, &$context)
+{
+    $context['results'][] = $node->nid . ' : ' . check_plain($node->title);
+    $context['message'] = t('[node/@nid] Indexing transcript...', array('@nid' => $node->nid));
+
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+    foreach ($fields as $field_name) {
+        if (isset($node->$field_name)) {
+            $field = $node->$field_name;
+
+            if (!(empty($field) || (empty($field[$node->language]) && empty($field['und'])))) {
+                $lang = empty($field[$node->language]) ? 'und' : $node->language;
+
+                $file = file_load($field[$lang][0]['fid']);
+                transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+                if (transcripts_node_add_transcript($file, $node->nid)) {
+                    drupal_set_message("[node/{$node->nid}] Indexed {$file->filename}");
+                    db_update('transcripts_apachesolr_transcript')
+                        ->fields(array('status' => 1))
+                        ->condition('module', 'transcripts_node', '=')
+                        ->condition('type', 'node', '=')
+                        ->condition('id', $node->nid, '=')
+                        ->execute();
+                } else {
+                    drupal_set_message("[node/{$node->nid}] FAILED to index {$file->filename}", 'error');
+                }
+            }
+        }
+    }
+}
+
+function transcripts_apachesolr_index_queued_transcripts_finished($success, $results, $operations)
+{
+    if ($success) {
+        drupal_set_message(t('Indexed @count transcripts.', array('@count' => count($results))));
+    } else {
+        $error_operation = reset($operations);
+        drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+    }
 }
