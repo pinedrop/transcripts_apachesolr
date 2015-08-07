@@ -79,7 +79,7 @@ function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form,
 
 function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form, array &$form_state, $nids = '')
 {
-    $limit = $nids == '' ? 'ALL' : replace(' ', '+', trim($nids));
+    $limit = $nids == '' ? 'ALL' : str_replace(' ', '+', trim($nids));
 
     return confirm_form($form,
         t('Are you sure you want to queue transcripts for reindexing?'),
