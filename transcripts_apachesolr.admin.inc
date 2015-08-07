@@ -127,12 +127,6 @@ function transcripts_apachesolr_index_transcripts_form_index_confirm(array $form
 function transcripts_apachesolr_index_transcripts_form_index_confirm_submit(array $form, array &$form_state)
 {
     $form_state['redirect'] = 'admin/config/user-interface/transcripts/apachesolr';
-    batch_set(transcripts_apachesolr_index_queued_transcripts());
-}
-
-function transcripts_apachesolr_index_queued_transcripts()
-{
-    drupal_set_message('Indexing queued transcripts...');
 
     $result = db_select('transcripts_apachesolr_transcript', 'tr')
         ->fields('tr')
@@ -146,12 +140,10 @@ function transcripts_apachesolr_index_queued_transcripts()
         $operations[] = array('transcripts_apachesolr_index_one_transcript', array($node));
     }
 
-    $batch = array(
+    batch_set(array(
         'operations' => $operations,
         'finished' => 'transcripts_apachesolr_index_queued_transcripts_finished',
-    );
-
-    return $batch;
+    ));
 }
 
 function transcripts_apachesolr_index_one_transcript($node, &$context)
