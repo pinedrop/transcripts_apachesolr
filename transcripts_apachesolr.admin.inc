@@ -2,16 +2,23 @@
 
 function transcripts_apachesolr_admin()
 {
-    $environments = apachesolr_load_all_environments();
-    foreach ($environments as $id => $environment) {
-        $options[$id] = $environment['name'];
-    }
-    $form = array();
+    return drupal_get_form('transcripts_apachesolr_configuration_form');
+}
 
+function transcripts_apachesolr_configuration_form()
+{
+    $form = array();
     $form['action'] = array(
         '#type' => 'fieldset',
         '#title' => t('Actions'),
         '#collapsible' => TRUE,
+    );
+    $form['action']['queue'] = array(
+        '#prefix' => '<div>',
+        '#suffix' => '</div>',
+        '#type' => 'submit',
+        '#value' => t('Queue all transcripts for reindexing'),
+        '#submit' => array('transcripts_apachesolr_index_transcripts_form_queue_submit'),
     );
     /*$form['action']['index'] = array(
         '#prefix' => '<div>',
@@ -24,14 +31,11 @@ function transcripts_apachesolr_admin()
         '#suffix' => '</span></div>',
         '#markup' => t('Could take time and could put an increased load on your server.'),
     );*/
-    $form['action']['queue'] = array(
-        '#prefix' => '<div>',
-        '#suffix' => '</div>',
-        '#type' => 'submit',
-        '#value' => t('Queue all transcripts for reindexing'),
-        '#submit' => array('transcripts_apachesolr_index_transcripts_form_queue_submit'),
-    );
 
+    $environments = apachesolr_load_all_environments();
+    foreach ($environments as $id => $environment) {
+        $options[$id] = $environment['name'];
+    }
     $form['transcripts_apachesolr_env_id'] = array(
         '#title' => t('Search environment'),
         '#type' => 'select',
@@ -39,16 +43,15 @@ function transcripts_apachesolr_admin()
         '#default_value' => transcripts_apachesolr_environment(),
         '#description' => t('Select the Apache Solr search environment that this module will use to index time code units.'),
     );
-    $form['save_configuration'] = array(
+    $form['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Save configuration'),
-        '#submit' => array('transcripts_apachesolr_save_configuration'),
     );
 
     return $form;
 }
 
-function transcripts_apachesolr_save_configuration(&$form_state)
+function transcripts_apachesolr_configuration_form_submit(&$form_state)
 {
     variable_set('transcripts_apachesolr_env_id', $form_state['values']['transcripts_apachesolr_env_id']);
     drupal_set_message(t('Your configuration has been saved.'));
@@ -69,7 +72,7 @@ function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form
 {
     return confirm_form($form,
         t('Are you sure you want to queue transcripts for reindexing?'),
-        'admin/config/user-interface/transcripts/apachesolr/queue',
+        'admin/config/user-interface/transcripts/apachesolr',
         t('Uploaded transcripts will be used to regenerate the transcript index. Any changes in the transcript index will be overwritten.'),
         t('Queue transcripts')
     );
