@@ -5,7 +5,7 @@ function transcripts_apachesolr_admin()
     return drupal_get_form('transcripts_apachesolr_configuration_form');
 }
 
-function transcripts_apachesolr_configuration_form()
+function transcripts_apachesolr_configuration_form($form, &$form_state)
 {
     $form = array();
     $form['action'] = array(
@@ -53,8 +53,10 @@ function transcripts_apachesolr_configuration_form()
 
 function transcripts_apachesolr_configuration_form_submit(&$form_state)
 {
-    variable_set('transcripts_apachesolr_env_id', $form_state['values']['transcripts_apachesolr_env_id']);
-    drupal_set_message(t('Your configuration has been saved.'));
+    if (isset($form_state['values']['transcripts_apachesolr_env_id'])) {
+        variable_set('transcripts_apachesolr_env_id', $form_state['values']['transcripts_apachesolr_env_id']);
+        drupal_set_message(t('Your configuration has been saved.'));
+    }
 }
 
 function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form, array &$form_state)
