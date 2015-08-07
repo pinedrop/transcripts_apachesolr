@@ -118,3 +118,95 @@ function transcripts_apachesolr_insert_tcu($trid, $tcu)
     }
     tcu_save($insert);
 }
+
+function transcripts_apachesolr_queue_transcripts($nids = '')
+{
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+
+    $query = db_select('transcripts_apachesolr_transcript', 'tr')
+        ->fields('tr')
+        ->condition('tr.status', 1, '=');
+
+    if ($nids) {
+        $query->condition('tr.id', explode('+', $nids), 'IN');
+    }
+    else {
+        $query->condition('tr.id', 0, '!=');
+    }
+    $result = $query->execute();
+
+    while ($record = $result->fetchAssoc()) {
+        $node = node_load($record['id']);
+
+        foreach ($fields as $field_name) {
+            if (isset($node->$field_name)) {
+                $field = $node->$field_name;
+
+                if (!(empty($field) || (empty($field[$node->language]) && empty($field['und'])))) {
+                    $lang = empty($field[$node->language]) ? 'und' : $node->language;
+
+                    $file = file_load($field[$lang][0]['fid']);
+
+                    $reindex = TRUE;
+                    foreach (module_implements('transcripts_apachesolr_queue_exclude') as $module) {
+                        $exclude = module_invoke($module, 'transcripts_apachesolr_queue_exclude', $file, $node);
+                        // If the hook returns TRUE we should exclude the node
+                        if (!empty($exclude)) {
+                            $reindex = FALSE;
+                        }
+                    }
+
+                    if ($reindex) {
+                        db_update('transcripts_apachesolr_transcript')
+                            ->fields(array('status' => 0))
+                            ->condition('module', 'transcripts_node', '=')
+                            ->condition('type', 'node', '=')
+                            ->condition('id', $node->nid, '=')
+                            ->execute();
+                    }
+                }
+            }
+        }
+    }
+}
+
+function transcripts_apachesolr_index_one_transcript($node, &$context)
+{
+    $context['results'][] = $node->nid . ' : ' . check_plain($node->title);
+    $context['message'] = t('[node/@nid] Indexing transcript', array('@nid' => $node->nid));
+
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+    foreach ($fields as $field_name) {
+        if (isset($node->$field_name)) {
+            $field = $node->$field_name;
+
+            if (!(empty($field) || (empty($field[$node->language]) && empty($field['und'])))) {
+                $lang = empty($field[$node->language]) ? 'und' : $node->language;
+
+                $file = file_load($field[$lang][0]['fid']);
+                transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+                if (transcripts_node_add_transcript($file, $node->nid)) {
+                    drupal_set_message("[node/{$node->nid}] Indexed {$file->filename}");
+                    db_update('transcripts_apachesolr_transcript')
+                        ->fields(array('status' => 1))
+                        ->condition('module', 'transcripts_node', '=')
+                        ->condition('type', 'node', '=')
+                        ->condition('id', $node->nid, '=')
+                        ->execute();
+                } else {
+                    drupal_set_message("[node/{$node->nid}] FAILED to index {$file->filename}", 'error');
+                }
+            }
+        }
+    }
+}
+
+function transcripts_apachesolr_index_queued_transcripts_finished($success, $results, $operations)
+{
+    if ($success) {
+        drupal_set_message(t('Indexed @count transcripts.', array('@count' => count($results))));
+    } else {
+        $error_operation = reset($operations);
+        drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+    }
+}
