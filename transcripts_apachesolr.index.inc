@@ -169,3 +169,34 @@ function transcripts_apachesolr_queue_transcripts($nids = '')
         }
     }
 }
+
+function transcripts_apachesolr_index_one_transcript($node, &$context)
+{
+    $context['results'][] = $node->nid . ' : ' . check_plain($node->title);
+    $context['message'] = t('[node/@nid] Indexing transcript...', array('@nid' => $node->nid));
+
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+    foreach ($fields as $field_name) {
+        if (isset($node->$field_name)) {
+            $field = $node->$field_name;
+
+            if (!(empty($field) || (empty($field[$node->language]) && empty($field['und'])))) {
+                $lang = empty($field[$node->language]) ? 'und' : $node->language;
+
+                $file = file_load($field[$lang][0]['fid']);
+                transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $node->nid);
+                if (transcripts_node_add_transcript($file, $node->nid)) {
+                    drupal_set_message("[node/{$node->nid}] Indexed {$file->filename}");
+                    db_update('transcripts_apachesolr_transcript')
+                        ->fields(array('status' => 1))
+                        ->condition('module', 'transcripts_node', '=')
+                        ->condition('type', 'node', '=')
+                        ->condition('id', $node->nid, '=')
+                        ->execute();
+                } else {
+                    drupal_set_message("[node/{$node->nid}] FAILED to index {$file->filename}", 'error');
+                }
+            }
+        }
+    }
+}
