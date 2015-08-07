@@ -27,7 +27,7 @@ function transcripts_apachesolr_admin()
     return $form;
 }
 
-function _mymod_form_submit(&$form_state)
+function transcripts_apachesolr_save_configuration(&$form_state)
 {
     variable_set('transcripts_apachesolr_env_id', $form_state['values']['transcripts_apachesolr_env_id']);
     drupal_set_message(t('Your configuration has been saved.'));
