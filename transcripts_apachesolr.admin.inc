@@ -76,10 +76,13 @@ function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form,
 
 function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form, array &$form_state)
 {
+    $qnids = trim($form_state['values']['queue_nids']);
+    $limit = $qnids == '' ? 'ALL' : $qnids;
+
     return confirm_form($form,
         t('Are you sure you want to queue transcripts for reindexing?'),
         'admin/config/user-interface/transcripts/apachesolr',
-        t('Uploaded transcripts will be used to regenerate the transcript index. Any changes in the transcript index will be overwritten.'),
+        t('Transcripts from the following nodes will be reindexed: ') .$qnids. t('. Any changes in the transcript index will be overwritten.'),
         t('Queue transcripts')
     );
 }
