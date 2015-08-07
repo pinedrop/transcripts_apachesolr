@@ -13,11 +13,15 @@ function transcripts_apachesolr_configuration_form($form, &$form_state)
         '#title' => t('Actions'),
         '#collapsible' => TRUE,
     );
+    $form['action']['queue_nids'] = array(
+        '#type' => 'textarea',
+        '#description' => t('If you only wish to queue some transcripts, enter them here, separated by the plus sign. For example: 185, or 185+240.'),
+    );
     $form['action']['queue'] = array(
         '#prefix' => '<div>',
         '#suffix' => '</div>',
         '#type' => 'submit',
-        '#value' => t('Queue all transcripts for reindexing'),
+        '#value' => t('Queue transcripts'),
         '#submit' => array('transcripts_apachesolr_index_transcripts_form_queue_submit'),
     );
     /*$form['action']['index'] = array(
@@ -83,6 +87,6 @@ function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form
 function transcripts_apachesolr_index_transcripts_form_queue_confirm_submit(array $form, array &$form_state)
 {
     $form_state['redirect'] = 'admin/config/user-interface/transcripts/apachesolr';
-    transcripts_apachesolr_queue_transcripts();
+    transcripts_apachesolr_queue_transcripts(trim($form_state['values']['queue_nids']));
     drupal_set_message(t('Transcripts queued for re-indexing. You must now index these transcripts.'));
 }
