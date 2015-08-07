@@ -65,6 +65,7 @@ function transcripts_apachesolr_configuration_form_submit($form, &$form_state)
 
 function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form, array &$form_state)
 {
+    watchdog('transcripts_apachesolr', 'Build info = '.dprint_r($form_state['build_info'], TRUE), NULL, WATCHDOG_DEBUG);
     $destination = array();
     if (isset($_GET['destination'])) {
         $destination = drupal_get_destination();
