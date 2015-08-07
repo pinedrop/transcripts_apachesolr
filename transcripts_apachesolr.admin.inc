@@ -38,7 +38,6 @@ function transcripts_apachesolr_admin()
         '#options' => $options,
         '#default_value' => transcripts_apachesolr_environment(),
         '#description' => t('Select the Apache Solr search environment that this module will use to index time code units.'),
-        '#weight' => -30,
     );
     $form['save_configuration'] = array(
         '#type' => 'submit',
