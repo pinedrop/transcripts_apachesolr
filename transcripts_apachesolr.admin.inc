@@ -102,6 +102,18 @@ function transcripts_apachesolr_index_transcripts_form_queue_confirm_submit(arra
     drupal_set_message(t('Transcripts queued for re-indexing. You must now index these transcripts.'));
 }
 
+function transcripts_apachesolr_index_transcripts_form_index_submit(array $form, array &$form_state)
+{
+    $redirect = 'admin/config/user-interface/transcripts/apachesolr/index';
+
+    $destination = array();
+    if (isset($_GET['destination'])) {
+        $destination = drupal_get_destination();
+        unset($_GET['destination']);
+    }
+    $form_state['redirect'] = array($redirect, array('query' => $destination));
+}
+
 function transcripts_apachesolr_index_transcripts_form_index_confirm(array $form, array &$form_state)
 {
     return confirm_form($form,
