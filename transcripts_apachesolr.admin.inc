@@ -91,6 +91,7 @@ function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form
 
 function transcripts_apachesolr_index_transcripts_form_queue_confirm_submit(array $form, array &$form_state)
 {
+    watchdog('transcripts_apachesolr', 'Form state confirm submit = '.dprint_r($form_state, TRUE), NULL, WATCHDOG_DEBUG);
     $form_state['redirect'] = 'admin/config/user-interface/transcripts/apachesolr';
     transcripts_apachesolr_queue_transcripts(trim($form_state['values']['queue_nids']));
     drupal_set_message(t('Transcripts queued for re-indexing. You must now index these transcripts.'));
