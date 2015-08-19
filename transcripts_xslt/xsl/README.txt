@@ -9,18 +9,24 @@ tested with other versions of Saxon.
 
 This directory provides examples of XSL transformers. Incoming XML can be in any 
 format, but the output must be very simple: a sequence of Time Coded Unit (<tcu>) 
-tags within a root <tcus> tag. Each <tcu> tag contains obligatory data such as 
-<speaker>, <start> and <end>, and then a set of user-defined <tiers>. The tier 
+tags within a root <tcus> tag. Each <tcu> tag should contain a <start> and an
+<end> tag. The optional <speakers> tag contains the speaker name in various
+transliteration formats. In the example below, the speaker name occurs in two
+user-defined formats, <ss_speaker_bod> (Tibetan) and <ss_speaker> (Default).
+
+A <tcu> tag should also contain a set of user-defined <tiers>. The tier
 label should be the same as the name of the field sent to the Solr index. Take 
 a look at Drupal's schema.xml file to familiarize yourself with the Apache Solr 
 Search Integration module's conventions for the naming of dynamic fields.
-
 
 Example target:
 
 <tcus>
    <tcu>
-     <speaker>Richard</speaker>
+     <speakers>
+        <ss_speaker_bod>ཟླ་སྒྲོན་ལགས</ss_speaker_bod>
+        <ss_speaker>Dadron</ss_speaker>
+     </speakers>
      <start>0.0</start>
      <end>3.7</end>
      <tiers>
@@ -44,5 +50,4 @@ Notes:
 
 1. Start and end times must be given in seconds.
 
-
-<< Last updated, 8 May 2013 >>
+<< Last updated, 19 August 2015 >>
