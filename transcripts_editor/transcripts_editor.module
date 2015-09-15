@@ -1,0 +1,192 @@
+<?php
+
+//include_once 'transcripts_editor.index.inc';
+
+function transcripts_editor_init()
+{
+    $node = menu_get_object();
+    if ($node && transcripts_node_has_transcript($node) && node_access('update', $node)) {
+        // Add x-editable from CDN
+        //bootstrap styles have weight -100/-99 in group CSS_THEME
+        drupal_add_css('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css', array('type' => 'external', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -80));
+
+        //bootstrap-min.js is weight -100 in group JS_THEME
+        drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
+        drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.js', 'file');
+
+        $exclude = array();
+        foreach (module_implements('transcripts_editor_exclude_tiers') as $module) {
+            $exclude = array_merge($exclude, module_invoke($module, 'transcripts_editor_exclude_tiers', $node->nid));
+        }
+        $exclude = array_unique($exclude);
+
+        drupal_add_js(
+            array(
+                'transcripts_editor' => array(
+                    'nid' => $node->nid,
+                    'exclude' => $exclude,
+                ),
+            ),
+            'setting'
+        );
+    }
+}
+
+function transcripts_editor_menu()
+{
+    $items = array();
+
+    $items['tcu/up/tier'] = array(
+        'page callback' => 'transcripts_editor_update_tier',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+
+    return $items;
+}
+
+function transcripts_editor_update_tier()
+{
+    //get nid that tcu belongs to
+    $tcuid = $_POST['pk'];
+    $nid = transcripts_apachesolr_parent_id($tcuid);
+
+    //does user have permissions to update tcu
+    if (node_access('update', node_load($nid))) {
+        $tcu = tcu_load($tcuid);
+        $tier_name = $_POST['name'];
+        $tier_value = $_POST['value'];
+        $tcu->setTiers(array_merge($tcu->getTiers(), array($_POST['name'] => $_POST['value'])));
+        tcu_save($tcu);
+        drupal_json_output(array(
+            'status' => 'success',
+            'data' => array('post' => array(
+                'tcuid' => $tcuid,
+                'tier_name' => $tier_name,
+                'tier_value' => $tier_value,
+            )),
+        ));
+    } else {
+        drupal_json_output(array(
+            'status' => 'error',
+            'message' => t('Sorry, you are not permitted to update this data.'),
+        ));
+    }
+}
+
+/*
+function transcripts_editor_theme() {
+        return array(
+                'transcripts_edit' => array(
+                        'file' => 'transcripts_editor.theme.inc',
+                ),
+	);
+}
+*/
+
+/*
+function transcripts_editor_preprocess_transcripts_video_controls(&$vars) {
+	$vars['edit'] = theme('transcripts_edit', array('pencil-id' => 'pencil' . $vars['trid']));
+}
+*/
+
+/*
+function transcripts_editor_update_tcu() {
+	$trid = $_POST['trid'];
+	$nid = $_POST['nid'];
+    
+	if (user_access('edit transcripts') && node_access('update', node_load($nid))) {
+		$k = 0;
+		$tcuids = array();
+        
+		if (!empty($_POST['update'])) {
+			foreach ($_POST['update'] as $update) {
+				$tcu = tcu_load($update['tcuid']);
+				if ($tcu->trid == $trid) {
+					$tcu->speaker = $update['speaker'];
+					$tcu->start = $update['start'];
+					$tcu->end = $update['end'];
+					$tcu->setTiers($update['tiers']);
+					tcu_save($tcu);
+					$k++;
+				}
+			}
+		}
+		if (!empty($_POST['insert'])) {
+			foreach ($_POST['insert'] as $insert) {
+				$tcu = tcu_create(
+					array(
+						'trid' => $trid,
+						'speaker' => isset($insert['speaker']) ? $insert['speaker'] : '',
+						'start' => isset($insert['start']) ? $insert['start'] : 0,
+						'end' => isset($insert['end']) ? $insert['end'] : 0,
+						'created' => REQUEST_TIME,
+						'changed' => REQUEST_TIME,
+					)
+				);
+				tcu_save($tcu);
+				$tcuids[] = $tcu->tcuid;
+				
+				$k++;
+			}
+		}
+		if (!empty($_POST['remove'])) {
+			foreach ($_POST['remove'] as $remove) {
+				$tcu = tcu_load($remove['tcuid']);
+				if ($tcu->trid == $trid) {
+					tcu_delete($tcu);
+					$k++;
+				}
+			}
+		}
+        
+		//flag transcript as dirty - is it costly to repeat this?
+		if ($k > 0 && !flag_get_flag('transcripts_dirty_transcript')->is_flagged($nid)) {
+			flag_get_flag('transcripts_dirty_transcript')->flag('flag', $nid, user_load(1)); //flag by superuser
+		}
+        
+		drupal_json_output(array(
+			'status' => TRUE, 
+			'tcuids' => $tcuids,
+		));
+	}
+	else {
+		drupal_json_output(array('status' => FALSE));
+	}
+}
+
+function transcripts_editor_permission() {
+	return array(
+		'edit transcripts' => array(
+			'title' => t('Edit transcripts and timecodes'),
+		),
+		'abandon transcript changes' => array(
+			'title' => t('Abandon transcript changes'), 
+			'description' => t('Return transcript to its original state by abandoning changes made to it online.'),
+		),
+	);
+}
+
+function transcripts_editor_transcripts_controller_prepare_player($trid) {
+	$blocked = FALSE;
+	
+	$arr = db_select('transcripts_transcript', 'tr')
+		->fields('tr', array('id'))
+		->condition('tr.trid', $trid, '=')
+		->execute()
+		->fetchAssoc();
+	$nid = $arr['id'];
+	
+	foreach (module_implements('transcripts_editor_disable_editing') as $module) {
+		$blocked = module_invoke($module, 'transcripts_editor_disable_editing', $nid);
+		//if hook returns TRUE then not allowed to edit
+		if (!empty($blocked)) break;
+	}
+	$return = array(
+		'editable' => !$blocked && user_access('edit transcripts') && node_access('update', node_load($nid)) ? true : false,
+		'nid' => $nid,
+	);
+	drupal_add_js(array("transcripts_editor_$trid" => $return), 'setting');
+}
+
+*/

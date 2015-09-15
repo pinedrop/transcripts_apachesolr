@@ -1,0 +1,9 @@
+;$Id$
+name = Transcripts Editor
+description = Online transcript editor for Transcripts UI
+dependencies[] = transcripts_ui
+dependencies[] = transcripts_apachesolr
+dependencies[] = flag
+package = Pinedrop Transcripts
+core = 7.x
+files[] = transcripts_editor.module
