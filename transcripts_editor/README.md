@@ -11,7 +11,7 @@ with permissions to edit transcripts in-situ.
 INSTALLATION
 ------------
 
-Requires: Transcripts, Transcripts Node, and Flag
+Requires: Transcripts UI, Transcripts Apachesolr, and Flag 2 or 3
 
 Install and enable the Transcripts Editor module as you would any other Drupal
 module.
@@ -20,56 +20,50 @@ module.
 PERMISSIONS
 -----------
 
+When this module is enabled, then users will be able to edit transcripts attached
+to nodes that they are allowed to edit.
+
 By use of hook_transcripts_editor_exclude_tiers, applications can prevent
 specific tiers from being edited. For example, it might make sense to distribute
 labor between transcribers and translators, so that transcribers are only allowed
 to correct transcription mistakes, and translators can only correct translation
 errors.
 
-To be able to edit transcripts, users need the 'Edit transcripts and timecodes'
-permission. Granting this permission to a user will give her the ability to
-edit any transcript belonging to a node that she can edit. She won't be able to
-edit transcripts belonging to nodes that she cannot edit.
-
-So, to make editing transcripts part of editing nodes, just give the permission
-to all authenticated users. To restrict transcript editing further, create a
-dedicated transcript editing role.
-
 
 EDITING
 -------
 
-To edit, click on the 'Transcript' tab for the node (node/%/transcript). Click
-on the 'pencil' icon under the video. (If you don't see a pencil icon, then
-you don't have permission to edit this transcript.)
+To edit a transcript, just click on what you want to edit.
 
-Once in edit mode, just click on the speaker names, tiers, and timecodes that
+Just click on the speaker names, tiers, and timecodes that
 you want to edit. To delete a line, click on the 'x' at the top right of the
 line. To insert a new line, click on the '+' below a line. New lines will
 inherit the speaker and timecodes from the previous line.
-
-Changes are automatically saved to Drupal every ten seconds. So if you make
-a change don't immediately leave or refresh the page. In general you can just
-leave the editor open and all changes will be saved.
 
 Note that changes are sent to Solr only as often as indexing occurs. It may
 be useful to add a line to the server's crontab to run cron every 5 minutes.
 
 There is no 'undo' functionality. However, from the node edit page users with
-the 'Abandon transcript changes' permission can click on a link that will
+the 'discard edits' permission can click on a link that will
 abandon all changes made online and regenerate TCUs from the originally
 uploaded transcript.
 
 
-TRANSCRIPTS EDITOR DISABLE
+OVERWRITING EDITS
+-----------------
 
-Requires: Transcripts Editor and Flag
+When you edit a transcript online, then the originally uploaded transcript is
+suddenly out of date. Transcripts Editor tracks this fact with the global Flag
+"Keep transcript edits". The module automatically flags a node when its attached 
+transcript is edited for the first time.
 
-Use this module to enable certain roles to freeze the editing of specific
-transcripts. For example, you may want to disable online transcript editing
-when a transcript is downloaded for offline editing.
+As long as the "Keep transcript edits" flag is on, then uploading a new transcript
+to the node will have no effect on the underlying index. To discard changes made
+online and revert to the upload transcript, then unflag the node on the node edit
+form.
 
-To configure this module, visit admin/structure/flags and assign some user
-roles the ability to flag and unflag content with transcripts_editor_disable.
+To prevent unauthorized transcript reversions (and thus loss of data), only users
+who can edit a node are allowed to revert its transcript. Still, users should take
+care when using this feature.
 
-<< Last modified, 27 July 2014 >>
+<< Last modified, 16 September 2015 >>
