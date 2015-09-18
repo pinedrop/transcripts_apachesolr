@@ -7,8 +7,8 @@ function transcripts_editor_init()
     $node = menu_get_object();
     if ($node && transcripts_node_has_transcript($node) && node_access('update', $node)) {
         $editable = TRUE;
-        foreach (module_implements('transcript_editor_disabled') as $module) {
-            if (module_invoke($module, 'transcript_editor_disabled', $node)) {
+        foreach (module_implements('transcripts_editor_disabled') as $module) {
+            if (module_invoke($module, 'transcripts_editor_disabled', $node)) {
                 $editable = FALSE;
                 break;
             }
