@@ -1,6 +1,3 @@
-# transcripts_editor
-Online transcript editing for Transcripts UI
-
 TRANSCRIPTS EDITOR
 ------------------
 
@@ -20,33 +17,30 @@ module.
 PERMISSIONS
 -----------
 
-When this module is enabled, then users will be able to edit transcripts attached
-to nodes that they are allowed to edit.
+Enabling this module allows users to edit transcripts attached to nodes that they 
+have the permission to edit.
 
-By use of hook_transcripts_editor_exclude_tiers, applications can prevent
-specific tiers from being edited. For example, it might make sense to distribute
-labor between transcribers and translators, so that transcribers are only allowed
-to correct transcription mistakes, and translators can only correct translation
-errors.
+The hooks hook_transcripts_editor_disabled and hook_transcripts_editor_exclude_tiers
+allow specific nodes or data tiers to be excluded from editing. For example,
+it might make sense to distribute labor between transcribers and translators, so 
+that transcribers are only allowed to correct transcription mistakes, and translators 
+only to correct translation errors.
 
 
 EDITING
 -------
 
-To edit a transcript, just click on what you want to edit.
+To edit a transcript, click on the tier that you want to edit.
 
-Just click on the speaker names, tiers, and timecodes that
-you want to edit. To delete a line, click on the 'x' at the top right of the
-line. To insert a new line, click on the '+' below a line. New lines will
-inherit the speaker and timecodes from the previous line.
+Note that transcript edits are sent to Solr only as often as indexing occurs. 
+It may be useful to add a line to the server's crontab to run cron every 5 minutes,
+so that one's edits are visible to others more quickly.
 
-Note that changes are sent to Solr only as often as indexing occurs. It may
-be useful to add a line to the server's crontab to run cron every 5 minutes.
+It may also be useful to occasionally refresh the page, in case other people are
+editing the transcript at the same time.
 
-There is no 'undo' functionality. However, from the node edit page users with
-the 'discard edits' permission can click on a link that will
-abandon all changes made online and regenerate TCUs from the originally
-uploaded transcript.
+There is no undo functionality. However, it is possible to overwrite edits made
+online (see below).
 
 
 OVERWRITING EDITS
@@ -57,13 +51,14 @@ suddenly out of date. Transcripts Editor tracks this fact with the global Flag
 "Keep transcript edits". The module automatically flags a node when its attached 
 transcript is edited for the first time.
 
-As long as the "Keep transcript edits" flag is on, then uploading a new transcript
-to the node will have no effect on the underlying index. To discard changes made
-online and revert to the upload transcript, then unflag the node on the node edit
+As long as the "Keep transcript edits" flag is on, then one is prevented from
+deleting or replacing the uploaded transcript. To discard changes made online 
+and revert to the upload transcript, then unflag the node on the node edit
 form.
 
-To prevent unauthorized transcript reversions (and thus loss of data), only users
-who can edit a node are allowed to revert its transcript. Still, users should take
-care when using this feature.
+On the flip side, one might want to disable online transcript editing when a
+transcript has been "checked out" for offline editing. To implement such a feature,
+hook_transcripts_editor_disabled would probably come in handy.
+
 
 << Last modified, 16 September 2015 >>
