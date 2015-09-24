@@ -155,7 +155,7 @@ function transcripts_editor_update_speaker()
             'data' => array(
                 'oldValue' => $oldValue,
                 'speakers' => $speakers,
-                'tcuids' => isset($tcuids) ? $tcuids : [],
+                'tcuids' => isset($tcuids) ? $tcuids : array(),
             ),
         ));
     } else {
