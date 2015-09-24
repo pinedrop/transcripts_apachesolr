@@ -7,7 +7,6 @@
                 .each(function () {
                     var transcript = this;
                     var trid = $(this).attr('data-transcripts-id');
-                    ;
 
                     //$.fn.editable.defaults.mode = 'inline';
                     var exclude = $.map(Drupal.settings.transcripts_editor.exclude,
@@ -79,14 +78,7 @@
                                     for (var i=0; i<response.data.tcuids.length; i++) {
                                         $("*[data-speaker-display='" + tier_name + "']", $("*[data-tcuid='" + response.data.tcuids[i] + "']")).html(newValue).editable('setValue', newValue);
                                     }
-                                    transcript_speakers[tier_name] = response.data.speakers
-
-                                    /*$(".speaker-display[data-speaker-display='" + tier_name + "']")
-                                        .filter(function () {
-                                            return $(this).closest()
-                                        })
-                                        .html(newValue)
-                                        .editable('setValue', newValue);*/;
+                                    transcript_speakers[tier_name] = response.data.speakers;
                                 }
                             },
                             'typeahead': [
@@ -104,7 +96,7 @@
                                 {
                                     name: 'Name',
                                     source: speaker_names[tier_name]
-                                },
+                                }
                             ]
                         });
                         $(this).on('shown', function (e, editable) {

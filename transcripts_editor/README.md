@@ -30,7 +30,23 @@ only to correct translation errors.
 EDITING
 -------
 
-To edit a transcript, click on the tier that you want to edit.
+To edit a data tier (for example, a transcription or translation), click on the
+text that you want to edit. The text becomes editable; save or cancel when finished.
+
+To edit a speaker name, click on the speaker name, change it, and then save or cancel.
+Editing speaker names works as follows. Suppose there are two speakers for the transcript,
+'Billy' and 'Tommy'. If a line is marked as being spoken by 'Billy', and you change it 
+to 'Tommy', then it will change that line, but other lines marked 'Billy' will not be
+changed. In other words, it is assumed that a mistake was previously made in identifying
+the line as being spoken by 'Billy'.
+
+On the other hand, if a line is marked as being spoken by 'Billy', and you change it to
+'Mr Billy', then it will change all instances of 'Billy' to 'Mr Billy'. In other words,
+it is assumed that you just want to change the way the speaker name is recorded, and
+that your change should affect the entire transcript.
+
+It is not yet possible to add a new speaker name, for example to attribute an existing
+line in this transcript to a third, previously unnoticed speaker named 'Freddy'.
 
 Note that transcript edits are sent to Solr only as often as indexing occurs. 
 It may be useful to add a line to the server's crontab to run cron every 5 minutes,
