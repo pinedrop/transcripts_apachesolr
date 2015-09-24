@@ -424,8 +424,9 @@ function transcript_search_form()
     return $output;
 }
 
-function transcripts_apachesolr_parent_id($tcuid)
+function transcripts_apachesolr_parent($tcuid)
 {
-    $query = db_query('SELECT id FROM {transcripts_apachesolr_transcript} trans LEFT JOIN {tcu} tcu ON trans.trid = tcu.trid WHERE tcu.tcuid = :tcuid', array(':tcuid' => $tcuid));
-    return $query->fetchField();
+    $result = db_query('SELECT trans.id, trans.trid FROM {transcripts_apachesolr_transcript} trans LEFT JOIN {tcu} tcu ON trans.trid = tcu.trid WHERE tcu.tcuid = :tcuid', array(':tcuid' => $tcuid));
+    $row = $result->fetchObject();
+    return array($row->id, $row->trid);
 }

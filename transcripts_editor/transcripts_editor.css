@@ -1,0 +1,12 @@
+.transcript-content .editable-transcript-processed .speaker-name {
+    overflow: visible;
+}
+.speaker-name .tt-hint, .speaker-name .tt-query {
+    border: 1px solid #ccc;
+}
+.speaker-name .tt-hint {
+    color: #999;
+}
+.speaker-name .tt-query {
+    color: black;
+}

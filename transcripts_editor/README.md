@@ -46,8 +46,8 @@ online (see below).
 OVERWRITING EDITS
 -----------------
 
-When you edit a transcript online, then the originally uploaded transcript is
-suddenly out of date. Transcripts Editor tracks this fact with the global Flag
+When you edit a transcript online, the originally uploaded transcript is
+suddenly out of date. Transcripts Editor tracks this fact with the global flag
 "Keep transcript edits". The module automatically flags a node when its attached 
 transcript is edited for the first time.
 

@@ -15,12 +15,17 @@ function transcripts_editor_init()
         }
 
         if ($editable) {
-            // Add x-editable from CDN
-            //bootstrap styles have weight -100/-99 in group CSS_THEME
-            drupal_add_css('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css', array('type' => 'external', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -80));
+            //bootstrap has weight -100/-99 in groups CSS_THEME & JS_THEME
+            drupal_add_css('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css', array('type' => 'external', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -80));
+            drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
 
-            //bootstrap-min.js is weight -100 in group JS_THEME
-            drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
+            //typeahead v 0.11 with adapted x-editable
+            drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/lib/typeahead.js-bootstrap.css', array('type' => 'file', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -90));
+            drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -90));
+            drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/lib/typeaheadjs.10x.js', array('type' => 'file', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
+
+            //transcripts_editor
+            drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.css', 'file');
             drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.js', 'file');
 
             $exclude = array();
@@ -34,6 +39,7 @@ function transcripts_editor_init()
                     'transcripts_editor' => array(
                         'nid' => $node->nid,
                         'exclude' => $exclude,
+                        'speaker_displays' => transcripts_ui_speaker_names(),
                     ),
                 ),
                 'setting'
@@ -51,6 +57,17 @@ function transcripts_editor_menu()
         'access callback' => TRUE,
         'type' => MENU_CALLBACK,
     );
+    $items['tcu/up/speaker'] = array(
+        'page callback' => 'transcripts_editor_update_speaker',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    $items['speakers/%'] = array(
+        'page arguments' => array(1),
+        'page callback' => 'transcripts_editor_speaker_names',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
 
     return $items;
 }
@@ -59,13 +76,13 @@ function transcripts_editor_update_tier()
 {
     //get nid that tcu belongs to
     $tcuid = $_POST['pk'];
-    $nid = transcripts_apachesolr_parent_id($tcuid);
+    list($nid, $trid) = transcripts_apachesolr_parent($tcuid);
 
     //does user have permissions to update tcu
     if (node_access('update', node_load($nid))) {
+        //it would probably be faster to update the column in tcu_tier,
+        //and then mark the tcu as needing to be reindexed
         $tcu = tcu_load($tcuid);
-        $tier_name = $_POST['name'];
-        $tier_value = $_POST['value'];
         $tcu->setTiers(array_merge($tcu->getTiers(), array($_POST['name'] => $_POST['value'])));
         tcu_save($tcu);
 
@@ -76,13 +93,70 @@ function transcripts_editor_update_tier()
             $flag->flag('flag', $nid, NULL, TRUE);
         }
 
+        /*
         drupal_json_output(array(
             'status' => 'success',
             'data' => array('post' => array(
                 'tcuid' => $tcuid,
                 'tier_name' => $tier_name,
-                'tier_value' => $tier_value,
+                'newValue' => $tier_value,
+                'oldValue' => $_POST['old'],
             )),
+        ));
+        */
+    } else {
+        drupal_json_output(array(
+            'status' => 'error',
+            'message' => t('Sorry, you are not permitted to update this data.'),
+        ));
+    }
+}
+
+function transcripts_editor_update_speaker()
+{
+    //get nid that tcu belongs to
+    $tcuid = $_POST['pk'];
+    list($nid, $trid) = transcripts_apachesolr_parent($tcuid);
+
+    //does user have permissions to update tcu
+    if (node_access('update', node_load($nid))) {
+        $tier = $_POST['name'];
+        $newValue = $_POST['value'];
+        $oldValue = $_POST['oldValue'];
+        $speakers = $_POST['speakers'];
+
+        //change speaker of selected line
+        $tcu = tcu_load($tcuid);
+        $tcu->setSpeakers(array_merge($tcu->getSpeakers(), array($tier => $newValue)));
+        tcu_save($tcu);
+
+        //change additional speakers if necessary
+        if (!in_array($newValue, $speakers)) {
+            $index = array_search($oldValue, $speakers);
+            $speakers[$index] = $newValue;
+            $result = db_query('SELECT speaker.tcuid From {tcu_speaker} speaker LEFT JOIN {tcu} tcu ON speaker.tcuid = tcu.tcuid WHERE tcu.trid = :trid AND speaker.tier = :tier AND speaker.value = :old', array(':trid' => $trid, ':tier' => $tier, ':old' => $oldValue));
+            $tcuids = $result->fetchCol();
+            $tcus = tcu_load_multiple($tcuids);
+            foreach ($tcus as $tcu) {
+                $tcu->setSpeakers(array_merge($tcu->getSpeakers(), array($tier => $newValue)));
+                tcu_save($tcu);
+            }
+        }
+
+        //flag node as having been edited
+        $flag = flag_get_flag('keep_transcript_edits');
+        if ($flag && !$flag->is_flagged($nid)) {
+            //must override permissions since we do not permit non-programmatic flagging
+            $flag->flag('flag', $nid, NULL, TRUE);
+        }
+
+        drupal_json_output(array(
+            'status' => 'success',
+            'data' => array(
+                'oldValue' => $oldValue,
+                'speakers' => $speakers,
+                'tcuids' => isset($tcuids) ? $tcuids : [],
+            ),
         ));
     } else {
         drupal_json_output(array(
@@ -113,4 +187,12 @@ function transcripts_editor_file_field_process($element, &$form_state, $form)
         }
     }
     return $element;
+}
+
+function transcripts_editor_speaker_names($tier) {
+    //watchdog('TRANSCRIPTS EDITOR', "Tier = $tier", NULL, WATCHDOG_INFO);
+    $result = db_query('SELECT DISTINCT value FROM {tcu_speaker} WHERE tier = :tier', array(':tier' => $tier));
+    $speaker_names = $result->fetchCol();
+    //watchdog('TRANSCRIPTS EDITOR', dprint_r($speaker_names, TRUE), NULL, WATCHDOG_INFO);
+    drupal_json_output($speaker_names);
 }
