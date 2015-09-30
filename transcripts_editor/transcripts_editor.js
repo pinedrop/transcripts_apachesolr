@@ -224,8 +224,10 @@ var TranscriptTimeUtil = {
                             $('.play-range', $tcu).click(function(e) {
                                 var t1 = $('input[name=beginInput]', $tcu).val();
                                 var t2 = $('input[name=endInput]', $tcu).val();
-                                //var scroller = Drupal.settings.scrollingTranscript[trid];
-                                //scroller.playOne($tcu);
+                                if (t2 > t1) {
+                                    var scroller = Drupal.settings.scrollingTranscript[trid];
+                                    scroller.playOne($tcu, t1, t2);
+                                }
                             });
                         });
                     });
