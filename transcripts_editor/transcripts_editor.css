@@ -1,3 +1,4 @@
+/* speaker name editing */
 .transcript-content .editable-transcript-processed .speaker-name {
     overflow: visible;
 }
@@ -9,4 +10,38 @@
 }
 .speaker-name .tt-query {
     color: black;
+}
+
+/* timecode editing */
+.edit-times {
+    position: absolute;
+    left: 23px;
+    top: 75px;
+}
+.range-display {
+    padding: 5px;
+    text-align: center;
+}
+.transcript-content .editable-transcript-processed .play-range {
+    padding: 0 2rem;
+}
+.transcript-content .editable-transcript-processed .play-range .glyphicon {
+    color: #5b68ce;
+    left: -1rem;
+}
+.range-display output {
+    display: inline;
+    width: 70px;
+    text-align: right;
+    font-size: 1rem;
+    font-family: "Lucida Console", Monaco, monospace; /* "Courier New", Courier, monospace; */
+}
+div.begin-range, div.end-range {
+    display: block;
+}
+.begin-range {
+    margin-right: 75px;
+}
+.end-range {
+    margin-left: 75px;
 }

@@ -52,6 +52,11 @@ function transcripts_editor_menu()
 {
     $items = array();
 
+    $items['tcu/up/times'] = array(
+        'page callback' => 'transcripts_editor_update_times',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
     $items['tcu/up/tier'] = array(
         'page callback' => 'transcripts_editor_update_tier',
         'access callback' => TRUE,
@@ -92,18 +97,6 @@ function transcripts_editor_update_tier()
             //must override permissions since we do not permit non-programmatic flagging
             $flag->flag('flag', $nid, NULL, TRUE);
         }
-
-        /*
-        drupal_json_output(array(
-            'status' => 'success',
-            'data' => array('post' => array(
-                'tcuid' => $tcuid,
-                'tier_name' => $tier_name,
-                'newValue' => $tier_value,
-                'oldValue' => $_POST['old'],
-            )),
-        ));
-        */
     } else {
         drupal_json_output(array(
             'status' => 'error',
@@ -161,7 +154,63 @@ function transcripts_editor_update_speaker()
     } else {
         drupal_json_output(array(
             'status' => 'error',
-            'message' => t('Sorry, you are not permitted to update this data.'),
+            'message' => t('You are not permitted to update this data.'),
+        ));
+    }
+}
+
+
+function transcripts_editor_update_times()
+{
+    //get nid that tcu belongs to
+    $tcuid = $_POST['pk'];
+    list($nid, $trid) = transcripts_apachesolr_parent($tcuid);
+
+    //does user have permissions to update tcu
+    if (node_access('update', node_load($nid))) {
+        $begin = $_POST['begin'];
+        $end = $_POST['end'];
+
+        if ($begin >= $end) {
+            drupal_json_output(array(
+                'status' => 'error',
+                'message' => t('Start time must precede end time.'),
+            ));
+        }
+        else {
+            //change timecodes of selected line
+            $tcu = tcu_load($tcuid);
+            if ($tcu->start != $begin || $tcu->end != $end) {
+                $tcu->start = $begin;
+                $tcu->end = $end;
+                tcu_save($tcu);
+
+                //flag node as having been edited
+                $flag = flag_get_flag('keep_transcript_edits');
+                if ($flag && !$flag->is_flagged($nid)) {
+                    //must override permissions since we do not permit non-programmatic flagging
+                    $flag->flag('flag', $nid, NULL, TRUE);
+                }
+
+                drupal_json_output(array(
+                    'status' => 'success',
+                    'data' => array(
+                        'begin' => $begin,
+                        'end' => $end,
+                    ),
+                ));
+            }
+            else {
+                drupal_json_output(array(
+                    'status' => 'error',
+                    'message' => t('No changes made.'),
+                ));
+            }
+        }
+    } else {
+        drupal_json_output(array(
+            'status' => 'error',
+            'message' => t('You are not permitted to update this data.'),
         ));
     }
 }

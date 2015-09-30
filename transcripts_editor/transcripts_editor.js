@@ -1,3 +1,25 @@
+var TranscriptTimeUtil = {
+    formatMs: function (t) {
+        var asfloat = parseFloat(t);
+        var mins = Math.floor(asfloat / 60);
+        var secs = asfloat % 60;
+        var time = (mins < 10 ? "0" + mins.toString() : mins.toString()) + ":" + (secs < 10 ? "0" + secs.toFixed(3) : secs.toFixed(3));
+        return time;
+    },
+    getRange: function (t) {
+        var time = parseFloat(t);
+        var min = time - 3;
+        if (min < 0) min = 0;
+        var max = time + 3;
+
+        return {
+            time: time.toFixed(3),
+            min: min.toFixed(3),
+            max: max.toFixed(3)
+        };
+    }
+};
+
 (function ($) {
     Drupal.behaviors.transcriptsEditor = {
         attach: function (context, settings) {
@@ -5,10 +27,10 @@
                 .addBack('[data-transcripts-role=transcript]')
                 .once('editable-transcript')
                 .each(function () {
-                    var transcript = this;
                     var trid = $(this).attr('data-transcripts-id');
+                    var $transcript = $(this);
 
-                    //$.fn.editable.defaults.mode = 'inline';
+                    /* language tiers */
                     var exclude = $.map(Drupal.settings.transcripts_editor.exclude,
                         function (val, i) {
                             return '[data-tier=' + val + ']';
@@ -17,6 +39,7 @@
                     $('.tier', this).not(exclude.join(',')).each(function () {
                         $(this).editable({
                             'mode': 'inline',
+                            'toggle': 'dblclick',
                             'placement': 'bottom',
                             'showbuttons': 'bottom',
                             'type': 'textarea',
@@ -32,6 +55,8 @@
                             }
                         });
                     });
+
+                    /* speaker names */
                     var displays = Drupal.settings.transcripts_editor.speaker_displays;
                     var speaker_names = {};
                     var transcript_speakers = {};
@@ -73,12 +98,17 @@
                             'params': getParams,
                             'url': Drupal.settings.basePath + 'tcu/up/speaker',
                             'success': function (response, newValue) {
-                                if (response.status == 'success') {
-                                    //change additional speaker names if called for
-                                    for (var i=0; i<response.data.tcuids.length; i++) {
-                                        $("*[data-speaker-display='" + tier_name + "']", $("*[data-tcuid='" + response.data.tcuids[i] + "']")).html(newValue).editable('setValue', newValue);
-                                    }
-                                    transcript_speakers[tier_name] = response.data.speakers;
+                                switch (response.status) {
+                                    case 'success':
+                                        //change additional speaker names if called for
+                                        for (var i = 0; i < response.data.tcuids.length; i++) {
+                                            $("*[data-speaker-display='" + tier_name + "']", $("*[data-tcuid='" + response.data.tcuids[i] + "']")).html(newValue).editable('setValue', newValue);
+                                        }
+                                        transcript_speakers[tier_name] = response.data.speakers;
+                                        break;
+                                    case 'error':
+                                        return response.message;
+                                        break;
                                 }
                             },
                             'typeahead': [
@@ -104,12 +134,101 @@
                             //$('input', editable.container.$form).addClass('form-control');
                             $('input', editable.container.$form).removeClass('form-control');
                         });
-                    }).click(
-                        function (e) {
-                            e.stopPropagation();
-                            $(this).editable('toggle');
-                        }
-                    );
+                    }).dblclick(function(e) {
+                        e.stopPropagation();
+                        $(this).editable('toggle');
+                    });
+
+                    /* timecodes */
+                    $('.play-button', this).each(function () {
+                        var $that = $(this);
+
+                        var $tcu = $(this).closest('[data-tcuid]');
+                        var begin = TranscriptTimeUtil.getRange($tcu.attr('data-begin'));
+
+                        var getTimecodes = function (params) {
+                            params.begin = $('input[name=beginInput]', $tcu).val();
+                            params.end = $('input[name=endInput]', $tcu).val();
+                            return params;
+                        };
+
+                        $(this).editable({
+                            'title': 'Adjust timecodes',
+                            'mode': 'popup',
+                            'toggle': 'manual',
+                            'placement': 'right',
+                            'showbuttons': 'bottom',
+                            'type': 'range',
+                            'name': 'time',
+                            'value': begin.time,
+                            'min': begin.min,
+                            'max': begin.max,
+                            'pk': $tcu.attr('data-tcuid'),
+                            'params': getTimecodes,
+                            'savenochange': true,
+                            'tpl': "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value);'>",
+                            'display': function (value, sourceData) {
+                                var asfloat = parseFloat(value);
+                                var mins = Math.floor(asfloat / 60);
+                                var secs = Math.floor(asfloat % 60);
+                                var time = mins.toString() + ":" + (secs < 10 ? "0" + secs.toString() : secs.toString());
+                                $('.play-tcu', this).html("<span class='glyphicon glyphicon-play'/> " + time);
+                                return false;
+                            },
+                            'validate': function (value) {
+                                if ($('input[name=endInput]', $tcu).val() < $('input[name=beginInput]', $tcu).val()) {
+                                    return "Start time must precede end time.";
+                                }
+                            },
+                            'url': Drupal.settings.basePath + 'tcu/up/times',
+                            'success': function (response, newValue) {
+                                switch (response.status) {
+                                    case 'success':
+                                        var t1 = TranscriptTimeUtil.getRange(response.data.begin);
+                                        var t2 = TranscriptTimeUtil.getRange(response.data.end);
+                                        $tcu.attr({
+                                            'data-begin': t1.time,
+                                            'data-end': t2.time
+                                        });
+                                        /* refresh begin time */
+                                        $(this).editable('setValue', t1.time);
+                                        $(this).editable('option', 'min', t1.min);
+                                        $(this).editable('option', 'max', t1.max);
+                                        $(this).editable('option', 'tpl', "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value);'>");
+                                        break;
+                                    case 'error':
+                                        return response.message;
+                                        break;
+                                }
+                            }
+                        }).after($("<div class='edit-times'><span class='glyphicon glyphicon-time'/></div>").dblclick(
+                            function(e) {
+                                e.stopPropagation();
+                                $('.play-button', $tcu).editable('toggle');
+                            }
+                        ));
+
+                        $(this).on('shown', function (e, editable) {
+                            $('.form-control', editable.container.$form).removeClass('form-control');
+
+                            var begin = TranscriptTimeUtil.getRange($tcu.attr('data-begin'));
+                            var end = TranscriptTimeUtil.getRange($tcu.attr('data-end'));
+
+                            $('.editable-input', editable.container.$form)
+                                .after($("<div class='end-range'><input name='endInput' type='range' min='" + end.min + "' max='" + end.max + "' step='0.001' oninput='endOutput.value=TranscriptTimeUtil.formatMs(endInput.value);'></div>"))
+                                .after($("<div class='range-display'><button class='btn btn-default btn-icon play-range' type='button'><span class='glyphicon glyphicon-play'/> <output name='beginOutput'>"
+                                    + TranscriptTimeUtil.formatMs(begin.time) + "</output> -&gt; <output name='endOutput'>"
+                                    + TranscriptTimeUtil.formatMs(end.time) + "</output></button></div>"))
+                                .addClass('begin-range');
+
+                            $('.play-range', $tcu).click(function(e) {
+                                var t1 = $('input[name=beginInput]', $tcu).val();
+                                var t2 = $('input[name=endInput]', $tcu).val();
+                                //var scroller = Drupal.settings.scrollingTranscript[trid];
+                                //scroller.playOne($tcu);
+                            });
+                        });
+                    });
                 });
         }
     }
