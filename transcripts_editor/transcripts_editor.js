@@ -176,7 +176,9 @@ var TranscriptTimeUtil = {
                                 return false;
                             },
                             'validate': function (value) {
-                                if ($('input[name=endInput]', $tcu).val() < $('input[name=beginInput]', $tcu).val()) {
+                                var t1 = parseFloat($('input[name=beginInput]', $tcu).val());
+                                var t2 = parseFloat($('input[name=endInput]', $tcu).val());
+                                if (!(t1 < t2)) {
                                     return "Start time must precede end time.";
                                 }
                             },
