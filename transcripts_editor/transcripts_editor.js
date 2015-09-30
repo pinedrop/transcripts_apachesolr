@@ -166,7 +166,7 @@ var TranscriptTimeUtil = {
                             'pk': $tcu.attr('data-tcuid'),
                             'params': getTimecodes,
                             'savenochange': true,
-                            'tpl': "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value);'>",
+                            'tpl': "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value); Drupal.settings.scrollingTranscript[\"" + trid + "\"].setCurrentTime(parseFloat(beginInput.value));''>",
                             'display': function (value, sourceData) {
                                 var asfloat = parseFloat(value);
                                 var mins = Math.floor(asfloat / 60);
@@ -196,7 +196,7 @@ var TranscriptTimeUtil = {
                                         $(this).editable('setValue', t1.time);
                                         $(this).editable('option', 'min', t1.min);
                                         $(this).editable('option', 'max', t1.max);
-                                        $(this).editable('option', 'tpl', "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value);'>");
+                                        $(this).editable('option', 'tpl', "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value); Drupal.settings.scrollingTranscript[\"" + trid + "\"].setCurrentTime(parseFloat(beginInput.value));'>");
                                         break;
                                     case 'error':
                                         return response.message;
@@ -217,7 +217,7 @@ var TranscriptTimeUtil = {
                             var end = TranscriptTimeUtil.getRange($tcu.attr('data-end'));
 
                             $('.editable-input', editable.container.$form)
-                                .after($("<div class='end-range'><input name='endInput' type='range' min='" + end.min + "' max='" + end.max + "' step='0.001' oninput='endOutput.value=TranscriptTimeUtil.formatMs(endInput.value);'></div>"))
+                                .after($("<div class='end-range'><input name='endInput' type='range' min='" + end.min + "' max='" + end.max + "' step='0.001' oninput='endOutput.value=TranscriptTimeUtil.formatMs(endInput.value); Drupal.settings.scrollingTranscript[\"" + trid + "\"].setCurrentTime(parseFloat(endInput.value));''></div>"))
                                 .after($("<div class='range-display'><button class='btn btn-default btn-icon play-range' type='button'><span class='glyphicon glyphicon-play'/> <output name='beginOutput'>"
                                     + TranscriptTimeUtil.formatMs(begin.time) + "</output> -&gt; <output name='endOutput'>"
                                     + TranscriptTimeUtil.formatMs(end.time) + "</output></button></div>"))
