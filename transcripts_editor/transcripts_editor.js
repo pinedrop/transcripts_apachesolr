@@ -222,11 +222,11 @@ var TranscriptTimeUtil = {
                                 .addClass('begin-range');
 
                             $('.play-range', $tcu).click(function(e) {
-                                var t1 = $('input[name=beginInput]', $tcu).val();
-                                var t2 = $('input[name=endInput]', $tcu).val();
+                                var t1 = parseFloat($('input[name=beginInput]', $tcu).val());
+                                var t2 = parseFloat($('input[name=endInput]', $tcu).val());
                                 if (t2 > t1) {
                                     var scroller = Drupal.settings.scrollingTranscript[trid];
-                                    scroller.playOne($tcu, t1, t2);
+                                    scroller.playOne($tcu, true, t1, t2);
                                 }
                             });
                         });
