@@ -203,7 +203,7 @@ var TranscriptTimeUtil = {
                                         break;
                                 }
                             }
-                        }).after($("<div class='edit-times'><span class='glyphicon glyphicon-time'/></div>").dblclick(
+                        }).after($("<div class='edit-times'><span class='glyphicon glyphicon-edit'/></div>").dblclick(
                             function(e) {
                                 e.stopPropagation();
                                 $('.play-button', $tcu).editable('toggle');
