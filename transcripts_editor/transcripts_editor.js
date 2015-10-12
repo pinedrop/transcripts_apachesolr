@@ -43,6 +43,7 @@ var TranscriptTimeUtil = {
                             'placement': 'bottom',
                             'showbuttons': 'bottom',
                             'type': 'textarea',
+                            'rows': 3,
                             'onblur': 'ignore',
                             'pk': $(this).closest('[data-tcuid]').attr('data-tcuid'),
                             'name': $(this).attr('data-tier'),
@@ -87,7 +88,7 @@ var TranscriptTimeUtil = {
 
                         $(this).editable({
                             'title': 'Speaker (' + displays[tier_name] + ')',
-                            'mode': 'popup',
+                            'mode': 'inline',
                             'toggle': 'manual',
                             'placement': 'right',
                             'showbuttons': 'bottom',
@@ -154,8 +155,9 @@ var TranscriptTimeUtil = {
 
                         $(this).editable({
                             'title': 'Adjust timecodes',
-                            'mode': 'popup',
+                            'mode': 'inline',
                             'toggle': 'manual',
+                            'onblur': 'ignore',
                             'placement': 'right',
                             'showbuttons': 'bottom',
                             'type': 'range',
