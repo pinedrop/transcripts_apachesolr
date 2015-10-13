@@ -18,12 +18,8 @@
     left: 23px;
     top: 75px;
 }
-.range-display {
-    padding: 5px;
-    text-align: center;
-}
 .transcript-content .editable-transcript-processed .play-range {
-    padding: 0 2rem;
+    padding: 0 1.7rem;
 }
 .transcript-content .editable-transcript-processed .play-range .glyphicon {
     color: #5b68ce;
@@ -34,14 +30,16 @@
     width: 70px;
     text-align: right;
     font-size: 1rem;
-    font-family: "Lucida Console", Monaco, monospace; /* "Courier New", Courier, monospace; */
+    font-family: "Lucida Console", Monaco, monospace;
 }
 div.begin-range, div.end-range {
     display: block;
 }
+/*
 .begin-range {
     margin-right: 75px;
 }
 .end-range {
     margin-left: 75px;
 }
+*/
