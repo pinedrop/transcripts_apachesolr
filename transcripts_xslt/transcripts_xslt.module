@@ -35,7 +35,7 @@ function transcripts_xslt_get_transformer($file)
     }
 }
 
-function transcripts_xslt_as_tcus($file)
+function transcripts_xslt_as_tcus($file, $params = array())
 {
     $transformer = transcripts_xslt_get_transformer($file);
     if (!$transformer) {
@@ -46,7 +46,6 @@ function transcripts_xslt_as_tcus($file)
     $dot = strrpos($file->uri, '.');
     $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
 
-    $params = array();
     if ($ext == 'txt') {
         $filepath = drupal_realpath($file->uri);
         // Check that we have a valid filepath.

@@ -36,7 +36,8 @@ function transcripts_node_node_insert($node)
 
 function transcripts_node_add_transcript($file, $nid)
 {
-    $tcus = transcripts_xslt_as_tcus($file);
+    //pass nid so it can be used in transcripts_xslt_saxon_params alter hook
+    $tcus = transcripts_xslt_as_tcus($file, array('nid' => $nid));
     if ($tcus === false) {
         return false;
     } else {
