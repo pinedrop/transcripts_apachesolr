@@ -4,8 +4,10 @@ include_once 'transcripts_editor.index.inc';
 
 function transcripts_editor_init()
 {
+    drupal_add_library('system', 'drupal.ajax');
+
     $node = menu_get_object();
-    if ($node && transcripts_node_has_transcript($node) && node_access('update', $node)) {
+    if (transcripts_editor_access_check($node)) {
         $editable = TRUE;
         foreach (module_implements('transcripts_editor_disabled') as $module) {
             if (module_invoke($module, 'transcripts_editor_disabled', $node)) {
@@ -15,16 +17,11 @@ function transcripts_editor_init()
         }
 
         if ($editable) {
-            //bootstrap has weight -100/-99 in groups CSS_THEME & JS_THEME
+            drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -90));
             drupal_add_css('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css', array('type' => 'external', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -80));
             drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
-
-            //typeahead v 0.11 with adapted x-editable
             drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/lib/typeahead.js-bootstrap.css', array('type' => 'file', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -90));
-            drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -90));
             drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/lib/typeaheadjs.10x.js', array('type' => 'file', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
-
-            //transcripts_editor
             drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.css', 'file');
             drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.js', 'file');
 
@@ -40,6 +37,7 @@ function transcripts_editor_init()
                         'nid' => $node->nid,
                         'exclude' => $exclude,
                         'speaker_displays' => transcripts_ui_speaker_names(),
+                        'edit_transcript_link' => 'node/' .$node->nid. '/edit-transcript',
                     ),
                 ),
                 'setting'
@@ -48,10 +46,25 @@ function transcripts_editor_init()
     }
 }
 
+function transcripts_editor_access_check($node) {
+    return $node && transcripts_node_has_transcript($node) && node_access('update', $node);
+}
+
 function transcripts_editor_menu()
 {
     $items = array();
 
+    $items['node/%node/edit-transcript'] = array(
+        'title' => 'Transcript',
+        'description' => t('Launch transcript editing'),
+        'access callback' => TRUE,
+        'page callback' => 'transcripts_editor_ajax',
+        'page arguments' => array(1),
+        'access callback' => 'transcripts_editor_access_check',
+        'access arguments' => array(1),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 99,
+    );
     $items['tcu/up/times'] = array(
         'page callback' => 'transcripts_editor_update_times',
         'access callback' => TRUE,
@@ -75,6 +88,11 @@ function transcripts_editor_menu()
     );
 
     return $items;
+}
+
+function transcripts_editor_ajax($nid) {
+    //this menu should always be overriden by javascript
+    return t('Error. Please return to the previous page.');
 }
 
 function transcripts_editor_update_tier()
