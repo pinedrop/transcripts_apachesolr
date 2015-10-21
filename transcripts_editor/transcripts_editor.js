@@ -142,11 +142,6 @@ var TranscriptTimeUtil = {
                     }
                 ]
             });
-            $(this).on('shown', function (e, editable) {
-                //make sure both .tt-hint and .tt-query have same styles; choose one:
-                //$('input', editable.container.$form).addClass('form-control');
-                $('input', editable.container.$form).removeClass('form-control');
-            });
         }).click(function (e) {
             e.stopPropagation();
             $(this).editable('toggle');
@@ -224,8 +219,6 @@ var TranscriptTimeUtil = {
             ));
 
             $(this).on('shown', function (e, editable) {
-                $('.form-control', editable.container.$form).removeClass('form-control');
-
                 var begin = TranscriptTimeUtil.getRange($tcu.attr('data-begin'));
                 var end = TranscriptTimeUtil.getRange($tcu.attr('data-end'));
 
