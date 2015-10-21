@@ -54,7 +54,7 @@ var TranscriptTimeUtil = {
         $('.tier', $transcript).not(exclude.join(',')).each(function () {
             $(this).editable({
                 'mode': 'inline',
-                'toggle': 'dblclick',
+                'toggle': 'click',
                 'showbuttons': 'bottom',
                 'type': 'textarea',
                 'rows': 3,
@@ -147,7 +147,7 @@ var TranscriptTimeUtil = {
                 //$('input', editable.container.$form).addClass('form-control');
                 $('input', editable.container.$form).removeClass('form-control');
             });
-        }).dblclick(function (e) {
+        }).click(function (e) {
             e.stopPropagation();
             $(this).editable('toggle');
         });
@@ -216,7 +216,7 @@ var TranscriptTimeUtil = {
                             break;
                     }
                 }
-            }).after($("<div class='edit-times'><span class='glyphicon glyphicon-edit'/></div>").dblclick(
+            }).after($("<div class='edit-times'><span class='glyphicon glyphicon-edit'/></div>").click(
                 function (e) {
                     e.stopPropagation();
                     $('.play-button', $tcu).editable('toggle');
