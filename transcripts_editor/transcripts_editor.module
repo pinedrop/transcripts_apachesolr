@@ -7,7 +7,7 @@ function transcripts_editor_init()
     drupal_add_library('system', 'drupal.ajax');
 
     $node = menu_get_object();
-    if (transcripts_editor_access_check($node)) {
+    if (arg(2) == NULL && transcripts_editor_access_check($node)) { //URL = node/nid
         $editable = TRUE;
         foreach (module_implements('transcripts_editor_disabled') as $module) {
             if (module_invoke($module, 'transcripts_editor_disabled', $node)) {
