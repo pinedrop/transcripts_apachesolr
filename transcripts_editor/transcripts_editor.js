@@ -239,7 +239,7 @@ var TranscriptTimeUtil = {
                 });
             });
         });
-        $transcript.addClass('editing-active');
+        $transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active');
     }
 
 })(jQuery);
