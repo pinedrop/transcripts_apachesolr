@@ -240,6 +240,7 @@ var TranscriptTimeUtil = {
             });
         });
         $transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active');
+        $('body').addClass('is-transcript-editing');
     }
 
 })(jQuery);
