@@ -227,7 +227,8 @@ var TranscriptTimeUtil = {
                     .after($("<div class='range-display'><button class='btn btn-default btn-icon play-range' type='button'><span class='glyphicon glyphicon-play'/> <output name='beginOutput'>"
                         + TranscriptTimeUtil.formatMs(begin.time) + "</output> -&gt; <output name='endOutput'>"
                         + TranscriptTimeUtil.formatMs(end.time) + "</output></button></div>"))
-                    .addClass('begin-range');
+                    .addClass('begin-range')
+                    .removeClass('form-control');
 
                 $('.play-range', $tcu).click(function (e) {
                     var t1 = parseFloat($('input[name=beginInput]', $tcu).val());
