@@ -173,7 +173,7 @@ var TranscriptTimeUtil = {
                 'max': begin.max,
                 'pk': $tcu.attr('data-tcuid'),
                 'params': getTimecodes,
-                'savenochange': true,
+                'savenochange': true, //because of the inserted end range input element
                 'tpl': "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value); Drupal.settings.scrollingTranscript[\"" + trid + "\"].setCurrentTime(parseFloat(beginInput.value));''>",
                 'display': function (value, sourceData) {
                     var asfloat = parseFloat(value);
@@ -214,6 +214,7 @@ var TranscriptTimeUtil = {
             }).after($("<div class='edit-times'><span class='glyphicon glyphicon-edit'/></div>").click(
                 function (e) {
                     e.stopPropagation();
+                    $(this).hide(); //hide icon
                     $('.play-button', $tcu).editable('toggle');
                 }
             ));
@@ -238,6 +239,8 @@ var TranscriptTimeUtil = {
                         scroller.playOne($tcu, true, t1, t2);
                     }
                 });
+            }).on('hidden', function(e, reason) {
+                $('div.edit-times', $tcu).show(); //show icon
             });
         });
         $transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active');
