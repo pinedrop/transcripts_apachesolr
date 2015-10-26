@@ -78,7 +78,6 @@ function transcripts_apachesolr_index_transcripts_form_queue_submit(array $form,
     $form_state['redirect'] = array($redirect, array('query' => $destination));
 }
 
-
 function transcripts_apachesolr_index_transcripts_form_queue_confirm(array $form, array &$form_state, $nids = '')
 {
     $message = $nids == '' ? t('All transcripts will be reindexed. ') : t('Transcripts from these nodes will be reindexed: ') . str_replace(' ', '+', trim($nids)) . '. ';
