@@ -30,15 +30,17 @@ var TranscriptTimeUtil = {
                     var $transcript = $(this);
                     var alreadyEditing = false;
 
-                    $('a[href$="' + settings.transcripts_editor.edit_transcript_link + '"]').click(function(e) {
-                        e.preventDefault();
-                        if (!alreadyEditing) {
-                            alreadyEditing = true;
-                            activateEditing($transcript);
-                            $(this).closest('ul').find('li').removeClass('active').find('a').removeClass('active');
-                            $(this).addClass('active').closest('li').addClass('active');
-                        }
-                    })
+                    $('a[href$="' + settings.transcripts_editor.edit_transcript_link + '"]')
+                        .addClass('transcript-edit')
+                        .click(function (e) {
+                            e.preventDefault();
+                            if (!alreadyEditing) {
+                                alreadyEditing = true;
+                                activateEditing($transcript);
+                                $(this).closest('ul').find('li').removeClass('active').find('a').removeClass('active');
+                                $(this).addClass('active').closest('li').addClass('active');
+                            }
+                        })
                 });
         }
     }
@@ -239,7 +241,7 @@ var TranscriptTimeUtil = {
                         scroller.playOne($tcu, true, t1, t2);
                     }
                 });
-            }).on('hidden', function(e, reason) {
+            }).on('hidden', function (e, reason) {
                 $('div.edit-times', $tcu).show(); //show icon
             });
         });
