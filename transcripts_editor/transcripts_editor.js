@@ -40,7 +40,7 @@ var TranscriptTimeUtil = {
                                 $(this).closest('ul').find('li').removeClass('active').find('a').removeClass('active');
                                 $(this).addClass('active').closest('li').addClass('active');
                             }
-                        })
+                        });
                 });
         }
     }
