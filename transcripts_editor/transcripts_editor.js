@@ -42,18 +42,26 @@ var TranscriptTimeUtil = {
                             }
                         });
                 });
-        }
-    }
-    function activateEditing($transcript) {
-        var trid = $transcript.attr('data-transcripts-id');
 
-        /* language tiers */
-        var exclude = $.map(Drupal.settings.transcripts_editor.exclude,
+            /* reactivate tier editing after a transcript search */
+            $('.tier.hit', context).each(function() {
+                if ($(this).closest('[data-transcripts-role=transcript]').hasClass('editing-active')) {
+                    activateTierEditing($(this).closest('.speaker-tiers'), getTierExclusions()); //FIXME should cache exclude
+                }
+            });
+        }
+    };
+
+    function getTierExclusions() {
+        return $.map(Drupal.settings.transcripts_editor.exclude,
             function (val, i) {
                 return '[data-tier=' + val + ']';
             }
         );
-        $('.tier', $transcript).not(exclude.join(',')).each(function () {
+    }
+
+    function activateTierEditing($tiers, exclude) {
+        $('.tier', $tiers).not(exclude.join(',')).each(function () {
             $(this).editable({
                 'mode': 'inline',
                 'toggle': 'click',
@@ -71,6 +79,16 @@ var TranscriptTimeUtil = {
                     if (response.status == 'error') return response.message;
                 }
             });
+        });
+    }
+
+    function activateEditing($transcript) {
+        var trid = $transcript.attr('data-transcripts-id');
+
+        /* language tiers */
+        var exclude = getTierExclusions();
+        $('.speaker-tiers', $transcript).each(function() {
+            activateTierEditing($(this), exclude);
         });
 
         /* speaker names */
