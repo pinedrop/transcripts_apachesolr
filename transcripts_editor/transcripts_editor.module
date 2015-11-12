@@ -4,10 +4,8 @@ include_once 'transcripts_editor.index.inc';
 
 function transcripts_editor_init()
 {
-    drupal_add_library('system', 'drupal.ajax');
-
     $node = menu_get_object();
-    if (arg(2) == NULL && transcripts_editor_access_check($node)) { //URL = node/nid
+    if ($node && transcripts_editor_access_check($node)) {
         $editable = TRUE;
         foreach (module_implements('transcripts_editor_disabled') as $module) {
             if (module_invoke($module, 'transcripts_editor_disabled', $node)) {
@@ -47,7 +45,8 @@ function transcripts_editor_init()
 }
 
 function transcripts_editor_access_check($node) {
-    return $node && transcripts_node_has_transcript($node) && node_access('update', $node);
+    //only allowed on page node/x
+    return arg(2) == NULL && transcripts_node_has_transcript($node) && node_access('update', $node);
 }
 
 function transcripts_editor_menu()
