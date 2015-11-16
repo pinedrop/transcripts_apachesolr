@@ -94,6 +94,31 @@ function transcripts_editor_ajax($nid) {
     return t('Error. Please return to the previous page.');
 }
 
+function transcripts_editor_theme()
+{
+    return array(
+        'transcripts_editor_tcu_gear' => array(
+            'path' => drupal_get_path('module', 'transcripts_editor'),
+            'file' => 'transcripts_editor.theme.inc',
+            'render element' => 'element',
+        ),
+    );
+}
+
+function transcripts_editor_transcripts_ui_tcu_alter(&$tcu)
+{
+    $dropdown = array(
+        'gear_menu' => array(
+            '#prefix' => "<div class='tcu-gear dropdown'>",
+            '#suffix' => "</div>",
+            '#theme' => 'transcripts_editor_tcu_gear',
+            '#sid' => $tcu['content']['tcu_info']['speaker_name']['#sid'],
+            '#ops' => array('Insert before', 'Insert after', 'Copy after', 'Remove'),
+        ),
+    );
+    $tcu['content'] = $dropdown + $tcu['content'];
+}
+
 function transcripts_editor_update_tier()
 {
     //get nid that tcu belongs to
@@ -175,7 +200,6 @@ function transcripts_editor_update_speaker()
         ));
     }
 }
-
 
 function transcripts_editor_update_times()
 {

@@ -1,3 +1,11 @@
+/* tcu gear menu */
+.tcu-gear {
+    display: none;
+}
+.editing-active .tcu-gear {
+    display: block;
+}
+
 /* speaker name editing */
 .transcript-content .editable-transcript-processed .speaker-name {
     overflow: visible;
