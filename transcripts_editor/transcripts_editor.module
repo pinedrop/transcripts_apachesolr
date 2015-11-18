@@ -21,7 +21,7 @@ function transcripts_editor_init()
             drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/lib/typeahead.js-bootstrap.css', array('type' => 'file', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -90));
             drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/lib/typeaheadjs.10x.js', array('type' => 'file', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
             drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.css', 'file');
-            drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.js', 'file');
+            drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/js/transcripts_editor.js', 'file');
 
             $exclude = array();
             foreach (module_implements('transcripts_editor_exclude_tiers') as $module) {
@@ -85,6 +85,11 @@ function transcripts_editor_menu()
         'access callback' => TRUE,
         'type' => MENU_CALLBACK,
     );
+    $items['tcu/gear'] = array(
+        'page callback' => 'transcripts_editor_gear_ops',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
 
     return $items;
 }
@@ -107,16 +112,93 @@ function transcripts_editor_theme()
 
 function transcripts_editor_transcripts_ui_tcu_alter(&$tcu)
 {
+    $tcuid = $tcu['content']['tcu_info']['speaker_name']['#sid'];
     $dropdown = array(
         'gear_menu' => array(
-            '#prefix' => "<div class='tcu-gear dropdown'>",
-            '#suffix' => "</div>",
             '#theme' => 'transcripts_editor_tcu_gear',
-            '#sid' => $tcu['content']['tcu_info']['speaker_name']['#sid'],
-            '#ops' => array('Insert before', 'Insert after', 'Copy after', 'Remove'),
+            '#tcuid' => $tcuid,
+            '#actions' => array(
+                'insert_before' => t('Insert before'),
+                'insert_after' => t('Insert after'),
+                'copy_after' => t('Copy after'),
+                'remove' => t('Remove'),
+            ),
+            '#prefix' => "<div id='tcu-gear-{$tcuid}' class='tcu-gear dropdown' data-tcuid='{$tcuid}'>",
+            '#suffix' => "</div>",
         ),
     );
     $tcu['content'] = $dropdown + $tcu['content'];
+}
+
+function transcripts_editor_gear_ops()
+{
+    $tcuid = $_POST['tcuid'];
+    $action = $_POST['action'];
+    $tiers = $_POST['tiers'];
+    $speaker_tiers = $_POST['speaker_tiers'];
+
+    switch ($action) {
+        case 'insert_before':
+            $sentence = new stdClass();
+            $sentence->sid = 3946;
+            $sentence->start = 12;
+            $sentence->end = 15;
+            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
+
+            drupal_json_output(array(
+                'status' => 'success',
+                'data' => array(
+                    'action' => 'insert_before',
+                    'tcu' => drupal_render($tcu),
+                ),
+            ));
+            break;
+        case 'insert_after':
+            $sentence = new stdClass();
+            $sentence->sid = 3946;
+            $sentence->start = 12;
+            $sentence->end = 15;
+            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
+
+            drupal_json_output(array(
+                'status' => 'success',
+                'data' => array(
+                    'action' => 'insert_after',
+                    'tcu' => drupal_render($tcu),
+                ),
+            ));
+            break;
+        case 'copy_after':
+            $sentence = new stdClass();
+            $sentence->sid = 3946;
+            $sentence->start = 12;
+            $sentence->end = 15;
+            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
+
+            drupal_json_output(array(
+                'status' => 'success',
+                'data' => array(
+                    'action' => 'copy_after',
+                    'tcu' => drupal_render($tcu),
+                ),
+            ));
+            break;
+        case 'remove':
+            $sentence = new stdClass();
+            $sentence->sid = 3946;
+            $sentence->start = 12;
+            $sentence->end = 15;
+            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
+
+            drupal_json_output(array(
+                'status' => 'success',
+                'data' => array(
+                    'action' => 'remove',
+                    'tcu' => drupal_render($tcu),
+                ),
+            ));
+            break;
+    }
 }
 
 function transcripts_editor_update_tier()

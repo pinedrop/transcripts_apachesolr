@@ -20,6 +20,13 @@ var TranscriptTimeUtil = {
     }
 };
 
+(function($, Drupal) {
+    Drupal.ajax.prototype.commands.resetTcuGear = function(ajax, response, status) {
+        $('#transcripts-editor-gear-op-' + response.tcuid + ' option:first-child').prop('selected', true);
+        $('.transcripts-editor-gear-op').blur();
+    };
+}(jQuery, Drupal));
+
 (function ($) {
     Drupal.behaviors.transcriptsEditor = {
         attach: function (context, settings) {
@@ -39,6 +46,38 @@ var TranscriptTimeUtil = {
                                 activateEditing($transcript);
                                 $(this).closest('ul').find('li').removeClass('active').find('a').removeClass('active');
                                 $(this).addClass('active').closest('li').addClass('active');
+                                $('.tcu-gear').each(function() {
+                                    var tcuid = $(this).attr('data-tcuid');
+                                    $('.dropdown-menu a', this).click(function(e) {
+                                        e.preventDefault();
+                                        $.ajax({
+                                            type: "POST",
+                                            url: Drupal.settings.basePath + 'tcu/gear',
+                                            data: {
+                                                'tcuid': tcuid,
+                                                'action': $(this).attr('data-val')
+                                            },
+                                            success: function(response) {
+                                                if (response.status == 'success') {
+                                                    $pivot = $('#' + tcuid);
+                                                    switch (response.data.action) {
+                                                        case 'insert_before':
+                                                            $pivot.before(response.data.tcu);
+                                                            break;
+                                                        case 'insert_after':
+                                                            $pivot.after(response.data.tcu);
+                                                            break;
+                                                        case 'copy_after':
+                                                            $pivot.after(response.data.tcu);
+                                                            break;
+                                                        case 'remove':
+                                                            break;
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    });
+                                });
                             }
                         });
                 });
