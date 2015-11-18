@@ -132,7 +132,10 @@ function transcripts_editor_transcripts_ui_tcu_alter(&$tcu)
 
 function transcripts_editor_gear_ops()
 {
+    $trid = $_POST['trid'];
     $tcuid = $_POST['tcuid'];
+    $start = $_POST['start'];
+    $end = $_POST['end'];
     $action = $_POST['action'];
     $tiers = $_POST['tiers'];
     $speaker_tiers = $_POST['speaker_tiers'];
@@ -154,17 +157,24 @@ function transcripts_editor_gear_ops()
             ));
             break;
         case 'insert_after':
-            $sentence = new stdClass();
-            $sentence->sid = 3946;
-            $sentence->start = 12;
-            $sentence->end = 15;
-            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
-
+            $tcu = tcu_create(
+                array(
+                    'trid' => $trid,
+                    'start' => $end,
+                    'end' => $end + 3,
+                    'created' => REQUEST_TIME,
+                    'changed' => REQUEST_TIME,
+                )
+            );
+            tcu_save($tcu);
+            $tcu->tcuid;
+            $tcu->sid = $tcu->tcuid;
+            $return = transcripts_ui_tcu($tcu, 'new-speaker');
             drupal_json_output(array(
                 'status' => 'success',
                 'data' => array(
                     'action' => 'insert_after',
-                    'tcu' => drupal_render($tcu),
+                    'tcu' => drupal_render($return),
                 ),
             ));
             break;

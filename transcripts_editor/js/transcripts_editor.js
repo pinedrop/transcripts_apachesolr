@@ -50,16 +50,19 @@ var TranscriptTimeUtil = {
                                     var tcuid = $(this).attr('data-tcuid');
                                     $('.dropdown-menu a', this).click(function(e) {
                                         e.preventDefault();
+                                        $pivot = $('#' + tcuid);
                                         $.ajax({
                                             type: "POST",
                                             url: Drupal.settings.basePath + 'tcu/gear',
                                             data: {
+                                                'trid': $transcript.attr('data-transcripts-id').split('-').pop(),
                                                 'tcuid': tcuid,
+                                                'start': $pivot.attr('data-begin'),
+                                                'end': $pivot.attr('data-end'),
                                                 'action': $(this).attr('data-val')
                                             },
                                             success: function(response) {
                                                 if (response.status == 'success') {
-                                                    $pivot = $('#' + tcuid);
                                                     switch (response.data.action) {
                                                         case 'insert_before':
                                                             $pivot.before(response.data.tcu);
