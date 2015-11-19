@@ -47,37 +47,43 @@ var TranscriptTimeUtil = {
                                 $(this).closest('ul').find('li').removeClass('active').find('a').removeClass('active');
                                 $(this).addClass('active').closest('li').addClass('active');
                                 $('.tcu-gear').each(function() {
-                                    var tcuid = $(this).attr('data-tcuid');
-                                    $('.dropdown-menu a', this).click(function(e) {
-                                        e.preventDefault();
-                                        $pivot = $('#' + tcuid);
-                                        $.ajax({
-                                            type: "POST",
-                                            url: Drupal.settings.basePath + 'tcu/gear',
-                                            data: {
-                                                'trid': $transcript.attr('data-transcripts-id').split('-').pop(),
-                                                'tcuid': tcuid,
-                                                'start': $pivot.attr('data-begin'),
-                                                'end': $pivot.attr('data-end'),
-                                                'action': $(this).attr('data-val')
-                                            },
-                                            success: function(response) {
-                                                if (response.status == 'success') {
-                                                    switch (response.data.action) {
-                                                        case 'insert_before':
-                                                            $pivot.before(response.data.tcu);
-                                                            break;
-                                                        case 'insert_after':
-                                                            $pivot.after(response.data.tcu);
-                                                            break;
-                                                        case 'copy_after':
-                                                            $pivot.after(response.data.tcu);
-                                                            break;
-                                                        case 'remove':
-                                                            break;
+                                    var gear = $(this);
+                                    var tcuid = gear.attr('data-tcuid');
+                                    $('[data-toggle=popover]', gear).popover().on('shown.bs.popover', function() {
+                                        $('span.icon').click(function() {
+                                            $('[data-toggle=popover]', gear).popover('hide');
+                                        });
+                                        $('a.tcu-action-link', gear).click(function (e) {
+                                            e.preventDefault();
+                                            $pivot = $('#' + tcuid);
+                                            $.ajax({
+                                                type: "POST",
+                                                url: Drupal.settings.basePath + 'tcu/gear',
+                                                data: {
+                                                    'trid': $transcript.attr('data-transcripts-id').split('-').pop(),
+                                                    'tcuid': tcuid,
+                                                    'start': $pivot.attr('data-begin'),
+                                                    'end': $pivot.attr('data-end'),
+                                                    'action': $(this).attr('data-val')
+                                                },
+                                                success: function (response) {
+                                                    if (response.status == 'success') {
+                                                        switch (response.data.action) {
+                                                            case 'insert_before':
+                                                                $pivot.before(response.data.tcu);
+                                                                break;
+                                                            case 'insert_after':
+                                                                $pivot.after(response.data.tcu);
+                                                                break;
+                                                            case 'copy_after':
+                                                                $pivot.after(response.data.tcu);
+                                                                break;
+                                                            case 'remove':
+                                                                break;
+                                                        }
                                                     }
                                                 }
-                                            }
+                                            });
                                         });
                                     });
                                 });

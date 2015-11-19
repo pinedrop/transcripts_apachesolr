@@ -123,7 +123,7 @@ function transcripts_editor_transcripts_ui_tcu_alter(&$tcu)
                 'copy_after' => t('Copy after'),
                 'remove' => t('Remove'),
             ),
-            '#prefix' => "<div id='tcu-gear-{$tcuid}' class='tcu-gear dropdown' data-tcuid='{$tcuid}'>",
+            '#prefix' => "<div id='tcu-gear-{$tcuid}' class='tcu-gear' data-tcuid='{$tcuid}'>",
             '#suffix' => "</div>",
         ),
     );

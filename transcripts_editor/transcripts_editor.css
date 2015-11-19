@@ -5,6 +5,9 @@
 .editing-active .tcu-gear {
     display: block;
 }
+.tcu-gear .icon {
+    float: right;
+}
 
 /* speaker name editing */
 .transcript-content .editable-transcript-processed .speaker-name {
