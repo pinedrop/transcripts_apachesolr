@@ -130,84 +130,109 @@ function transcripts_editor_transcripts_ui_tcu_alter(&$tcu)
     $tcu['content'] = $dropdown + $tcu['content'];
 }
 
+function transcripts_editor_mark_edited($nid)
+{
+    //flag node as having been edited
+    $flag = flag_get_flag('keep_transcript_edits');
+    if ($flag && !$flag->is_flagged($nid)) {
+        //must override permissions since we do not permit non-programmatic flagging
+        $flag->flag('flag', $nid, NULL, TRUE);
+    }
+}
+
 function transcripts_editor_gear_ops()
 {
-    $trid = $_POST['trid'];
+    //get nid that tcu belongs to
     $tcuid = $_POST['tcuid'];
-    $start = $_POST['start'];
-    $end = $_POST['end'];
-    $action = $_POST['action'];
-    $tiers = $_POST['tiers'];
-    $speaker_tiers = $_POST['speaker_tiers'];
+    list($nid, $trid) = transcripts_apachesolr_parent($tcuid);
 
-    switch ($action) {
-        case 'insert_before':
-            $sentence = new stdClass();
-            $sentence->sid = 3946;
-            $sentence->start = 12;
-            $sentence->end = 15;
-            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
+    if ($trid == $_POST['trid'] && node_access('update', node_load($nid))) { //security and permissions check
+        $start = $_POST['start'];
+        $end = $_POST['end'];
+        $action = $_POST['action'];
+        $speakers = $_POST['speakers'];
+        $tiers = $_POST['tiers'];
 
-            drupal_json_output(array(
-                'status' => 'success',
-                'data' => array(
-                    'action' => 'insert_before',
-                    'tcu' => drupal_render($tcu),
-                ),
-            ));
-            break;
-        case 'insert_after':
-            $tcu = tcu_create(
-                array(
-                    'trid' => $trid,
-                    'start' => $end,
-                    'end' => $end + 3,
-                    'created' => REQUEST_TIME,
-                    'changed' => REQUEST_TIME,
-                )
-            );
-            tcu_save($tcu);
-            $tcu->tcuid;
-            $tcu->sid = $tcu->tcuid;
-            $return = transcripts_ui_tcu($tcu, 'new-speaker');
-            drupal_json_output(array(
-                'status' => 'success',
-                'data' => array(
-                    'action' => 'insert_after',
-                    'tcu' => drupal_render($return),
-                ),
-            ));
-            break;
-        case 'copy_after':
-            $sentence = new stdClass();
-            $sentence->sid = 3946;
-            $sentence->start = 12;
-            $sentence->end = 15;
-            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
-
-            drupal_json_output(array(
-                'status' => 'success',
-                'data' => array(
-                    'action' => 'copy_after',
-                    'tcu' => drupal_render($tcu),
-                ),
-            ));
-            break;
-        case 'remove':
-            $sentence = new stdClass();
-            $sentence->sid = 3946;
-            $sentence->start = 12;
-            $sentence->end = 15;
-            $tcu = transcripts_ui_tcu($sentence, 'new-speaker');
-
-            drupal_json_output(array(
-                'status' => 'success',
-                'data' => array(
-                    'action' => 'remove',
-                    'tcu' => drupal_render($tcu),
-                ),
-            ));
-            break;
+        switch ($action) {
+            case 'insert_before':
+                $tcu = tcu_create(
+                    array(
+                        'trid' => $trid,
+                        'start' => $start - 3,
+                        'end' => $start,
+                        'created' => REQUEST_TIME,
+                        'changed' => REQUEST_TIME,
+                    )
+                );
+                $tiers = array_fill_keys(array_keys($tiers), '');
+                $tcu->setTiers($tiers);
+                $tcu->setSpeakers($speakers);
+                tcu_save($tcu);
+                $tcu->sid = $tcu->tcuid;
+                transcripts_editor_mark_edited($nid);
+                drupal_json_output(array(
+                    'status' => 'success',
+                    'data' => array(
+                        'action' => 'insert_before',
+                        'tcu' => drupal_render(transcripts_ui_tcu($tcu, 'what-speaker', $speakers, transcripts_ui_tier_list($tiers))),
+                    ),
+                ));
+                break;
+            case 'insert_after':
+                $tcu = tcu_create(
+                    array(
+                        'trid' => $trid,
+                        'start' => $end,
+                        'end' => $end + 3,
+                        'created' => REQUEST_TIME,
+                        'changed' => REQUEST_TIME,
+                    )
+                );
+                $tiers = array_fill_keys(array_keys($tiers), '');
+                $tcu->setTiers($tiers);
+                $tcu->setSpeakers($speakers);
+                tcu_save($tcu);
+                $tcu->sid = $tcu->tcuid;
+                transcripts_editor_mark_edited($nid);
+                drupal_json_output(array(
+                    'status' => 'success',
+                    'data' => array(
+                        'action' => 'insert_after',
+                        'tcu' => drupal_render(transcripts_ui_tcu($tcu, 'what-speaker', $speakers, transcripts_ui_tier_list($tiers))),
+                    ),
+                ));
+                break;
+            case 'copy_after':
+                $tcu = tcu_create(
+                    array(
+                        'trid' => $trid,
+                        'start' => $start,
+                        'end' => $end,
+                        'created' => REQUEST_TIME,
+                        'changed' => REQUEST_TIME,
+                    )
+                );
+                $tcu->setTiers($tiers);
+                $tcu->setSpeakers($speakers);
+                tcu_save($tcu);
+                $tcu->sid = $tcu->tcuid;
+                transcripts_editor_mark_edited($nid);
+                drupal_json_output(array(
+                    'status' => 'success',
+                    'data' => array(
+                        'action' => 'copy_after',
+                        'tcu' => drupal_render(transcripts_ui_tcu($tcu, 'what-speaker', $speakers, transcripts_ui_tier_list($tiers))),
+                    ),
+                ));
+                break;
+            case 'remove':
+                break;
+        }
+    } else {
+        drupal_json_output(array(
+            'status' => 'error',
+            'message' => t('Sorry, you are not permitted to execute this operation.'),
+        ));
     }
 }
 
@@ -224,13 +249,7 @@ function transcripts_editor_update_tier()
         $tcu = tcu_load($tcuid);
         $tcu->setTiers(array_merge($tcu->getTiers(), array($_POST['name'] => $_POST['value'])));
         tcu_save($tcu);
-
-        //flag node as having been edited
-        $flag = flag_get_flag('keep_transcript_edits');
-        if ($flag && !$flag->is_flagged($nid)) {
-            //must override permissions since we do not permit non-programmatic flagging
-            $flag->flag('flag', $nid, NULL, TRUE);
-        }
+        transcripts_editor_mark_edited($nid);
     } else {
         drupal_json_output(array(
             'status' => 'error',
@@ -269,14 +288,7 @@ function transcripts_editor_update_speaker()
                 tcu_save($tcu);
             }
         }
-
-        //flag node as having been edited
-        $flag = flag_get_flag('keep_transcript_edits');
-        if ($flag && !$flag->is_flagged($nid)) {
-            //must override permissions since we do not permit non-programmatic flagging
-            $flag->flag('flag', $nid, NULL, TRUE);
-        }
-
+        transcripts_editor_mark_edited($nid);
         drupal_json_output(array(
             'status' => 'success',
             'data' => array(
@@ -317,14 +329,7 @@ function transcripts_editor_update_times()
                 $tcu->start = $begin;
                 $tcu->end = $end;
                 tcu_save($tcu);
-
-                //flag node as having been edited
-                $flag = flag_get_flag('keep_transcript_edits');
-                if ($flag && !$flag->is_flagged($nid)) {
-                    //must override permissions since we do not permit non-programmatic flagging
-                    $flag->flag('flag', $nid, NULL, TRUE);
-                }
-
+                transcripts_editor_mark_edited($nid);
                 drupal_json_output(array(
                     'status' => 'success',
                     'data' => array(
@@ -372,9 +377,7 @@ function transcripts_editor_file_field_process($element, &$form_state, $form)
 }
 
 function transcripts_editor_speaker_names($tier) {
-    //watchdog('TRANSCRIPTS EDITOR', "Tier = $tier", NULL, WATCHDOG_INFO);
     $result = db_query('SELECT DISTINCT value FROM {tcu_speaker} WHERE tier = :tier', array(':tier' => $tier));
     $speaker_names = $result->fetchCol();
-    //watchdog('TRANSCRIPTS EDITOR', dprint_r($speaker_names, TRUE), NULL, WATCHDOG_INFO);
     drupal_json_output($speaker_names);
 }

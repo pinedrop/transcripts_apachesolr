@@ -41,47 +41,13 @@ var TranscriptTimeUtil = {
                         .addClass('transcript-edit')
                         .click(function (e) {
                             e.preventDefault();
+                            $(this).closest('ul').find('li').removeClass('active').find('a').removeClass('active');
+                            $(this).addClass('active').closest('li').addClass('active');
+
                             if (!alreadyEditing) {
                                 alreadyEditing = true;
-                                activateEditing($transcript);
-                                $(this).closest('ul').find('li').removeClass('active').find('a').removeClass('active');
-                                $(this).addClass('active').closest('li').addClass('active');
-                                $('.tcu-gear').each(function () {
-                                    var gear = $(this);
-                                    var tcuid = gear.attr('data-tcuid');
-                                    $('a.tcu-action-link', gear).click(function (e) {
-                                        e.preventDefault();
-                                        $pivot = $('#' + tcuid);
-                                        $.ajax({
-                                            type: "POST",
-                                            url: Drupal.settings.basePath + 'tcu/gear',
-                                            data: {
-                                                'trid': $transcript.attr('data-transcripts-id').split('-').pop(),
-                                                'tcuid': tcuid,
-                                                'start': $pivot.attr('data-begin'),
-                                                'end': $pivot.attr('data-end'),
-                                                'action': $(this).attr('data-val')
-                                            },
-                                            success: function (response) {
-                                                if (response.status == 'success') {
-                                                    switch (response.data.action) {
-                                                        case 'insert_before':
-                                                            $pivot.before(response.data.tcu);
-                                                            break;
-                                                        case 'insert_after':
-                                                            $pivot.after(response.data.tcu);
-                                                            break;
-                                                        case 'copy_after':
-                                                            $pivot.after(response.data.tcu);
-                                                            break;
-                                                        case 'remove':
-                                                            break;
-                                                    }
-                                                }
-                                            }
-                                        });
-                                    });
-                                });
+                                activateEditing($transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active'));
+                                $('body').addClass('is-transcript-editing'); ///but what if multiple transcripts are being edited on the same page
                             }
                         });
                 });
@@ -125,12 +91,12 @@ var TranscriptTimeUtil = {
         });
     }
 
-    function activateEditing($transcript) {
-        var trid = $transcript.attr('data-transcripts-id');
+    function activateEditing($context) {
+        var trid = $context.closest('[data-transcripts-id').attr('data-transcripts-id');
 
         /* language tiers */
         var exclude = getTierExclusions();
-        $('.speaker-tiers', $transcript).each(function () {
+        $('.speaker-tiers', $context).each(function () {
             activateTierEditing($(this), exclude);
         });
 
@@ -150,7 +116,7 @@ var TranscriptTimeUtil = {
             }
         }
 
-        $('.speaker-display', $transcript).each(function () {
+        $('.speaker-display', $context).each(function () {
             var tier_name = $(this).attr('data-speaker-display');
             var speaker_name = $(this).text();
             if (transcript_speakers[tier_name].indexOf(speaker_name) == -1) {
@@ -211,7 +177,7 @@ var TranscriptTimeUtil = {
         });
 
         /* timecodes */
-        $('.play-button', $transcript).each(function () {
+        $('.play-button', $context).each(function () {
             var $that = $(this);
 
             var $tcu = $(this).closest('[data-tcuid]');
@@ -306,8 +272,54 @@ var TranscriptTimeUtil = {
                 $('div.edit-times', $tcu).show(); //show icon
             });
         });
-        $transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active');
-        $('body').addClass('is-transcript-editing');
+
+        /* gear menu */
+        $('.tcu-gear', $context).each(function () {
+            var $gear = $(this);
+            var tcuid = $gear.attr('data-tcuid');
+            $('a.tcu-action-link', $gear).click(function (e) {
+                e.preventDefault();
+                $pivot = $('#' + tcuid);
+                $speakers = {};
+                $pivot.find('.speaker-display').each(function() {
+                    $speakers[$(this).attr('data-speaker-display')] = $(this).html();
+                });
+                $tiers = {};
+                $pivot.find('.tier').each(function() {
+                    $tiers[$(this).attr('data-tier')] = $(this).html();
+                });
+                $.ajax({
+                    type: "POST",
+                    url: Drupal.settings.basePath + 'tcu/gear',
+                    data: {
+                        'trid': trid.split('-').pop(),
+                        'tcuid': tcuid,
+                        'start': $pivot.attr('data-begin'),
+                        'end': $pivot.attr('data-end'),
+                        'speakers': $speakers,
+                        'tiers': $tiers,
+                        'action': $(this).attr('data-val')
+                    },
+                    success: function (response) {
+                        if (response.status == 'success') {
+                            switch (response.data.action) {
+                                case 'insert_before':
+                                    activateEditing($(response.data.tcu).insertBefore($pivot));
+                                    break;
+                                case 'insert_after':
+                                    activateEditing($(response.data.tcu).insertAfter($pivot));
+                                    break;
+                                case 'copy_after':
+                                    activateEditing($(response.data.tcu).insertAfter($pivot));
+                                    break;
+                                case 'remove':
+                                    break;
+                            }
+                        }
+                    }
+                });
+            });
+        });
     }
 
 })(jQuery);
