@@ -43,3 +43,6 @@
 div.begin-range, div.end-range {
     display: block;
 }
+.editing-timecodes .tcu-info .speaker-name {
+    display: none;
+}

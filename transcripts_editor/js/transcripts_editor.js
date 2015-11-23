@@ -268,8 +268,10 @@ var TranscriptTimeUtil = {
                         scroller.playOne($tcu, true, t1, t2);
                     }
                 });
+                $tcu.addClass('editing-timecodes');
             }).on('hidden', function (e, reason) {
                 $('div.edit-times', $tcu).show(); //show icon
+                $tcu.removeClass('editing-timecodes');
             });
         });
 
