@@ -34,6 +34,7 @@ function transcripts_editor_init()
                     'transcripts_editor' => array(
                         'nid' => $node->nid,
                         'exclude' => $exclude,
+                        'tiers' => transcripts_ui_tiers(),
                         'speaker_displays' => transcripts_ui_speaker_names(),
                         'edit_transcript_link' => 'node/' .$node->nid. '/edit-transcript',
                     ),

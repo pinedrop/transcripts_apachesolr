@@ -80,6 +80,7 @@ var TranscriptTimeUtil = {
                 'onblur': 'ignore',
                 'pk': $(this).closest('[data-tcuid]').attr('data-tcuid'),
                 'name': $(this).attr('data-tier'),
+                'emptytext': Drupal.settings.transcripts_editor.tiers[$(this).attr('data-tier')],
                 'params': {
                     'oldValue': $(this).text()
                 },
@@ -92,7 +93,7 @@ var TranscriptTimeUtil = {
     }
 
     function activateEditing($context) {
-        var trid = $context.closest('[data-transcripts-id').attr('data-transcripts-id');
+        var trid = $context.closest('[data-transcripts-id]').attr('data-transcripts-id');
 
         /* language tiers */
         var exclude = getTierExclusions();
