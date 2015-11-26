@@ -5,9 +5,12 @@
 .editing-active .tcu-gear {
     display: block;
 }
+.scroller.transcripts-editor-processed .tcu-delete-warning {
+    background: red;
+}
 
 /* speaker name editing */
-.transcript-content .editable-transcript-processed .speaker-name {
+.scroller.transcripts-editor-processed .speaker-name {
     overflow: visible;
 }
 .speaker-name .tt-hint, .speaker-name .tt-query {
@@ -26,10 +29,10 @@
     left: 23px;
     top: 75px;
 }
-.transcript-content .editable-transcript-processed .play-range {
+.scroller.transcripts-editor-processed .play-range {
     padding: 0 1.7rem;
 }
-.transcript-content .editable-transcript-processed .play-range .glyphicon {
+.scroller.transcripts-editor-processed .play-range .glyphicon {
     color: #5b68ce;
     left: -1rem;
 }

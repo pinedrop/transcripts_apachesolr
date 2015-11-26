@@ -36,6 +36,7 @@ var TranscriptTimeUtil = {
                 .once('transcripts-editor')
                 .each(function () {
                     var $transcript = $(this);
+                    var trid = $transcript.attr('data-transcripts-id');
                     var alreadyEditing = false;
 
                     $('a[href$="' + settings.transcripts_editor.edit_transcript_link + '"]')
@@ -49,6 +50,10 @@ var TranscriptTimeUtil = {
                                 alreadyEditing = true;
                                 activateEditing($transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active'));
                                 $('body').addClass('is-transcript-editing'); ///but what if multiple transcripts are being edited on the same page
+
+                                $('#tcu-delete-modal-' + trid).on('hide.bs.modal', function(e) {
+                                    $('#' + $(this).attr('data-tcuid')).removeClass('tcu-delete-warning');
+                                });
                             }
                         });
                 });
@@ -282,6 +287,7 @@ var TranscriptTimeUtil = {
             var tcuid = $gear.attr('data-tcuid');
             $('a.tcu-action-link', $gear).click(function (e) {
                 e.preventDefault();
+                action = $(this).attr('data-val');
                 $pivot = $('#' + tcuid);
                 $speakers = {};
                 $pivot.find('.speaker-display').each(function() {
@@ -291,38 +297,43 @@ var TranscriptTimeUtil = {
                 $pivot.find('.tier').each(function() {
                     $tiers[$(this).attr('data-tier')] = $(this).html();
                 });
-                $.ajax({
-                    type: "POST",
-                    url: Drupal.settings.basePath + 'tcu/gear',
-                    data: {
-                        'trid': trid.split('-').pop(),
-                        'tcuid': tcuid,
-                        'start': $pivot.attr('data-begin'),
-                        'end': $pivot.attr('data-end'),
-                        'speakers': $speakers,
-                        'tiers': $tiers,
-                        'action': $(this).attr('data-val')
-                    },
-                    success: function (response) {
-                        if (response.status == 'success') {
-                            switch (response.data.action) {
-                                case 'insert_before':
-                                    $tcu = $(response.data.tcu).insertBefore($pivot);
-                                    activateEditing($tcu);
-                                    Drupal.settings.scrollingTranscript[trid].addOne($tcu);
-                                    break;
-                                case 'insert_after':
-                                case 'copy_after':
-                                    $tcu = $(response.data.tcu).insertAfter($pivot);
-                                    activateEditing($tcu);
-                                    Drupal.settings.scrollingTranscript[trid].addOne($tcu);
-                                    break;
-                                case 'remove':
-                                    break;
+                data = {
+                    'trid': trid.split('-').pop(),
+                    'tcuid': tcuid,
+                    'start': $pivot.attr('data-begin'),
+                    'end': $pivot.attr('data-end'),
+                    'speakers': $speakers,
+                    'tiers': $tiers,
+                    'action': action
+                };
+                if (action == 'delete') { //require confirmation
+                    $pivot.addClass('tcu-delete-warning');
+                    $('#tcu-delete-modal-' + trid).attr('data-tcuid', tcuid).modal('show');
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: Drupal.settings.basePath + 'tcu/gear',
+                        data: data,
+                        success: function (response) {
+                            if (response.status == 'success') {
+                                switch (response.data.action) {
+                                    case 'insert_before':
+                                        $tcu = $(response.data.tcu).insertBefore($pivot);
+                                        activateEditing($tcu);
+                                        Drupal.settings.scrollingTranscript[trid].addOne($tcu);
+                                        break;
+                                    case 'insert_after':
+                                    case 'copy_after':
+                                        $tcu = $(response.data.tcu).insertAfter($pivot);
+                                        activateEditing($tcu);
+                                        Drupal.settings.scrollingTranscript[trid].addOne($tcu);
+                                        break;
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
             });
         });
     }
