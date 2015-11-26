@@ -28,6 +28,7 @@ var TranscriptTimeUtil = {
 }(jQuery, Drupal));
 
 (function ($) {
+
     Drupal.behaviors.transcriptsEditor = {
         attach: function (context, settings) {
             $('[data-transcripts-role=transcript]', context)
@@ -265,8 +266,7 @@ var TranscriptTimeUtil = {
                     var t1 = parseFloat($('input[name=beginInput]', $tcu).val());
                     var t2 = parseFloat($('input[name=endInput]', $tcu).val());
                     if (t2 > t1) {
-                        var scroller = Drupal.settings.scrollingTranscript[trid];
-                        scroller.playOne($tcu, true, t1, t2);
+                        Drupal.settings.scrollingTranscript[trid].playOne($tcu, true, t1, t2);
                     }
                 });
                 $tcu.addClass('editing-timecodes');
@@ -307,13 +307,15 @@ var TranscriptTimeUtil = {
                         if (response.status == 'success') {
                             switch (response.data.action) {
                                 case 'insert_before':
-                                    activateEditing($(response.data.tcu).insertBefore($pivot));
+                                    $tcu = $(response.data.tcu).insertBefore($pivot);
+                                    activateEditing($tcu);
+                                    Drupal.settings.scrollingTranscript[trid].addOne($tcu);
                                     break;
                                 case 'insert_after':
-                                    activateEditing($(response.data.tcu).insertAfter($pivot));
-                                    break;
                                 case 'copy_after':
-                                    activateEditing($(response.data.tcu).insertAfter($pivot));
+                                    $tcu = $(response.data.tcu).insertAfter($pivot);
+                                    activateEditing($tcu);
+                                    Drupal.settings.scrollingTranscript[trid].addOne($tcu);
                                     break;
                                 case 'remove':
                                     break;
