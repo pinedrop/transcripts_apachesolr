@@ -9,8 +9,8 @@
                 <?php print $message; ?>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal"><?php print $no; ?></button>
-                <button type="button" class="btn btn-primary"><?php print $yes; ?></button>
+                <button type="button" class="btn btn-default tcu-delete-cancel" data-dismiss="modal"><?php print $no; ?></button>
+                <button type="button" class="btn btn-primary tcu-delete-confirm"><?php print $yes; ?></button>
             </div>
         </div> <!-- modal content -->
     </div> <!-- modal dialog -->

@@ -49,11 +49,8 @@ var TranscriptTimeUtil = {
                             if (!alreadyEditing) {
                                 alreadyEditing = true;
                                 activateEditing($transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active'));
+                                activateTcuDeleteModal(trid);
                                 $('body').addClass('is-transcript-editing'); ///but what if multiple transcripts are being edited on the same page
-
-                                $('#tcu-delete-modal-' + trid).on('hide.bs.modal', function(e) {
-                                    $('#' + $(this).attr('data-tcuid')).removeClass('tcu-delete-warning');
-                                });
                             }
                         });
                 });
@@ -67,12 +64,61 @@ var TranscriptTimeUtil = {
         }
     };
 
+    function getTcuData($tcu) {
+        $speakers = {};
+        $tcu.find('.speaker-display').each(function () {
+            $speakers[$(this).attr('data-speaker-display')] = $(this).html();
+        });
+        $tiers = {};
+        $tcu.find('.tier').each(function () {
+            $tiers[$(this).attr('data-tier')] = $(this).html();
+        });
+        return {
+            'tcuid': $tcu.attr('data-tcuid'),
+            'start': $tcu.attr('data-begin'),
+            'end': $tcu.attr('data-end'),
+            'speakers': $speakers,
+            'tiers': $tiers
+        };
+    }
+
     function getTierExclusions() {
         return $.map(Drupal.settings.transcripts_editor.exclude,
             function (val, i) {
                 return '[data-tier=' + val + ']';
             }
         );
+    }
+
+    function activateTcuDeleteModal(trid) {
+        var $delete = $('#tcu-delete-modal-' + trid).on('shown.bs.modal', function (e) {
+            $('#' + $(this).attr('data-tcuid')).addClass('tcu-delete-warning');
+        }).on('hide.bs.modal', function (e) {
+            $('#' + $(this).attr('data-tcuid')).removeClass('tcu-delete-warning');
+        });
+        $('button.tcu-delete-confirm', $delete).click(function () {
+            tcuid = $delete.attr('data-tcuid');
+            $tcu = $('#' + tcuid);
+            data = getTcuData($tcu);
+            $.extend(data, {'trid': trid.split('-').pop(), 'action': 'delete'});
+            $.ajax({
+                type: "POST",
+                url: Drupal.settings.basePath + 'tcu/gear',
+                data: data,
+                success: function (response) {
+                    if (response.status == 'success') {
+                        switch (response.data.action) {
+                            case 'delete': //should always be delete
+                                if (response.data.tcuid == tcuid) { //should always be true
+                                    $tcu.hide('slow', function() {$tcu.remove()});
+                                }
+                                break;
+                        }
+                    }
+                }
+            });
+            $delete.modal('hide');
+        });
     }
 
     function activateTierEditing($tiers, exclude) {
@@ -283,34 +329,17 @@ var TranscriptTimeUtil = {
 
         /* gear menu */
         $('.tcu-gear', $context).each(function () {
-            var $gear = $(this);
-            var tcuid = $gear.attr('data-tcuid');
-            $('a.tcu-action-link', $gear).click(function (e) {
+            var tcuid = $(this).attr('data-tcuid');
+            $('a.tcu-action-link', this).click(function (e) {
                 e.preventDefault();
                 action = $(this).attr('data-val');
-                $pivot = $('#' + tcuid);
-                $speakers = {};
-                $pivot.find('.speaker-display').each(function() {
-                    $speakers[$(this).attr('data-speaker-display')] = $(this).html();
-                });
-                $tiers = {};
-                $pivot.find('.tier').each(function() {
-                    $tiers[$(this).attr('data-tier')] = $(this).html();
-                });
-                data = {
-                    'trid': trid.split('-').pop(),
-                    'tcuid': tcuid,
-                    'start': $pivot.attr('data-begin'),
-                    'end': $pivot.attr('data-end'),
-                    'speakers': $speakers,
-                    'tiers': $tiers,
-                    'action': action
-                };
-                if (action == 'delete') { //require confirmation
-                    $pivot.addClass('tcu-delete-warning');
+                if (action == 'delete') { //this action requires confirmation
                     $('#tcu-delete-modal-' + trid).attr('data-tcuid', tcuid).modal('show');
                 }
-                else {
+                else { //execute action directly
+                    $pivot = $('#' + tcuid);
+                    data = getTcuData($pivot);
+                    $.extend(data, {'trid': trid.split('-').pop(), 'action': action});
                     $.ajax({
                         type: "POST",
                         url: Drupal.settings.basePath + 'tcu/gear',

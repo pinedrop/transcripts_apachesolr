@@ -181,6 +181,8 @@ function transcripts_editor_gear_ops()
         $speakers = $_POST['speakers'];
         $tiers = $_POST['tiers'];
 
+        transcripts_editor_mark_edited($nid);
+
         switch ($action) {
             case 'insert_before':
                 $tcu = tcu_create(
@@ -197,7 +199,6 @@ function transcripts_editor_gear_ops()
                 $tcu->setSpeakers($speakers);
                 tcu_save($tcu);
                 $tcu->sid = $tcu->tcuid;
-                transcripts_editor_mark_edited($nid);
                 drupal_json_output(array(
                     'status' => 'success',
                     'data' => array(
@@ -221,7 +222,6 @@ function transcripts_editor_gear_ops()
                 $tcu->setSpeakers($speakers);
                 tcu_save($tcu);
                 $tcu->sid = $tcu->tcuid;
-                transcripts_editor_mark_edited($nid);
                 drupal_json_output(array(
                     'status' => 'success',
                     'data' => array(
@@ -244,7 +244,6 @@ function transcripts_editor_gear_ops()
                 $tcu->setSpeakers($speakers);
                 tcu_save($tcu);
                 $tcu->sid = $tcu->tcuid;
-                transcripts_editor_mark_edited($nid);
                 drupal_json_output(array(
                     'status' => 'success',
                     'data' => array(
@@ -254,6 +253,14 @@ function transcripts_editor_gear_ops()
                 ));
                 break;
             case 'delete':
+                tcu_delete(tcu_load($tcuid));
+                drupal_json_output(array(
+                    'status' => 'success',
+                    'data' => array(
+                        'action' => 'delete',
+                        'tcuid' => $tcuid,
+                    ),
+                ));
                 break;
         }
     } else {
