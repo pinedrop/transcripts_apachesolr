@@ -107,7 +107,6 @@ var TranscriptTimeUtil = {
                 data: data,
                 success: function (response) {
                     if (response.status == 'success') {
-                        $delete.modal('hide');
                         switch (response.data.action) {
                             case 'delete': //should always be delete
                                 if (response.data.tcuid == tcuid) { //should always be true
@@ -118,6 +117,7 @@ var TranscriptTimeUtil = {
                     }
                 }
             });
+            $delete.modal('hide');
         });
     }
 
