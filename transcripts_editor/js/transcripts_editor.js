@@ -48,9 +48,8 @@ var TranscriptTimeUtil = {
 
                             if (!alreadyEditing) {
                                 alreadyEditing = true;
-                                activateEditing($transcript.prepend("<div class='editing-message'>Transcript editing is active.</div>").addClass('editing-active'));
+                                activateEditing($transcript.addClass('editing-active'));
                                 activateTcuDeleteModal(trid);
-                                $('body').addClass('is-transcript-editing'); ///but what if multiple transcripts are being edited on the same page
                             }
                         });
                 });
