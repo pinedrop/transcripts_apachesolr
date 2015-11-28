@@ -97,7 +97,7 @@ var TranscriptTimeUtil = {
         });
         $('button.tcu-delete-confirm', $delete).click(function () {
             tcuid = $delete.attr('data-tcuid');
-            $tcu = $('#' + tcuid);
+            $tcu = $('#' + tcuid).addClass('tcu-delete-pending');
             data = getTcuData($tcu);
             $.extend(data, {'trid': trid.split('-').pop(), 'action': 'delete'});
             $.ajax({
@@ -109,7 +109,7 @@ var TranscriptTimeUtil = {
                         switch (response.data.action) {
                             case 'delete': //should always be delete
                                 if (response.data.tcuid == tcuid) { //should always be true
-                                    $tcu.hide('slow', function() {$tcu.remove()});
+                                    $tcu.removeClass('tcu-delete-pending').addClass('tcu-delete-complete').hide('slow', function() {$tcu.remove()});
                                 }
                                 break;
                         }
