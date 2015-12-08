@@ -90,7 +90,11 @@ function tcu_create($values = array())
 
 function tcu_save(Tcu $tcu)
 {
-    return $tcu->save();
+    $return = $tcu->save();
+    if (module_exists('apachesolr_realtime')) {
+        apachesolr_realtime_entity_update($tcu, 'tcu');
+    }
+    return $return;
 }
 
 class Tcu extends Entity
