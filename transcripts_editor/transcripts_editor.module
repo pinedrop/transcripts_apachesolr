@@ -226,7 +226,7 @@ function transcripts_editor_gear_ops()
                     'status' => 'success',
                     'data' => array(
                         'action' => 'insert_after',
-                        'tcu' => drupal_render(transcripts_ui_tcu($tcu, 'what-speaker', $speakers, transcripts_ui_tier_list($tiers))),
+                        'tcu' => drupal_render(transcripts_ui_tcu($tcu, 'same-speaker', $speakers, transcripts_ui_tier_list($tiers))),
                     ),
                 ));
                 break;
@@ -248,7 +248,7 @@ function transcripts_editor_gear_ops()
                     'status' => 'success',
                     'data' => array(
                         'action' => 'copy_after',
-                        'tcu' => drupal_render(transcripts_ui_tcu($tcu, 'what-speaker', $speakers, transcripts_ui_tier_list($tiers))),
+                        'tcu' => drupal_render(transcripts_ui_tcu($tcu, 'same-speaker', $speakers, transcripts_ui_tier_list($tiers))),
                     ),
                 ));
                 break;

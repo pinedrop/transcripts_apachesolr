@@ -200,6 +200,7 @@ var TranscriptTimeUtil = {
         }
 
         $('.speaker-display', $context).each(function () {
+            var $tcu = $(this).closest('[data-tcuid]');
             var tier_name = $(this).attr('data-speaker-display');
             var speaker_name = $(this).text();
             if (transcript_speakers[tier_name].indexOf(speaker_name) == -1) {
@@ -218,20 +219,23 @@ var TranscriptTimeUtil = {
                 'toggle': 'manual',
                 'showbuttons': 'right',
                 'type': 'typeaheadjs',
-                'pk': $(this).closest('[data-tcuid]').attr('data-tcuid'),
+                'pk': $tcu.attr('data-tcuid'),
                 'name': tier_name,
                 'params': getParams,
                 'url': Drupal.settings.basePath + 'tcu/up/speaker',
                 'success': function (response, newValue) {
                     switch (response.status) {
                         case 'success':
+                            $('.speaker-name', $tcu).removeClass('same-speaker new-speaker').addClass('what-speaker');
                             //change additional speaker names if called for
                             for (var i = 0; i < response.data.tcuids.length; i++) {
-                                $('[data-tcuid=' + response.data.tcuids[i] + ']').addClass('what-speaker')
+                                $('.speaker-name', '[data-tcuid=' + response.data.tcuids[i] + ']')
+                                    .removeClass('same-speaker new-speaker').addClass('what-speaker')
                                     .find($('[data-speaker-display=' + tier_name + ']'))
                                     .html(newValue).editable('setValue', newValue);
                             }
                             transcript_speakers[tier_name] = response.data.speakers;
+                            $(this).editable('setValue', newValue); //otherwise can't fix what speakers
                             fixWhatSpeakers($('[data-transcripts-id=' + trid + ']'));
                             break;
                         case 'error':
