@@ -138,8 +138,11 @@ var TranscriptTimeUtil = {
                             case 'delete': //should always be delete
                                 if (response.data.tcuid == tcuid) { //should always be true
                                     $tcu.removeClass('tcu-delete-pending').addClass('tcu-delete-complete').hide('slow', function() {
-
+                                        $next = $tcu.next('[data-tcuid]');
                                         $tcu.remove();
+                                        if ($next.length != 0) {
+                                            setSpeakerChange($next);
+                                        }
                                     });
                                 }
                                 break;
