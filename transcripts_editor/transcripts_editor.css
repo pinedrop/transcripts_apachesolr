@@ -22,6 +22,9 @@
 .speaker-name .tt-query {
     color: black;
 }
+.editing-active .same-speaker {
+    display: block;
+}
 
 /* timecode editing */
 .edit-times {

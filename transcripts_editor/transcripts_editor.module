@@ -197,7 +197,6 @@ function transcripts_editor_gear_ops()
                 $tiers = array_fill_keys(array_keys($tiers), '');
                 $tcu->setTiers($tiers);
                 $tcu->setSpeakers($speakers);
-                transcripts_editor_update_index($tcu);
                 tcu_save($tcu);
                 $tcu->sid = $tcu->tcuid;
                 drupal_json_output(array(

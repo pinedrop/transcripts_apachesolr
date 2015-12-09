@@ -63,11 +63,39 @@ var TranscriptTimeUtil = {
         }
     };
 
-    function getTcuData($tcu) {
-        $speakers = {};
+    function getSpeakerDisplays($tcu) {
+        var speakers = {};
         $tcu.find('.speaker-display').each(function () {
-            $speakers[$(this).attr('data-speaker-display')] = $(this).html();
+            speakers[$(this).attr('data-speaker-display')] = $(this).html();
         });
+        return speakers;
+    }
+
+    function setSpeakerChange($tcu) {
+        $previous = $tcu.prev('[data-tcuid]');
+        if ($previous.length == 0) {
+            $('.speaker-name', $tcu).removeClass('what-speaker same-speaker').addClass('new-speaker');
+        }
+        else {
+            if (JSON.stringify(getSpeakerDisplays($previous)) === JSON.stringify(getSpeakerDisplays($tcu))) {
+                $('.speaker-name', $tcu).removeClass('what-speaker new-speaker').addClass('same-speaker');
+            }
+            else {
+                $('.speaker-name', $tcu).removeClass('what-speaker same-speaker').addClass('new-speaker');
+            }
+        }
+    }
+
+    function fixWhatSpeakers($transcript) {
+        $('[data-tcuid]', $transcript).has('.what-speaker').each(function() {
+            setSpeakerChange($(this));
+            $next = $(this).next('[data-tcuid]');
+            if ($next.length != 0) setSpeakerChange($next);
+        });
+    }
+
+    function getTcuData($tcu) {
+        $speakers = getSpeakerDisplays($tcu);
         $tiers = {};
         $tcu.find('.tier').each(function () {
             $tiers[$(this).attr('data-tier')] = $(this).html();
@@ -109,7 +137,10 @@ var TranscriptTimeUtil = {
                         switch (response.data.action) {
                             case 'delete': //should always be delete
                                 if (response.data.tcuid == tcuid) { //should always be true
-                                    $tcu.removeClass('tcu-delete-pending').addClass('tcu-delete-complete').hide('slow', function() {$tcu.remove()});
+                                    $tcu.removeClass('tcu-delete-pending').addClass('tcu-delete-complete').hide('slow', function() {
+
+                                        $tcu.remove();
+                                    });
                                 }
                                 break;
                         }
@@ -196,9 +227,12 @@ var TranscriptTimeUtil = {
                         case 'success':
                             //change additional speaker names if called for
                             for (var i = 0; i < response.data.tcuids.length; i++) {
-                                $("*[data-speaker-display='" + tier_name + "']", $("*[data-tcuid='" + response.data.tcuids[i] + "']")).html(newValue).editable('setValue', newValue);
+                                $('[data-tcuid=' + response.data.tcuids[i] + ']').addClass('what-speaker')
+                                    .find($('[data-speaker-display=' + tier_name + ']'))
+                                    .html(newValue).editable('setValue', newValue);
                             }
                             transcript_speakers[tier_name] = response.data.speakers;
+                            fixWhatSpeakers($('[data-transcripts-id=' + trid + ']'));
                             break;
                         case 'error':
                             return response.message;
@@ -348,12 +382,14 @@ var TranscriptTimeUtil = {
                                 switch (response.data.action) {
                                     case 'insert_before':
                                         $tcu = $(response.data.tcu).insertBefore($pivot);
+                                        fixWhatSpeakers($('[data-transcripts-id=' + trid + ']'));
                                         activateEditing($tcu);
                                         Drupal.settings.scrollingTranscript[trid].addOne($tcu);
                                         break;
                                     case 'insert_after':
                                     case 'copy_after':
                                         $tcu = $(response.data.tcu).insertAfter($pivot);
+                                        fixWhatSpeakers($('[data-transcripts-id=' + trid + ']'));
                                         activateEditing($tcu);
                                         Drupal.settings.scrollingTranscript[trid].addOne($tcu);
                                         break;
