@@ -63,6 +63,14 @@ var TranscriptTimeUtil = {
         }
     };
 
+    function getTierData($tcu) {
+        var tiers = {};
+        $tcu.find('.tier').each(function () {
+            tiers[$(this).attr('data-tier')] = $(this).hasClass('editable-empty') ? '' : $(this).html(); //don't copy empty value
+        });
+        return tiers;
+    }
+
     function getSpeakerDisplays($tcu) {
         var speakers = {};
         $tcu.find('.speaker-display').each(function () {
@@ -95,17 +103,14 @@ var TranscriptTimeUtil = {
     }
 
     function getTcuData($tcu) {
-        $speakers = getSpeakerDisplays($tcu);
-        $tiers = {};
-        $tcu.find('.tier').each(function () {
-            $tiers[$(this).attr('data-tier')] = $(this).html();
-        });
+        var speakers = getSpeakerDisplays($tcu);
+        var tiers = getTierData($tcu);
         return {
             'tcuid': $tcu.attr('data-tcuid'),
             'start': $tcu.attr('data-begin'),
             'end': $tcu.attr('data-end'),
-            'speakers': $speakers,
-            'tiers': $tiers
+            'speakers': speakers,
+            'tiers': tiers
         };
     }
 
