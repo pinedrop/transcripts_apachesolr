@@ -282,9 +282,20 @@ function transcripts_editor_update_tier()
         //it would probably be faster to update the column in tcu_tier,
         //and then mark the tcu as needing to be reindexed
         $tcu = tcu_load($tcuid);
-        $tcu->setTiers(array_merge($tcu->getTiers(), array($_POST['name'] => $_POST['value'])));
-        tcu_save($tcu);
-        transcripts_editor_mark_edited($nid);
+        $tiers = $tcu->getTiers();
+        $existing = $tiers[$_POST['name']];
+        if ($_POST['oldValue'] == $existing) {
+            $tcu->setTiers(array_merge($tiers, array($_POST['name'] => $_POST['value'])));
+            tcu_save($tcu);
+            transcripts_editor_mark_edited($nid);
+        }
+        else {
+            drupal_json_output(array(
+                'status' => 'error',
+                'message' => t('Someone else has edited this text.'),
+                'replace' => $existing,
+            ));
+        }
     } else {
         drupal_json_output(array(
             'status' => 'error',
@@ -308,30 +319,41 @@ function transcripts_editor_update_speaker()
 
         //change speaker of selected line
         $tcu = tcu_load($tcuid);
-        $tcu->setSpeakers(array_merge($tcu->getSpeakers(), array($tier => $newValue)));
-        tcu_save($tcu);
+        $speakerdisplays = $tcu->getSpeakers();
+        $existing = $speakerdisplays[$tier];
+        if ($_POST['oldValue'] == $existing) {
+            $tcu->setSpeakers(array_merge($speakerdisplays, array($tier => $newValue)));
+            tcu_save($tcu);
 
-        //change additional speakers if necessary
-        if (!in_array($newValue, $speakers)) {
-            $index = array_search($oldValue, $speakers);
-            $speakers[$index] = $newValue;
-            $result = db_query('SELECT speaker.tcuid From {tcu_speaker} speaker LEFT JOIN {tcu} tcu ON speaker.tcuid = tcu.tcuid WHERE tcu.trid = :trid AND speaker.tier = :tier AND speaker.value = :old', array(':trid' => $trid, ':tier' => $tier, ':old' => $oldValue));
-            $tcuids = $result->fetchCol();
-            $tcus = tcu_load_multiple($tcuids);
-            foreach ($tcus as $tcu) {
-                $tcu->setSpeakers(array_merge($tcu->getSpeakers(), array($tier => $newValue)));
-                tcu_save($tcu);
+            //change additional speakers if necessary
+            if (!in_array($newValue, $speakers)) {
+                $index = array_search($oldValue, $speakers);
+                $speakers[$index] = $newValue;
+                $result = db_query('SELECT speaker.tcuid From {tcu_speaker} speaker LEFT JOIN {tcu} tcu ON speaker.tcuid = tcu.tcuid WHERE tcu.trid = :trid AND speaker.tier = :tier AND speaker.value = :old', array(':trid' => $trid, ':tier' => $tier, ':old' => $oldValue));
+                $tcuids = $result->fetchCol();
+                $tcus = tcu_load_multiple($tcuids);
+                foreach ($tcus as $tcu) {
+                    $tcu->setSpeakers(array_merge($tcu->getSpeakers(), array($tier => $newValue)));
+                    tcu_save($tcu);
+                }
             }
+            transcripts_editor_mark_edited($nid);
+            drupal_json_output(array(
+                'status' => 'success',
+                'data' => array(
+                    'oldValue' => $oldValue,
+                    'speakers' => $speakers,
+                    'tcuids' => isset($tcuids) ? $tcuids : array(),
+                ),
+            ));
         }
-        transcripts_editor_mark_edited($nid);
-        drupal_json_output(array(
-            'status' => 'success',
-            'data' => array(
-                'oldValue' => $oldValue,
-                'speakers' => $speakers,
-                'tcuids' => isset($tcuids) ? $tcuids : array(),
-            ),
-        ));
+        else {
+            drupal_json_output(array(
+                'status' => 'error',
+                'message' => t('Someone else has edited this speaker name.'),
+                'replace' => $existing,
+            ));
+        }
     } else {
         drupal_json_output(array(
             'status' => 'error',
@@ -358,25 +380,35 @@ function transcripts_editor_update_times()
             ));
         }
         else {
-            //change timecodes of selected line
+            $oldBegin = $_POST['oldBegin'];
+            $oldEnd = $_POST['oldEnd'];
             $tcu = tcu_load($tcuid);
-            if ($tcu->start != $begin || $tcu->end != $end) {
-                $tcu->start = $begin;
-                $tcu->end = $end;
-                tcu_save($tcu);
-                transcripts_editor_mark_edited($nid);
-                drupal_json_output(array(
-                    'status' => 'success',
-                    'data' => array(
-                        'begin' => $begin,
-                        'end' => $end,
-                    ),
-                ));
-            }
-            else {
+            if ($tcu->start == $oldBegin && $tcu->end == $oldEnd) {
+                if ($tcu->start != $begin || $tcu->end != $end) {
+                    //change timecodes of selected line
+                    $tcu->start = $begin;
+                    $tcu->end = $end;
+                    tcu_save($tcu);
+                    transcripts_editor_mark_edited($nid);
+                    drupal_json_output(array(
+                        'status' => 'success',
+                        'data' => array(
+                            'begin' => $begin,
+                            'end' => $end,
+                        ),
+                    ));
+                } else {
+                    drupal_json_output(array(
+                        'status' => 'error',
+                        'message' => t('No changes made.'),
+                    ));
+                }
+            } else {
                 drupal_json_output(array(
                     'status' => 'error',
-                    'message' => t('No changes made.'),
+                    'message' => t('Someone else has edited these timecodes.'),
+                    't1' => $tcu->start,
+                    't2' => $tcu->end,
                 ));
             }
         }

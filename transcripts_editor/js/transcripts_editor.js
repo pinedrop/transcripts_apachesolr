@@ -177,7 +177,12 @@ var TranscriptTimeUtil = {
                 },
                 'url': Drupal.settings.basePath + 'tcu/up/tier',
                 'success': function (response, newValue) {
-                    if (response.status == 'error') return response.message;
+                    if (response.status == 'error') {
+                        if (response.replace) {
+                            $(this).html(response.replace).editable('setValue', response.replace).editable('option', 'params', {'oldValue': response.replace});
+                        }
+                        return response.message;
+                    }
                 }
             });
         });
@@ -248,8 +253,10 @@ var TranscriptTimeUtil = {
                             fixWhatSpeakers($('[data-transcripts-id=' + trid + ']'));
                             break;
                         case 'error':
+                            if (response.replace) {
+                                $(this).html(response.replace).editable('setValue', response.replace);
+                            }
                             return response.message;
-                            break;
                     }
                 },
                 'typeahead': [
@@ -285,6 +292,8 @@ var TranscriptTimeUtil = {
             var getTimecodes = function (params) {
                 params.begin = $('input[name=beginInput]', $tcu).val();
                 params.end = $('input[name=endInput]', $tcu).val();
+                params.oldBegin = $tcu.attr('data-begin');
+                params.oldEnd = $tcu.attr('data-end');
                 return params;
             };
 
@@ -336,8 +345,21 @@ var TranscriptTimeUtil = {
                             Drupal.settings.scrollingTranscript[trid].resetPlayIndex();
                             break;
                         case 'error':
+                            if (response.t1) {
+                                var t1 = TranscriptTimeUtil.getRange(response.t1);
+                                var t2 = TranscriptTimeUtil.getRange(response.t2);
+                                $tcu.attr({
+                                    'data-begin': t1.time,
+                                    'data-end': t2.time
+                                });
+                                /* refresh begin time */
+                                $(this).editable('setValue', t1.time);
+                                $(this).editable('option', 'min', t1.min);
+                                $(this).editable('option', 'max', t1.max);
+                                $(this).editable('option', 'tpl', "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value); Drupal.settings.scrollingTranscript[\"" + trid + "\"].setCurrentTime(parseFloat(beginInput.value));'>");
+                                Drupal.settings.scrollingTranscript[trid].resetPlayIndex();
+                            }
                             return response.message;
-                            break;
                     }
                 }
             }).after($("<div class='edit-times'><span class='glyphicon glyphicon-edit'/></div>").click(

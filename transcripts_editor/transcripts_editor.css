@@ -1,3 +1,8 @@
+/* general editing */
+.editableform .has-error .editable-submit {
+    display: none;
+}
+
 /* tcu gear menu */
 .tcu-gear {
     display: none;
