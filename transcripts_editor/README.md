@@ -13,6 +13,16 @@ Requires: Transcripts UI, Transcripts Apachesolr, and Flag 2 or 3
 Install and enable the Transcripts Editor module as you would any other Drupal
 module.
 
+For the best experience, install Apachesolr Realtime with the following patch:
+
+  https://www.drupal.org/node/2217823
+   
+Then, check "Time Code Unit" under the "Real Time Indexing" settings on your
+Apache Solr Search configuration page (admin/config/search/apachesolr). This
+way, all transcript edits will be sent to the index immediately, ensuring that
+your changes will be immediately visible to others, and to yourself if you
+switch from edit to view mode.
+
 
 PERMISSIONS
 -----------

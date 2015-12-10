@@ -148,6 +148,7 @@ var TranscriptTimeUtil = {
                                         if ($next.length != 0) {
                                             setSpeakerChange($next);
                                         }
+                                        Drupal.settings.scrollingTranscript[trid].resetPlayIndex();
                                     });
                                 }
                                 break;
@@ -332,6 +333,7 @@ var TranscriptTimeUtil = {
                             $(this).editable('option', 'min', t1.min);
                             $(this).editable('option', 'max', t1.max);
                             $(this).editable('option', 'tpl', "<input name='beginInput' type='range' step='0.001' oninput='beginOutput.value=TranscriptTimeUtil.formatMs(beginInput.value); Drupal.settings.scrollingTranscript[\"" + trid + "\"].setCurrentTime(parseFloat(beginInput.value));'>");
+                            Drupal.settings.scrollingTranscript[trid].resetPlayIndex();
                             break;
                         case 'error':
                             return response.message;
@@ -397,6 +399,7 @@ var TranscriptTimeUtil = {
                                         fixWhatSpeakers($('[data-transcripts-id=' + trid + ']'));
                                         activateEditing($tcu);
                                         Drupal.settings.scrollingTranscript[trid].addOne($tcu);
+                                        Drupal.settings.scrollingTranscript[trid].resetPlayIndex();
                                         break;
                                     case 'insert_after':
                                     case 'copy_after':
@@ -404,6 +407,7 @@ var TranscriptTimeUtil = {
                                         fixWhatSpeakers($('[data-transcripts-id=' + trid + ']'));
                                         activateEditing($tcu);
                                         Drupal.settings.scrollingTranscript[trid].addOne($tcu);
+                                        Drupal.settings.scrollingTranscript[trid].resetPlayIndex();
                                         break;
                                 }
                             }
