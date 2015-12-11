@@ -48,6 +48,7 @@ var TranscriptTimeUtil = {
 
                             if (!alreadyEditing) {
                                 alreadyEditing = true;
+                                disableTranscriptViews($transcript);
                                 activateEditing($transcript.addClass('editing-active'));
                                 activateTcuDeleteModal(trid);
                             }
@@ -62,6 +63,14 @@ var TranscriptTimeUtil = {
             });
         }
     };
+
+    function disableTranscriptViews($transcript) {
+        var $select = $('select.transcript-options', $('[data-transcripts-role=transcript-controls][data-transcripts-id=' + $transcript.attr('data-transcripts-id') + ']'));
+        $('optgroup[data-type=views] option', $select).each(function() {
+            $transcript.removeClass($(this).val());
+        }).remove();
+        $select.selectpicker('refresh');
+    }
 
     function getTierData($tcu) {
         var tiers = {};

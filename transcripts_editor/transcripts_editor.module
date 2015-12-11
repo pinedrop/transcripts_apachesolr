@@ -20,8 +20,8 @@ function transcripts_editor_init()
             drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js', array('type' => 'external', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
             drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/lib/typeahead.js-bootstrap.css', array('type' => 'file', 'group' => CSS_THEME, 'every_page' => TRUE, 'weight' => -90));
             drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/lib/typeaheadjs.10x.js', array('type' => 'file', 'group' => JS_THEME, 'every_page' => TRUE, 'weight' => -80));
-            drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/transcripts_editor.css', 'file');
-            drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/js/transcripts_editor.js', 'file');
+            drupal_add_css(drupal_get_path('module', 'transcripts_editor') . '/transcripts-editor.css', 'file');
+            drupal_add_js(drupal_get_path('module', 'transcripts_editor') . '/js/transcripts-editor.js', 'file');
 
             $exclude = array();
             foreach (module_implements('transcripts_editor_exclude_tiers') as $module) {
