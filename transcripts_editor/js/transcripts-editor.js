@@ -371,7 +371,7 @@ var TranscriptTimeUtil = {
                             return response.message;
                     }
                 }
-            }).after($("<div class='edit-times'><span class='glyphicon glyphicon-edit'/></div>").click(
+            }).append($("<div class='edit-times'><span class='glyphicon glyphicon-edit'/></div>").click(
                 function (e) {
                     e.stopPropagation();
                     $(this).hide(); //hide icon
