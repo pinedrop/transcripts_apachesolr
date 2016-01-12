@@ -25,7 +25,7 @@ function transcripts_xslt_menu()
 function transcripts_xslt_get_transformer($file)
 {
     $dot = strrpos($file->uri, '.');
-    $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
+    $ext = $dot === FALSE ? '' : strtolower(substr($file->uri, $dot + 1));
     $transformer_fid = variable_get('transcripts_xslt_'.$ext.'_transformer', '');
     if ($transformer_fid) {
         return file_load($transformer_fid);
