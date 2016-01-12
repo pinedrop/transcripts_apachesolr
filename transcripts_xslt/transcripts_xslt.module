@@ -46,22 +46,36 @@ function transcripts_xslt_as_tcus($file, $params = array())
     $dot = strrpos($file->uri, '.');
     $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
 
-    if ($ext == 'txt') {
-        $filepath = drupal_realpath($file->uri);
-        // Check that we have a valid filepath.
-        if (!$filepath || !is_file($filepath)) {
-            watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $file->fid, '%filepath' => $file->uri), WATCHDOG_WARNING);
-            return false;
-        }
-        $params['file'] = $filepath;
-        $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
+    switch ($ext) {
+        case 'txt':
+            $filepath = drupal_realpath($file->uri);
+            // Check that we have a valid filepath.
+            if (!$filepath || !is_file($filepath)) {
+                watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $file->fid, '%filepath' => $file->uri), WATCHDOG_WARNING);
+                return false;
+            }
+            $params['file'] = $filepath;
 
-        $source = '';
-        $it = 'toolbox';
-    }
-    else {
-        $source = $file;
-        $it = '';
+            $source = '';
+            $it = 'toolbox';
+            break;
+        case 'srt':
+            $filepath = drupal_realpath($file->uri);
+            // Check that we have a valid filepath.
+            if (!$filepath || !is_file($filepath)) {
+                watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $file->fid, '%filepath' => $file->uri), WATCHDOG_WARNING);
+                return false;
+            }
+            $params['file'] = $filepath;
+            $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
+
+            $source = '';
+            $it = 'toolbox';
+            break;
+        case 'xml':
+            $source = $file;
+            $it = '';
+            break;
     }
     drupal_alter('transcripts_xslt_saxon_params', $params, $file);
 
