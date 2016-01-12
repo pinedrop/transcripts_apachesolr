@@ -56,8 +56,8 @@ function transcripts_xslt_as_tcus($file, $params = array())
             }
             $params['file'] = $filepath;
 
-            $source = '';
-            $it = 'toolbox';
+            $source = ''; //transforming text, no source XML
+            $it = 'toolbox'; //apply this template
             break;
         case 'srt':
             $filepath = drupal_realpath($file->uri);
@@ -67,14 +67,15 @@ function transcripts_xslt_as_tcus($file, $params = array())
                 return false;
             }
             $params['file'] = $filepath;
-            $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
+            $params['tier_id'] = 'ts_content'; //name of "language unknown" tier
+            $params['speaker_display_id'] = 'ss_speaker'; //name of "language unknown" speaker display id
 
-            $source = '';
-            $it = 'toolbox';
+            $source = ''; //transforming text, no source XML
+            $it = 'srt'; //apply this template
             break;
         case 'xml':
-            $source = $file;
-            $it = '';
+            $source = $file; //source XML
+            $it = ''; //apply stylesheet
             break;
     }
     drupal_alter('transcripts_xslt_saxon_params', $params, $file);
