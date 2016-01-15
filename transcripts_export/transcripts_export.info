@@ -1,0 +1,13 @@
+name = Transcripts Export
+description = Drupal module for exporting transcripts to formats such as InqScribe and SRT
+package = Pinedrop Transcripts
+core = 7.x
+php = 5.2.4
+dependencies[] = transcripts_apachesolr
+#dependencies[] = apachesolr_views
+#dependencies[] = ctools
+#dependencies[] = views
+#dependencies[] = views_data_export
+#features[ctools][] = views:views_default:3.0
+#features[features_api][] = api:1
+#features[views_view][] = transcripts_export_inqscribe
