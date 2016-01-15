@@ -87,7 +87,7 @@
                 });
                 var text = ul.join('\n');
                 var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
-                saveAs(blob, "transcript.inqscr"); //FIXME base filename on trid
+                saveAs(blob, "transcript.txt"); //FIXME base filename on trid
             });
         }
     };
