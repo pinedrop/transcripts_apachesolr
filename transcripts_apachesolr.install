@@ -1,5 +1,14 @@
 <?php
 
+function transcripts_apachesolr_update_7001() {
+    db_add_field('transcripts_apachesolr_transcript', 'tiers',
+        array(
+            'type' => 'text',
+            'description' => 'A optional comma delimited list of tier names',
+        )
+    );
+}
+
 function transcripts_apachesolr_schema() {
 	$schema['transcripts_apachesolr_transcript'] = array(
 		'description' => 'Track use of a transcript',
@@ -42,6 +51,10 @@ function transcripts_apachesolr_schema() {
             	'unsigned' => TRUE,
             	'not null' => TRUE,
             	'default' => 0,
+            ),
+            'tiers' => array(
+                'type' => 'text',
+                'description' => 'A optional comma delimited list of tier names',
             ),
         ),
         'primary key' => array('trid'),

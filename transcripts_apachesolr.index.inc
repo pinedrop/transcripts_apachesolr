@@ -78,6 +78,15 @@ function transcripts_apachesolr_add_transcript($module, $type, $fid, $id, $tcus)
 {
     //check that tcus have been created
     if (isset($tcus['tcu'])) {
+        if (isset($tcus['tcu'][0])) { //numeric array, more than one tcu
+            $tiers = array();
+            foreach ($tcus['tcu'] as $tcu) {
+                $tiers = $tiers + array_filter(array_map('trim', $tcu['tiers']));
+            }
+        } else {
+            $tiers = array_filter(array_map('trim', $tcus['tcu'])); //non-numeric single tcu
+        }
+
         $trid = db_insert('transcripts_apachesolr_transcript')
             ->fields(array(
                 'module' => $module,
@@ -85,6 +94,7 @@ function transcripts_apachesolr_add_transcript($module, $type, $fid, $id, $tcus)
                 'fid' => $fid,
                 'id' => $id,
                 'status' => 1,
+                'tiers' => implode(' ', array_keys($tiers)),
             ))
             ->execute();
 
