@@ -95,7 +95,7 @@ function transcripts_apachesolr_add_transcript($module, $type, $fid, $id, $tcus)
                 $tiers = $tiers + array_filter(array_map('trim', $tcu['tiers']));
             }
         } else {
-            $tiers = array_filter(array_map('trim', $tcus['tcu'])); //non-numeric single tcu
+            $tiers = array_filter(array_map('trim', $tcus['tcu']['tiers'])); //non-numeric single tcu
         }
 
         $trid = db_insert('transcripts_apachesolr_transcript')
