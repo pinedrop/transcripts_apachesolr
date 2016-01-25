@@ -54,6 +54,7 @@ function transcripts_xslt_as_tcus($file, $params = array())
                 return false;
             }
             $params['file'] = $filepath;
+            $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
 
             $source = ''; //transforming text, no source XML
             $it = 'toolbox'; //apply this template
