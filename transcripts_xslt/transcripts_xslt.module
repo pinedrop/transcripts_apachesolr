@@ -25,9 +25,8 @@ function transcripts_xslt_menu()
 function transcripts_xslt_get_transformer($file)
 {
     $dot = strrpos($file->uri, '.');
-    $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
-
-    $transformer_fid = $ext == 'xml' ? variable_get('transcripts_xslt_xml_transformer', '') : variable_get('transcripts_xslt_txt_transformer', '');
+    $ext = $dot === FALSE ? '' : strtolower(substr($file->uri, $dot + 1));
+    $transformer_fid = variable_get('transcripts_xslt_'.$ext.'_transformer', '');
     if ($transformer_fid) {
         return file_load($transformer_fid);
     } else {
@@ -46,22 +45,38 @@ function transcripts_xslt_as_tcus($file, $params = array())
     $dot = strrpos($file->uri, '.');
     $ext = $dot === FALSE ? '' : substr($file->uri, $dot + 1);
 
-    if ($ext == 'txt') {
-        $filepath = drupal_realpath($file->uri);
-        // Check that we have a valid filepath.
-        if (!$filepath || !is_file($filepath)) {
-            watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $file->fid, '%filepath' => $file->uri), WATCHDOG_WARNING);
-            return false;
-        }
-        $params['file'] = $filepath;
-        $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
+    switch ($ext) {
+        case 'txt':
+            $filepath = drupal_realpath($file->uri);
+            // Check that we have a valid filepath.
+            if (!$filepath || !is_file($filepath)) {
+                watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $file->fid, '%filepath' => $file->uri), WATCHDOG_WARNING);
+                return false;
+            }
+            $params['file'] = $filepath;
+            $params['tierNames'] = variable_get('transcripts_xslt_toolbox_mappings', 'tx|ts_content_qya, mb|ts_content_morph, ge|ts_content_igt, ft|ts_content_epo');
 
-        $source = '';
-        $it = 'toolbox';
-    }
-    else {
-        $source = $file;
-        $it = '';
+            $source = ''; //transforming text, no source XML
+            $it = 'toolbox'; //apply this template
+            break;
+        case 'srt':
+            $filepath = drupal_realpath($file->uri);
+            // Check that we have a valid filepath.
+            if (!$filepath || !is_file($filepath)) {
+                watchdog('Transcripts XSLT', '[file/%fid] %filepath is not a valid file path.', array('%fid' => $file->fid, '%filepath' => $file->uri), WATCHDOG_WARNING);
+                return false;
+            }
+            $params['file'] = $filepath;
+            $params['tier_id'] = 'ts_content_und'; //name of "language unknown" tier (see: https://en.wikipedia.org/wiki/ISO_639-3)
+            $params['speaker_display_id'] = 'ss_speaker'; //name of "language unknown" speaker display id
+
+            $source = ''; //transforming text, no source XML
+            $it = 'srt'; //apply this template
+            break;
+        case 'xml':
+            $source = $file; //source XML
+            $it = ''; //apply stylesheet
+            break;
     }
     drupal_alter('transcripts_xslt_saxon_params', $params, $file);
 

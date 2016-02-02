@@ -8,7 +8,8 @@ with permissions to edit transcripts in-situ.
 INSTALLATION
 ------------
 
-Requires: Transcripts UI, Transcripts Apachesolr, and Flag 2 or 3
+Requires: Transcripts UI, Transcripts Apachesolr, and Flag 2 or 3. Also requires
+Typeahead, a module contained within [Drupal KMaps Modules](https://github.com/shanti-uva/drupal_kmaps_modules).
 
 Install and enable the Transcripts Editor module as you would any other Drupal
 module.

@@ -39,6 +39,18 @@ function transcripts_xslt_settings_form()
         ),
         '#description' => t($desc),
     );
+    $desc = 'Upload an XSLT stylesheet that will be used to transform incoming SRT transcripts into time code units. '
+        . 'This stylesheet should use the unparsed-text() function to load in a SubRip file and transform it into XML.';
+    $form['transcripts_xslt_settings']['transcripts_xslt_srt_transformer'] = array(
+        '#type' => 'managed_file',
+        '#title' => 'SRT transformer',
+        '#default_value' => variable_get('transcripts_xslt_srt_transformer', ''),
+        '#upload_location' => 'public://transcripts_transformers',
+        '#upload_validators' => array(
+            'file_validate_extensions' => array('xsl'),
+        ),
+        '#description' => t($desc),
+    );
     $desc = 'Enter a comma-separated list of Toolbox tier mappings, '
         . 'each in the form TOOLBOX_TIER|TRANSCRIPTS_TIER. '
         . 'You can ignore this field if you are not importing transcripts from Toolbox.';

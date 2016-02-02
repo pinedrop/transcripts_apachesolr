@@ -3,7 +3,7 @@
 function transcripts_apachesolr_already_indexed($module, $type, $id, $fid = NULL)
 {
     $query = db_select('transcripts_apachesolr_transcript', 'tr')
-        ->fields('tr', array('trid'))
+        ->fields('tr')
         ->condition('tr.module', $module, '=')
         ->condition('tr.type', $type, '=')
         ->condition('tr.id', $id, '=');
@@ -21,6 +21,17 @@ function transcripts_apachesolr_already_indexed_trid($module, $type, $id, $fid =
     if ($result) {
         $arr = $result->fetchAssoc();
         return $arr['trid'];
+    } else {
+        return FALSE;
+    }
+}
+
+function transcripts_apachesolr_already_indexed_tiers($module, $type, $id, $fid = NULL)
+{
+    $result = transcripts_apachesolr_already_indexed($module, $type, $id, $fid);
+    if ($result) {
+        $arr = $result->fetchAssoc();
+        return $arr['tiers'];
     } else {
         return FALSE;
     }
@@ -78,6 +89,15 @@ function transcripts_apachesolr_add_transcript($module, $type, $fid, $id, $tcus)
 {
     //check that tcus have been created
     if (isset($tcus['tcu'])) {
+        if (isset($tcus['tcu'][0])) { //numeric array, more than one tcu
+            $tiers = array();
+            foreach ($tcus['tcu'] as $tcu) {
+                $tiers = $tiers + array_filter(array_map('trim', $tcu['tiers']));
+            }
+        } else {
+            $tiers = array_filter(array_map('trim', $tcus['tcu']['tiers'])); //non-numeric single tcu
+        }
+
         $trid = db_insert('transcripts_apachesolr_transcript')
             ->fields(array(
                 'module' => $module,
@@ -85,6 +105,7 @@ function transcripts_apachesolr_add_transcript($module, $type, $fid, $id, $tcus)
                 'fid' => $fid,
                 'id' => $id,
                 'status' => 1,
+                'tiers' => implode(' ', array_keys($tiers)),
             ))
             ->execute();
 
