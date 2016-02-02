@@ -67,7 +67,7 @@ function transcripts_xslt_as_tcus($file, $params = array())
                 return false;
             }
             $params['file'] = $filepath;
-            $params['tier_id'] = 'ts_content'; //name of "language unknown" tier
+            $params['tier_id'] = 'ts_content_und'; //name of "language unknown" tier (see: https://en.wikipedia.org/wiki/ISO_639-3)
             $params['speaker_display_id'] = 'ss_speaker'; //name of "language unknown" speaker display id
 
             $source = ''; //transforming text, no source XML
