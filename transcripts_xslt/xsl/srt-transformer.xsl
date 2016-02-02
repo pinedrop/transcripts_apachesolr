@@ -5,7 +5,7 @@
     <xml:output method="xml" encoding="UTF-8"/>
 
     <xsl:param name="file" select="'transcript.srt'"/>
-    <xsl:param name="tier_id" select="'ts_content'"/>
+    <xsl:param name="tier_id" select="'ts_content_und'"/>
     <xsl:param name="speaker_display_id" select="'ss_speaker'"/>
 
     <xsl:template match="/">
