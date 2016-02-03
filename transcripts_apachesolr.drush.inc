@@ -67,6 +67,13 @@ function drush_transcripts_apachesolr_transcripts_solr_index()
                             ->execute();
                     } else {
                         drush_log("[node/{$node->nid}] FAILED to index {$file->filename}", 'error');
+                        // must update because transcripts_apachesolr_remove_transcript removed the record
+                        db_update('transcripts_apachesolr_transcript')
+                            ->fields(array('status' => 0))
+                            ->condition('module', 'transcripts_node', '=')
+                            ->condition('type', 'node', '=')
+                            ->condition('id', $node->nid, '=')
+                            ->execute();
                     }
                 }
             }
