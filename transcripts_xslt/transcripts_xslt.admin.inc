@@ -72,7 +72,7 @@ function transcripts_xslt_settings_form()
 /* http://www.michaelbagnall.com/blogs/managed-files-within-drupal-7 */
 function transcripts_xslt_transformer_submit($form, $form_state)
 {
-    $transformers = array('transcripts_xslt_xml_transformer', 'transcripts_xslt_txt_transformer');
+    $transformers = array('transcripts_xslt_xml_transformer', 'transcripts_xslt_txt_transformer', 'transcripts_xslt_srt_transformer');
 
     foreach ($transformers as $field) {
         $transformer = (!empty($form['transcripts_xslt_settings'][$field]['#default_value'])) ? $form['transcripts_xslt_settings'][$field]['#default_value'] : 0;
