@@ -15,12 +15,18 @@ function transcripts_apachesolr_get_solr()
     return apachesolr_get_solr(transcripts_apachesolr_environment());
 }
 
-function transcripts_apachesolr_scroller($trid, $tiers)
+function transcripts_apachesolr_scroller($trid, $nid)
 {
     // how will options get through when function is not called as part of page request?
-    $options = array(
-        'term' => isset($_GET['term']) ? '"' . $_GET['term'] . '"' : '',
-    );
+    $options = array();
+    $options['term'] = isset($_GET['term']) ? '"' . $_GET['term'] . '"' : '';
+
+    // override default tier list if transcript-specific tier list is available
+    $val = transcripts_apachesolr_already_indexed_tiers('transcripts_node', 'node', $nid);
+    if (!empty($val)) {
+        $tiers = array_fill_keys(explode(' ', $val), null);
+        $options['tiers'] = array_intersect_key(transcripts_ui_tiers(), $tiers);
+    }
 
     $ui = transcripts_ui_ui('transcripts_apachesolr', $trid, $options);
     if ($ui->tcuCount > 0) {
