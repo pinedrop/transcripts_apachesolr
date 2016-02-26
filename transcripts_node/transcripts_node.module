@@ -34,8 +34,7 @@ function transcripts_node_get_player($nid)
 {
     $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
     if ($trid) {
-        $tiers = transcripts_ui_tiers();
-        return transcripts_apachesolr_scroller($trid, $tiers);
+        return transcripts_apachesolr_scroller($trid, $nid);
     }
 }
 
@@ -137,8 +136,7 @@ function transcripts_node_field_formatter_view($entity_type, $entity, $field, $i
                     $nid = arg(1);
                     $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
                     if ($trid) {
-                        $tiers = transcripts_ui_tiers();
-                        $element[$delta] = array('#markup' => transcripts_apachesolr_scroller($trid, $tiers));
+                        $element[$delta] = array('#markup' => transcripts_apachesolr_scroller($trid, $nid));
                     }
                 }
             }
