@@ -63,11 +63,12 @@ function transcripts_apachesolr_transcripts_ui_transcript($ui)
         foreach ($tiers as $tier) {
             $arr[] = $tier .':"' . $options['term'] . '"';
         }
-        $q = implode(" OR ", $arr);
+        $q = implode(" ", $arr);
         if (!$options['hits_only']) {
-            $q .= " OR *:*";
+            $q .= " *:*";
         }
         $params = array(
+            'q.op' => 'OR',
             'q' => $q,
             'start' => 0,
             'rows' => 1000, //what if transcript has more than 1000 lines??
