@@ -1,0 +1,290 @@
+<?php
+
+function tcu_entity_info()
+{
+    $return = array(
+        'tcu' => array(
+            'label' => t('Time Code Unit'),
+            'description' => t('Entity type for transcript tcus'),
+            'entity class' => 'Tcu',
+            'controller class' => 'TcuController',
+            'base table' => 'tcu',
+            'fieldable' => FALSE,
+            'entity keys' => array(
+                'id' => 'tcuid',
+            ),
+            'bundles' => array(
+                'tcu' => array(
+                    'label' => t('Tcu'),
+                ),
+            ),
+            'label callback' => 'entity_class_label',
+            'uri callback' => 'entity_class_uri',
+            'module' => 'tcu',
+        ),
+    );
+    return $return;
+}
+
+function tcu_apachesolr_entity_info_alter(&$entity_info)
+{
+    $entity_info['tcu']['indexable'] = TRUE;
+    //$entity_info['tcu']['status callback'][] = 'tcu_status_callback';
+    $entity_info['tcu']['document callback'][] = 'tcu_solr_document';
+    $entity_info['tcu']['reindex callback'] = 'tcu_solr_reindex';
+    $entity_info['tcu']['index_table'] = 'apachesolr_index_entities_tcu';
+    //$entity_info['tcu']['result callback'] = 'tcu_result';
+}
+
+function tcu_load($tcuid, $reset = FALSE)
+{
+    $tcus = tcu_load_multiple(array($tcuid), array(), $reset);
+    return reset($tcus);
+}
+
+function tcu_load_multiple($tcuids = array(), $conditions = array(), $reset = FALSE)
+{
+    $tcus = entity_load('tcu', $tcuids, $conditions, $reset);
+
+    foreach ($tcus as &$tcu) {
+        $tcuid = $tcu->tcuid;
+
+        $tiers = array();
+        $result = db_query('SELECT * FROM {tcu_tier} WHERE tcuid = :tcuid', array(':tcuid' => $tcuid));
+        foreach ($result as $record) {
+            $tiers[$record->tier] = $record->value;
+        }
+        $tcu->setTiers($tiers);
+
+        $speakers = array();
+        $result = db_query('SELECT * FROM {tcu_speaker} WHERE tcuid = :tcuid', array(':tcuid' => $tcuid));
+        foreach ($result as $record) {
+            $speakers[$record->tier] = $record->value;
+        }
+        $tcu->setSpeakers($speakers);
+    }
+
+    return $tcus;
+}
+
+function tcu_delete(Tcu $tcu)
+{
+    $tcu->delete();
+}
+
+function tcu_delete_multiple(array $tcuids)
+{
+    entity_get_controller('tcu')->delete($tcuids);
+    db_delete('tcu_tier')
+        ->condition('tcuid', $tcuids, 'IN')
+        ->execute();
+    db_delete('tcu_speaker')
+        ->condition('tcuid', $tcuids, 'IN')
+        ->execute();
+}
+
+function tcu_create($values = array())
+{
+    return entity_get_controller('tcu')->create($values);
+}
+
+function tcu_save(Tcu $tcu)
+{
+    $return = $tcu->save();
+    if (module_exists('apachesolr_realtime')) {
+        apachesolr_realtime_entity_update($tcu, 'tcu');
+    }
+    return $return;
+}
+
+class Tcu extends Entity
+{
+    protected $_tiers = array();
+    protected $_speakers = array();
+
+    public function __construct($values = array())
+    {
+        parent::__construct($values, 'tcu');
+    }
+
+    public function setTiers($tiers)
+    {
+        $this->_tiers = $tiers;
+    }
+
+    public function getTiers()
+    {
+        return $this->_tiers;
+    }
+
+    public function setSpeakers($speakers)
+    {
+        $this->_speakers = $speakers;
+    }
+
+    public function getSpeakers()
+    {
+        return $this->_speakers;
+    }
+
+    protected function defaultLabel()
+    {
+        return $this->tcuid;
+    }
+
+    protected function defaultUri()
+    {
+        return array(
+            'path' => 'transcript/' . $this->trid . '/' . $this->tcuid,
+        );
+    }
+}
+
+class TcuController extends EntityAPIController
+{
+    public function create(array $values = array())
+    {
+        // Add values that are specific to our Model
+        $values += array(
+            'tcuid' => '',
+            'trid' => '',
+            'start' => '',
+            'end' => '',
+            'created' => '',
+            'changed' => '',
+        );
+        $tcu = parent::create($values);
+        return $tcu;
+    }
+}
+
+function tcu_solr_document(ApacheSolrDocument $document, $tcu, $entity_type)
+{
+    $tcu = tcu_load($tcu->tcuid);
+    //$parent = node_load($tcu->trid);
+    //$document->ss_node_label = $parent->title; //FIXME
+
+    unset($document->content);
+    $document->label = $tcu->tcuid;
+    $document->is_trid = $tcu->trid;
+    $document->fts_start = $tcu->start;
+    $document->fts_end = $tcu->end;
+    $document->fts_duration = $tcu->end - $tcu->start;
+    foreach ($tcu->getTiers() as $tier => $value) {
+        $document->$tier = $value;
+    }
+    foreach ($tcu->getSpeakers() as $tier => $value) {
+        $document->$tier = $value;
+    }
+    $documents = array();
+    $documents[] = $document;
+    return $documents;
+}
+
+function tcu_solr_reindex()
+{
+    $indexer_table = apachesolr_get_indexer_table('tcu');
+    $transaction = db_transaction();
+    $env_id = apachesolr_default_environment();
+    try {
+        db_delete($indexer_table)
+            ->condition('entity_type', 'tcu')
+            ->execute();
+
+        if (apachesolr_get_index_bundles($env_id, 'tcu')) {
+            $select = db_select('tcu', 's');
+            $select->addExpression("'tcu'", 'entity_type');
+            $select->addExpression("'tcu'", 'bundle');
+            $select->addExpression(REQUEST_TIME, 'changed');
+            $select->addField('s', 'tcuid', 'entity_id');
+
+            $insert = db_insert($indexer_table)
+                ->fields(array('entity_id', 'bundle', 'entity_type', 'changed'))
+                ->from($select)
+                ->execute();
+        }
+    } catch (Exception $e) {
+        $transaction->rollback();
+        drupal_set_message($e->getMessage(), 'error');
+        watchdog_exception('Apache Solr', $e);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+function tcu_entity_insert($entity, $type)
+{
+    if ($type == 'tcu') {
+        $indexer_table = apachesolr_get_indexer_table('tcu');
+        list($id) = entity_extract_ids($type, $entity);
+        $tiers = $entity->getTiers();
+        foreach ($tiers as $tier => $value) {
+            db_insert('tcu_tier')
+                ->fields(array(
+                    'tcuid' => $entity->tcuid,
+                    'tier' => $tier,
+                    'value' => $value,
+                ))
+                ->execute();
+        }
+        $speakers = $entity->getSpeakers();
+        foreach ($speakers as $tier => $value) {
+            db_insert('tcu_speaker')
+                ->fields(array(
+                    'tcuid' => $entity->tcuid,
+                    'tier' => $tier,
+                    'value' => $value,
+                ))
+                ->execute();
+        }
+    }
+}
+
+function tcu_entity_update($entity, $type)
+{
+    if ($type == 'tcu') {
+        $indexer_table = apachesolr_get_indexer_table('tcu');
+        list($id) = entity_extract_ids($type, $entity);
+        db_update($indexer_table)
+            ->fields(array('changed' => REQUEST_TIME))
+            ->condition('entity_id', $id)
+            ->condition('entity_type', 'tcu')
+            ->execute();
+
+        $tiers = $entity->getTiers();
+        foreach ($tiers as $tier => $value) {
+            db_merge('tcu_tier')
+                ->key(array(
+                    'tcuid' => $entity->tcuid,
+                    'tier' => $tier,
+                ))
+                ->fields(array(
+                    'value' => $value,
+                ))
+                ->execute();
+        }
+
+        $speakers = $entity->getSpeakers();
+        foreach ($speakers as $tier => $value) {
+            db_merge('tcu_speaker')
+                ->key(array(
+                    'tcuid' => $entity->tcuid,
+                    'tier' => $tier,
+                ))
+                ->fields(array(
+                    'value' => $value,
+                ))
+                ->execute();
+        }
+    }
+}
+
+function tcu_entity_delete($entity, $type)
+{
+    if ($type == 'tcu') {
+        db_delete('tcu_tier')
+            ->condition('tcuid', $entity->tcuid)
+            ->execute();
+    }
+}

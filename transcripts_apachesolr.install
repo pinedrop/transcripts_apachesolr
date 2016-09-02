@@ -1,0 +1,67 @@
+<?php
+
+function transcripts_apachesolr_update_7001() {
+    db_add_field('transcripts_apachesolr_transcript', 'tiers',
+        array(
+            'type' => 'text',
+            'description' => 'A optional comma delimited list of tier names',
+        )
+    );
+}
+
+function transcripts_apachesolr_schema() {
+	$schema['transcripts_apachesolr_transcript'] = array(
+		'description' => 'Track use of a transcript',
+		'fields' => array(
+			'trid' => array(
+				'description' => 'Transcript ID',
+				'type' => 'serial',
+				'not null' => TRUE,
+			),
+			'fid' => array(
+				'description' => 'File ID',
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+            ),
+            'module' => array(
+            	'description' => 'The name of the module that is using the transcript',
+            	'type' => 'varchar',
+            	'length' => 255,
+            	'not null' => TRUE,
+            	'default' => '',
+            ),
+            'type' => array(
+            	'description' => 'The name of the object type in which the transcript is used',
+            	'type' => 'varchar',
+            	'length' => 64,
+            	'not null' => TRUE,
+            	'default' => '',
+            ),
+            'id' => array(
+            	'description' => 'The primary key of the object using the transcript',
+            	'type' => 'int',
+            	'unsigned' => TRUE,
+            	'not null' => TRUE,
+            	'default' => 0,
+            ),
+            'status' => array(
+            	'description' => 'The status of the transcript in the index',
+            	'type' => 'int',
+            	'unsigned' => TRUE,
+            	'not null' => TRUE,
+            	'default' => 0,
+            ),
+            'tiers' => array(
+                'type' => 'text',
+                'description' => 'A optional comma delimited list of tier names',
+            ),
+        ),
+        'primary key' => array('trid'),
+        'indexes' => array(
+        	'module_type_id' => array('module', 'type', 'id'),
+        ),
+    );
+
+	return $schema;
+}

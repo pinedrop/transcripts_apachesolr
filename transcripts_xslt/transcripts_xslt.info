@@ -1,0 +1,5 @@
+name = Transcripts XSLT
+description = Transforms transcripts into time code units using XSLT 2
+package = Pinedrop Transcripts
+core = 7.x
+files[] = transcripts_xslt.module

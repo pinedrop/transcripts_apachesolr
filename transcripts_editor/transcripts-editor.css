@@ -1,0 +1,59 @@
+/* general editing */
+.editableform .has-error .editable-submit {
+    display: none;
+}
+
+/* tcu gear menu */
+.tcu-gear {
+    display: none;
+}
+.editing-active .tcu-gear {
+    display: block;
+}
+.scroller.transcripts-editor-processed .tcu-delete-warning {
+    background: red;
+}
+
+/* speaker name editing */
+.scroller.transcripts-editor-processed .speaker-name {
+    overflow: visible;
+}
+.speaker-name .tt-hint, .speaker-name .tt-query {
+    border: 1px solid #ccc;
+}
+.speaker-name .tt-hint {
+    color: #999;
+}
+.speaker-name .tt-query {
+    color: black;
+}
+.editing-active .same-speaker {
+    display: block;
+}
+
+/* timecode editing */
+.edit-times {
+    position: absolute;
+    left: 23px;
+    top: 75px;
+}
+.scroller.transcripts-editor-processed .play-range {
+    padding: 0 1.7rem;
+}
+.scroller.transcripts-editor-processed .play-range .glyphicon {
+    color: #5b68ce;
+    left: -1rem;
+}
+.range-display output {
+    display: inline;
+    width: 70px;
+    text-align: right;
+    font-size: 1rem;
+    font-family: "Lucida Console", Monaco, monospace;
+}
+div.begin-range, div.end-range {
+    display: block;
+}
+.editing-timecodes .tcu-info .speaker-name {
+    display: none;
+}

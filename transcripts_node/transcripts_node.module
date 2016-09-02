@@ -1,0 +1,264 @@
+<?php
+
+function transcripts_node_init()
+{
+    module_load_include('inc', 'transcripts_node', 'transcripts_node.index');
+}
+
+function transcripts_node_menu()
+{
+    $items = array();
+    $items['node/%/transcript'] = array(
+        'title' => 'Transcript',
+        'page callback' => 'transcripts_node_get_player',
+        'page arguments' => array(1),
+        'access callback' => 'transcripts_node_transcript_access',
+        'access arguments' => array(1),
+        'type' => MENU_CALLBACK,
+        'weight' => 80,
+    );
+    return $items;
+}
+
+function transcripts_node_transcripts_apachesolr_redirect($transcript, $fragment = NULL)
+{
+    $path = 'node/' . $transcript['id'] . '/transcript';
+    if ($fragment === NULL) {
+        drupal_goto($path);
+    } else {
+        drupal_goto($path, array('fragment' => $fragment));
+    }
+}
+
+function transcripts_node_get_player($nid)
+{
+    $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
+    if ($trid) {
+        return transcripts_apachesolr_scroller($trid, $nid);
+    }
+}
+
+function transcripts_node_videotag($entity_id, $trid)
+{
+    $node = node_load($entity_id);
+
+    if ($node->type == 'video') {
+        foreach ($node->field_video_compressed['und'] as $vid) {
+            $val['video_url'][] = file_create_url($vid['uri']);
+        }
+    } else if ($node->type == 'audio') {
+        foreach ($node->field_audio_compressed['und'] as $vid) {
+            $val['video_url'][] = file_create_url($vid['uri']);
+        }
+    }
+
+    $vars = array();
+    $vars['trid'] = 'trid-' . $trid;
+    $vars['tag_type'] = isset($val['audio']) ? 'audio' : 'video';
+    $vars['video_url'] = isset($val['video_url']) ? $val['video_url'] : '';
+    $vars['video_tag'] = isset($val['video_tag']) ? $val['video_tag'] : '';
+
+    return theme('transcripts_apachesolr_video_tag', $vars);
+}
+
+function transcripts_node_transcript_access($nid)
+{
+    $node = node_load($nid);
+    return transcripts_node_has_transcript($node) && node_access('view', $node) ? true : false;
+}
+
+function transcripts_node_has_transcript($node)
+{
+    $fields = array_filter(transcripts_node_all_file_fields(), 'is_transcript_field');
+    foreach ($fields as $field) {
+        if (!empty($node->$field)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Return all fields that are of type 'file'. Copied from apachesolr_attachments.
+ */
+function transcripts_node_all_file_fields()
+{
+    $field_names = array();
+    if (module_exists('file')) {
+        $fields = field_info_fields();
+        foreach ($fields as $field_name => $field) {
+            if ($field['type'] == 'file') {
+                $field_names[] = $field_name;
+            }
+        }
+    }
+    return $field_names;
+}
+
+function is_transcript_field($field_name)
+{
+    $transcript_fields = variable_get('transcripts_transcript_fields', array());
+    if (in_array($field_name, array_keys($transcript_fields))) {
+        return $transcript_fields[$field_name];
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function transcripts_node_field_formatter_info()
+{
+    return array(
+        'transcripts_scroller_with_controls' => array(
+            'label' => t('Scrolling transcript with controls'),
+            'field types' => array('file'),
+        ),
+        'transcripts_html5_video' => array(
+            'label' => t('HTML 5 audio or video tag'),
+            'field types' => array('file'),
+        ),
+    );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function transcripts_node_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display)
+{
+    $element = array();
+
+    switch ($display['type']) {
+        case 'transcripts_scroller_with_controls':
+            if (is_transcript_field($field['field_name'])) {
+                foreach ($items as $delta => $item) {
+                    $nid = arg(1);
+                    $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
+                    if ($trid) {
+                        $element[$delta] = array('#markup' => transcripts_apachesolr_scroller($trid, $nid));
+                    }
+                }
+            }
+            break;
+
+        case 'transcripts_html5_video':
+            list($nid, ,) = entity_extract_ids($entity_type, $entity);
+            $trid = transcripts_apachesolr_already_indexed_trid('transcripts_node', 'node', $nid);
+            if ($trid) {
+                $urls = array();
+                foreach ($items as $delta => $item) {
+                    $urls[] = file_create_url($item['uri']);
+                }
+                $vars = array();
+                $vars['trid'] = 'trid-' . $trid;
+                $vars['urls'] = $urls;
+
+                if ($entity->type == 'audio') {
+                    $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_audio', $vars));
+                } else if ($entity->type == 'video') {
+                    $element[0] = array('#markup' => theme('transcripts_apachesolr_html5_video', $vars));
+                }
+
+            }
+            break;
+    }
+
+    return $element;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function transcripts_node_form_alter(&$form, $form_state, $form_id)
+{
+    if (isset($form['#field']) && $form['#field']['type'] == 'file') {
+        $form['instance']['transcripts'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('Transcripts Settings'),
+            '#collapsed' => FALSE,
+            '#weight' => 20,
+        );
+        $form['instance']['transcripts']['is_transcript'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Treat as transcript'),
+            '#default_value' => is_transcript_field($form['#field']['field_name']),
+            '#description' => t('Tick this box if files should be indexed as part of a transcripts.'),
+            '#weight' => 2
+        );
+        if (!in_array('transcripts_node_form_submit', $form['#submit'])) {
+            $form['#submit'][] = 'transcripts_node_form_submit';
+        }
+    }
+}
+
+/**
+ * Implements hook_form_submit().
+ */
+function transcripts_node_form_submit($form, &$form_state)
+{
+    $field_name = $form_state['values']['instance']['field_name'];
+    $is_transcript = $form_state['values']['instance']['transcripts']['is_transcript'];
+    $transcript_fields = variable_get('transcripts_transcript_fields', array());
+    $transcript_fields[$field_name] = $is_transcript;
+    variable_set('transcripts_transcript_fields', $transcript_fields);
+}
+
+/**
+ * Implements hook_element_info().
+ */
+function transcripts_node_element_info()
+{
+    $elements = array();
+    $elements['managed_file']['#process'][] = 'transcripts_node_file_field_process';
+    return $elements;
+}
+
+function transcripts_node_file_field_process($element, &$form_state, $form)
+{
+    if (isset($element['#field_name']) && is_transcript_field($element['#field_name'])) {
+        array_unshift($element['upload_button']['#submit'], 'transcripts_node_file_submit');
+        array_unshift($element['remove_button']['#submit'], 'transcripts_node_file_submit');
+    }
+    return $element;
+}
+
+function transcripts_node_file_submit($form, &$form_state) {
+    $parents = $form_state['triggering_element']['#array_parents'];
+    $button_key = array_pop($parents);
+    $element = drupal_array_get_nested_value($form, $parents);
+
+    if ($button_key == 'upload_button') {
+        // Transcripts are added even if the operation is canceled by not saving the node.
+        if ($element['#file']) {
+            $nid = isset($form_state['node']->nid) ? $form_state['node']->nid : 0;
+
+            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $nid); //prevent multiple uploads without saving node
+            if (transcripts_node_add_transcript($element['#file'], $nid)) {
+                drupal_set_message(t("The transcript {$element['#file']->filename} has been indexed and will be visible after processing."), 'status');
+                watchdog('transcripts_node', '[node/%nid] Transcript indexed.', array('%nid' => $nid), WATCHDOG_DEBUG);
+            } else {
+                drupal_set_message(t("There was an error and the transcript {$element['#file']->filename} could not be indexed. Please alert the site administrator."), 'error');
+                watchdog('transcripts_node', '[node/%nid] Transcript could not be indexed.', array('%nid' => $nid), WATCHDOG_DEBUG);
+            }
+        }
+    }
+    else if ($button_key == 'remove_button') {
+        // Transcripts are removed even if the operation is canceled by not saving the node.
+        if ($element['#file']) {
+            $nid = isset($form_state['node']->nid) ? $form_state['node']->nid : 0;
+            $fid = $nid == 0 ? $element['#file']->fid : NULL; //delete all pre-existing transcripts if multiple
+            transcripts_apachesolr_remove_transcript('transcripts_node', 'node', $nid, $fid);
+            drupal_set_message("The transcript <em>{$element['#file']->filename}</em> has been removed.", 'status');
+            watchdog('transcripts_node', '[node/%nid] Transcript removed.', array('%nid' => $nid), WATCHDOG_DEBUG);
+        }
+    }
+
+    // Set the form to rebuild so that $form is correctly updated in response to
+    // processing the file removal. Since this function did not change $form_state
+    // if the upload button was clicked, a rebuild isn't necessary in that
+    // situation and setting $form_state['redirect'] to FALSE would suffice.
+    // However, we choose to always rebuild, to keep the form processing workflow
+    // consistent between the two buttons.
+    $form_state['rebuild'] = TRUE;
+}

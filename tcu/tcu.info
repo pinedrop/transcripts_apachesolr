@@ -1,0 +1,9 @@
+name = Time Code Unit
+description = Models time-coded units for transcripts
+dependencies[] = entity
+dependencies[] = apachesolr
+dependencies[] = apachesolr_search
+package = Pinedrop Transcripts
+core = 7.x
+files[] = tcu.install
+files[] = tcu.module

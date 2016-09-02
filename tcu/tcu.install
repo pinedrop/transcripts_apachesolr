@@ -1,0 +1,193 @@
+<?php
+
+function tcu_update_7001() {
+    db_drop_field('tcu', 'speaker');
+
+        $schema['tcu_speaker'] = array(
+          'description' => 'Stores speaker names for tcus',
+          'fields' => array(
+            'tcuid' => array(
+              'description' => 'Foreign Key: tcu id',
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+            ),
+            'tier' => array(
+              'type' => 'varchar',
+              'length' => 128,
+              'not null' => TRUE,
+              'default' => '',
+              'description' => 'The speaker name tier',
+            ),
+            'value' => array(
+              'type' => 'text',
+              'not null' => TRUE,
+              'description' => 'The speaker name value',
+            ),
+          ),
+          'primary key' => array('tcuid', 'tier'),
+          'foreign keys' => array(
+            'tcu' => array(
+              'table' => 'tcu',
+              'columns' => array('tcuid' => 'tcuid'),
+            ),
+          ),
+        );
+
+    db_create_table('tcu_speaker', $schema['tcu_speaker']);
+}
+
+/**
+ * Implements hook_schema().
+ */
+function tcu_schema() {
+	$schema['tcu'] = array(
+		'description' => 'Transcript TCUs',
+		'fields' => array(
+			'tcuid' => array(
+				'description' => 'The primary identifier for the tcu',
+				'type' => 'serial',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+			),
+			'trid' => array(
+				'description' => 'The transcript that this tcu comes from',
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+			),
+			'start' => array(
+				'description' => 'The start time for the tcu in seconds',
+				'type' => 'float',
+				'not null' => TRUE,
+				'default' => 0,
+			),
+			'end' => array(
+				'description' => 'The end time for the tcu in seconds',
+				'type' => 'float',
+				'not null' => TRUE,
+				'default' => 0,
+			),
+			'created' => array(
+				'description' => 'Tcu creation timestamp',
+				'type' => 'int',
+				'not null' => TRUE,
+				'default' => 0,
+			),
+			'changed' => array(
+				'description' => 'Tcu changed timestamp',
+				'type' => 'int',
+				'not null' => TRUE,
+				'default' => 0,
+			),
+		),
+		'unique keys' => array(
+			'tcuid' => array('tcuid'),
+		),
+		'primary key' => array('tcuid'),
+	);
+  
+  $schema['tcu_tier'] = array(
+    'description' => 'Stores tier data for tcus',
+    'fields' => array(
+      'tcuid' => array(
+        'description' => 'Foreign Key: tcu id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'tier' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The name of the tier',
+      ),
+      'value' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'The tier value',
+      ),
+    ),
+    'primary key' => array('tcuid', 'tier'),
+    'foreign keys' => array(
+      'tcu' => array(
+        'table' => 'tcu',
+        'columns' => array('tcuid' => 'tcuid'),
+      ),
+    ),
+  );
+
+    $schema['tcu_speaker'] = array(
+      'description' => 'Stores speaker names for tcus',
+      'fields' => array(
+        'tcuid' => array(
+          'description' => 'Foreign Key: tcu id',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'tier' => array(
+          'type' => 'varchar',
+          'length' => 128,
+          'not null' => TRUE,
+          'default' => '',
+          'description' => 'The speaker name tier',
+        ),
+        'value' => array(
+          'type' => 'text',
+          'not null' => TRUE,
+          'description' => 'The speaker name value',
+        ),
+      ),
+      'primary key' => array('tcuid', 'tier'),
+      'foreign keys' => array(
+        'tcu' => array(
+          'table' => 'tcu',
+          'columns' => array('tcuid' => 'tcuid'),
+        ),
+      ),
+    );
+
+  $schema['apachesolr_index_entities_tcu'] = array(
+  	'description' => t('Stores a record of when a tcu changed to determine if it needs indexing by Solr'),
+		'fields' => array(
+				'entity_type' => array(
+					'description' => 'The type of entity.',
+					'type' => 'varchar',
+					'length' => 32,
+					'not null' => TRUE,
+				),
+				'entity_id' => array(
+					'description' => 'The primary identifier for an entity.',
+					'type' => 'int',
+					'unsigned' => TRUE,
+					'not null' => TRUE,
+				),
+				'bundle' => array(
+					'description' => 'The bundle to which this entity belongs.',
+					'type' => 'varchar',
+					'length' => 128,
+					'not null' => TRUE,
+				),
+				'status' => array(
+					'description' => 'Boolean indicating whether the entity should be in the index.',
+					'type' => 'int',
+					'not null' => TRUE,
+					'default' => 1,
+				),
+				'changed' => array(
+					'description' => 'The Unix timestamp when an entity was changed.',
+					'type' => 'int',
+					'not null' => TRUE,
+					'default' => 0,
+				),
+		),
+    'indexes' => array(
+    	'bundle_changed' => array('bundle', 'changed'),
+    ),
+    'primary key' => array('entity_id'),
+  );
+  
+  return $schema;
+}

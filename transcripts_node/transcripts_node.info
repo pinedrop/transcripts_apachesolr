@@ -1,0 +1,6 @@
+name = Transcripts Node
+description = Facilitates attaching transcripts to nodes
+dependencies[] = transcripts_xslt
+package = Pinedrop Transcripts
+core = 7.x
+files[] = transcripts_node.module
